@@ -58,11 +58,27 @@ class MimeExtensionMapping(SimpleItem):
         self.ghost = ghost
         self.title = condition
         
-    def valid(self, context):
+    def isValid(self, context):
         return not not self.condition(context)
 
-    def extension(self, context):
+    def getExtension(self, context):
+        """
+        get the extension if any for the content
+        """
         return self.extension(context)
+
+    def process(self, descriptor, context):
+        """
+        process a content descriptor, applying the rules specified by
+        this deployment rule.
+        """
+        extension = self.getExtension( context )
+        descriptor.setExtension( extension )
+        if self.ghost:
+            descriptor.setGhost( True )
+            descriptor.setRenderMethod( None ) # xxx redundant
+        descriptor.setRenderMethod( self.view_method )
+        return descriptor
 
     def editMapping(self, extension_expression, condition, view_method, ghost=0, RESPONSE=None):
         """ """

@@ -64,9 +64,6 @@ class ContentStorage:
         """
         store a rendered content object on the filesystem.
         """
-        
-        filename = descriptor.getFileName()
-        #structure = context.getContentOrganization().getActiveStructure()
 
         # sometimes we want to have content in the uri db
         # but we don't actually want to store it...
@@ -76,17 +73,31 @@ class ContentStorage:
         content_path = self.structure.getContentPathFromDescriptor(
                                                          descriptor
                                                          )
+        descriptors = descriptor.getDescriptors()
+
+        # if we have child descriptors assume its a sub contained content
+        # for now.. XXX the underlying issue is that the structure is
+        # already generated and now we possibly need to push new directories
+        # into the structure.
 
         if content_path.endswith(sep):
             #log.debug('EGAGS')
             content_path = content_path[:-1]
 
         if not path.exists(content_path):
-            log.warning( 'content directory %s does not exist for %s'%(content_path, descriptor.content_url))
-            return
-        
-        location = sep.join( ( content_path, filename) )
+            if not os.path.startswith( self.structure.mount_point ):
+                log.warning( 'content directory %s does not exist for %s'%(content_path, descriptor.content_url))
+                return
+            # xxx nested content, not supported.. but it would break here.
+            os.mkdir( content_path )
+        return self.storeDescriptor( content_path, descriptor )
 
+    store = __call__
+    
+    def storeDescriptor(self, content_path, descriptor ):
+
+        filename = descriptor.getFileName()
+        location = sep.join( ( content_path, filename) )
         content = descriptor.getContent()
         rendered = descriptor.getRendered()
 
@@ -117,4 +128,4 @@ class ContentStorage:
         finally:
             fh.close()
             
-    store = __call__
+

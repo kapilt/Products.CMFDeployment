@@ -40,6 +40,8 @@ CMFDeployment
    possibly allow for setting args on the catalog source
  - allow for multiple sources
 
+ Mastering
+ - renamine mime mapping to content/deployment rule
 
 Bugs and Feature Requests
 

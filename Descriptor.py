@@ -50,7 +50,12 @@ def make_lookup(seq):
     return d.has_key
     
 
-class ContentDescriptor:
+class DescriptorContainer(list):
+    """
+    container object for descriptors
+    """
+
+class ContentDescriptor(object):
     """
     a drop of water in a sieve
     """
@@ -67,10 +72,18 @@ class ContentDescriptor:
         self.content_url = None
         self.content_folderish_p = None
         self.composite_content_p = None
+        self.child_descriptors = None
         
     def getId(self):
         return self.content.getId()
 
+    def getDescriptors(self):
+        descriptors = self.getChildDescriptors()
+        if descriptors is None:
+            return (self,)
+        descriptors.insert( 0, self )
+        return tuple(descriptors)
+    
     def getContent(self):
         return self.content
 
@@ -143,3 +156,14 @@ class ContentDescriptor:
         
     def getSourcePath(self):
         return self.source_path
+
+    #################################
+    #
+
+    def addChildDescriptor(self, descriptor):
+        if self.child_descriptors is None:
+            self.child_descriptors = DescriptorContainer()
+        self.child_descriptors.append( descriptor )
+            
+    def getChildDescriptors(self):
+        return self.child_descriptors

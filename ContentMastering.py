@@ -114,32 +114,37 @@ class ContentMastering(Folder):
 
     #################################
     def prepare(self, descriptor):
-
-        portal = getToolByName(self, 'portal_url').getPortalObject()        
+        """
+        prepare a descriptor for deployment by finding and applying a
+        deployment/content/mime rule for it.
+        """
+        portal = getToolByName(self, 'portal_url').getPortalObject()
         c = descriptor.getContent()
         ctx = getMimeExprContext(c, portal) 
         mappings = self.mime.objectValues()
-                
         for m in mappings:
-            if m.valid(ctx):
-                descriptor.setExtension(m.extension(ctx))
-                
-                if m.ghost:
-                    descriptor.setRenderMethod(None) # xxx redundant
-                    descriptor.setGhost(1)
-                else:
-                    descriptor.setRenderMethod(m.view_method)
-                return 1
-
+            if m.isValid(ctx):
+                m.process( descriptor, ctx )
+                return True
         log.debug('no mime mapping (%s)->(%s)'%(str(c.portal_type), descriptor.content_url))
-            
         return None
 
     def cook(self, descriptor):
+        """
+        render the contents of a descriptor and its child descriptors
+        """
 
         if descriptor.isGhost():
             return
-        
+
+        # get child descriptors if any
+        descriptors = descriptor.getDescriptors()
+
+        for descriptor in descriptors:
+            self.renderContent( descriptor )
+
+    def renderContent( self, descriptor ):
+            
         c = descriptor.getContent()
         vm = descriptor.getRenderMethod()
 
@@ -168,7 +173,7 @@ class ContentMastering(Folder):
                 descriptor.setRendered(render())
         except:
             log.error('Error While Rendering %s'%(str(c.getPhysicalPath())))
-            descriptor.setGhost(1) # ghostify it
+            descriptor.setGhost(1) # ghostify it        
 
     #################################
     def setup(self):
