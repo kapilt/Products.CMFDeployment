@@ -135,6 +135,9 @@ class URIResolver:
         
         self.uris[relative_url]=content_path
 
+        if descriptor.isContentFolderish():
+            self.uris[relative_url+'/']=content_path
+
         # lets add in the generic CMF view method as well
         self.uris[normalize(relative_url+'/view', '/')]=content_path
 
@@ -226,6 +229,8 @@ class URIResolver:
           - content relative - ../foo
           - absolute relative - /portal/content
           - absolute - http://foobz:8080/baz/blurbie
+          
+          XXX need to add handling of absolute folder with ending slash [CHP]
           
         relative uris, convert to absolute uris
 

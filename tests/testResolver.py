@@ -25,10 +25,6 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 12/29/2002
 $Id: $
-
-write unit test for
-< type="text/css" media="screen"> @import url(http://localhost:8080/plone/plone.css);</style>    
-
 """
 
 import os, sys, timeif __name__ == '__main__':    execfile(os.path.join(sys.path[0], 'framework.py'))from Testing import ZopeTestCaseZopeTestCase.installProduct('CMFDeployment')
@@ -70,9 +66,9 @@ class CompositeContent(FolderContent):
 class ContentDB:
 
     root = FolderContent('/', """
-    <css @import="http://www.example.com/style/site.css" />
-
-    <image href="/images/bar.gif">bar</image>
+    <style type="text/css">@import url(http://www.example.com/style/site.css);</style>
+    <link rel="Stylesheet" type="text/css"          href="(http://www.example.com/style/linked_site.css" />
+    <img href="/images/bar.gif" />bar
     This is a test <a href="/reptiles/snake">snake</a>
     This is a test <a href="mammals/elephant">snake</a>
     This is a test <a href="./reptiles/snake">snake</a>   
@@ -80,6 +76,7 @@ class ContentDB:
     
     #################################
     reptiles = FolderContent("/reptiles", """
+    <base href="/reptiles" />
     This is a test <a href="snake">snake</a>   
     This is a test <a href="./lizard">snake</a>   
     """)
@@ -121,6 +118,7 @@ class ContentDB:
     bar_image = Content("/images/bar.gif", "")
     style = FolderContent("/style", "")
     style_image = Content("/style/site.css", "")
+    lined_style_image = Content("/style/linked_site.css", "")
 
 class DescriptorDB:
     pass
@@ -305,6 +303,14 @@ class ResolveURITests(BaseResolverTests):
         nu = self.resolver.resolveURI(uri, curi, 0)
         self.assertEqual(nu, '/deploy/reptiles/snake.html')
 
+    def testResolverURL13(self):
+        # absolute url to folder with / at end
+        r = getDescriptor('lizard')
+        curi = r.getContent().absolute_url(1)        
+        uri = 'http://www.example.com/reptiles/'
+
+        nu = self.resolver.resolveURI(uri, curi, 0)
+        self.assertEqual(nu, '/deploy/reptiles/index.html')
 
 
 class ResolverTests(BaseResolverTests):
@@ -353,7 +359,8 @@ class ResolverTests(BaseResolverTests):
         self.resolver.resolve(d)
         rendered_target = d.getRendered()
 
-        expected = (            
+        expected = (
+            '/deploy/reptiles/index.html',
             '/deploy/reptiles/snake.html',
             '/deploy/reptiles/lizard.html',
             )            
