@@ -62,11 +62,12 @@ class ContentStorage:
     
     def __call__(self, descriptor):
         """
-        store a rendered content object on the filesystem.
+        store a rendered content object on the filesystem
         """
 
         # sometimes we want to have content in the uri db
-        # but we don't actually want to store it...
+        # but we don't actually want to store it... either because
+        # of an error during rendering or based on configuration.
         if descriptor.isGhost(): 
             return 
         
@@ -75,14 +76,9 @@ class ContentStorage:
                                                          )
         descriptors = descriptor.getDescriptors()
 
-        # if we have child descriptors assume its a sub contained content
-        # for now.. XXX the underlying issue is that the structure is
-        # already generated and now we possibly need to push new directories
-        # into the structure.
-        #        if content_path.endswith(sep):
-        #            log.debug('EGAGS')
-        #            content_path = content_path[:-1]
-
+        if content_path.endswith(sep):
+            log.warning('invalid content path detected %s .. fixing'%content_path)
+            content_path = content_path[:-1]
 
         for descriptor in descriptors:
             self.storeDescriptor( content_path, descriptor )
@@ -92,7 +88,8 @@ class ContentStorage:
     store = __call__
     
     def storeDescriptor(self, content_path, descriptor ):
-
+        """
+        """
         filename = descriptor.getFileName()
         location = sep.join( ( content_path, filename) )
         content = descriptor.getContent()
@@ -102,31 +99,13 @@ class ContentStorage:
         if not self.createParentDirectories( location ):
             return
             
-        #log.debug('storing location  %s, format %s size %d'%(location,
-        #                                                     descriptor.getContent().Format(),
-        #                                                     len(rendered)
-        #                                             )
-        #          )
-        
-
         self.stats( location, len(rendered) )
 
         rendered = self.filters.filter(descriptor, rendered, location)
-        
         if not rendered:
             return
 
         fh = open(location, 'w')
-
-#### remove windows compatiblity for the moment        
-##         try:         
-##             if content.Format().split('/')[0]=='text':
-
-##             else:
-##                 fh = open(location, 'wb')
-##         except:
-## 	    log.error("Could not open file for storage %s %s"%(location, descriptor.getContent().getPortalTypeName()))
-## 	    return
         try:
             fh.write(rendered)
         finally:
