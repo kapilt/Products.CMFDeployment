@@ -102,6 +102,12 @@ class IContentRule(Interface):
         results on the content descriptor
         """
 
+    def toXml():
+        """
+        return an xml representation of the content rule
+        must include product and factory information
+        """
+
 class IContentSource(Interface):
 
     def getContent():
