@@ -109,7 +109,7 @@ class ContentDirectoryView(SimpleItem):
         if RESPONSE is not None:
             RESPONSE.redirect('directory_view_settings')
 
-	security.declareProtected(CMFCorePermissions.ManagePortal, 'getContentDirectoryViewMap')
+    security.declareProtected(CMFCorePermissions.ManagePortal, 'getContentDirectoryViewMap')
     def getDirectoryViewMap(self):
         return dict(self._view_map.items())
 
