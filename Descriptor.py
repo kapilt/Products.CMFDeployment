@@ -81,9 +81,8 @@ class ContentDescriptor(object):
         descriptors = self.getChildDescriptors()
         if descriptors is None:
             return (self,)
-        descriptors.insert( 0, self )
-        return tuple(descriptors)
-    
+        return (self,)+tuple(descriptors)
+
     def getContent(self):
         return self.content
 
@@ -159,7 +158,6 @@ class ContentDescriptor(object):
 
     #################################
     #
-
     def addChildDescriptor(self, descriptor):
         if self.child_descriptors is None:
             self.child_descriptors = DescriptorContainer()

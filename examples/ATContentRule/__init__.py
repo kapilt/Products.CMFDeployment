@@ -46,12 +46,13 @@ xml_export_template = """
 
 def addArchetypeContentRule(self,
                             id,
+                            condition='',
                             RESPONSE = None
                             ):
     """
     add an archetype rule
     """
-    atrule = ArchetypeContentRule(id)
+    atrule = ArchetypeContentRule(id, condition)
     self._setObject(id, atrule)
     if RESPONSE is not None:
         return RESPONSE.redirect('manage_workspace')
@@ -79,7 +80,7 @@ class ArchetypeContentRule(SimpleItem):
 
     def process(self, descriptor, context):
         content = descriptor.getContent()
-        resource_descriptors = self.getSchemaResources()
+        resource_descriptors = self.getSchemaResources( content )
         for rd in resource_descriptors:
             descriptor.addChildDescriptor( rd )
         descriptor.setRenderMethod('view')
@@ -88,15 +89,23 @@ class ArchetypeContentRule(SimpleItem):
     def getSchemaResources( self, content):
         schema = content.Schema()
         content_path = content.absolute_url(1)
+        factory = None
         for field in schema.filterFields():
-            if isinstance( field, (field.ImageField, field.FileField)):
-                value = field.get( instance )
+            if isinstance( field, (atapi.ImageField, atapi.FileField)):
+                value = field.get( content )
             else:
                 continue
-            if value is None:
+            if not value:
                 continue
-            descriptor = DescriptorFactory( value )
-            descriptor.setRenderMethod('')
+            if factory is None:
+                factory = DescriptorFactory( self.getDeploymentPolicy() )
+            descriptor = factory( value )
+            # xxx this isn't actually used :-( but it needs to be resolvable
+            # file objects get special treatment.  the system will work without
+            # but through a spurious log message.
+            descriptor.setRenderMethod('index_html')
+            descriptor.setBinary( True )
+            yield descriptor
 
     def toXml(self):
         d = {'id':self.id,

@@ -201,6 +201,7 @@ def make_policy(portal, policy_node):
     mastering = getattr(policy, DefaultConfiguration.ContentMastering)    
     
     for m in policy_node.mastering.mimes:
+        # transparently map old policies to the expected format
         product = m.get('product', DEFAULT_RULE_PRODUCT)
         factory = m.get('factory', DEFAULT_RULE_FACTORY)
         
