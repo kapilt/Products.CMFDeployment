@@ -9,6 +9,9 @@
 <tr><td>Id</td>
     <td><input type="text" name="id"></td></tr>
 
+<tr><td>Condition (TALES) </td>
+    <td><input type="text" name="condition"></td></tr>
+
 <tr><td colspan="2">
     <input type="submit" value="Add Archetype Content Rule"> </td></tr>
 

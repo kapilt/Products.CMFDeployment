@@ -26,6 +26,7 @@ $Id: $
 from Products.Archetypes import public as atapi
 from Products.CMFDeployment.Descriptor import DescriptorFactory
 from Products.CMFDeployment.DeploymentInterfaces import IContentRule
+from Products.CMFCore.Expression import Expression
 
 from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
@@ -34,7 +35,8 @@ from Globals import DTMLFile, InitializeClass
 xml_export_template = """
 <mime id="%(id)s"
       product="%(product)s"
-      factory="%(factory)s" />
+      factory="%(factory)s"
+      condition="%(factory)s" />
 """
 
 def addArchetypeContentRule(self,
@@ -59,10 +61,16 @@ class ArchetypeContentRule(SimpleItem):
 
     security = ClassSecurityInfo()
 
-    def isValid(self, context):
+    def __init__(self, id, title='', condition=''):
+        self.condition_text = condition
+        self.condition = Expression( condition )
 
-        if isinstance( context, atapi.BaseContent ):
-            return True
+    def isValid(self, descriptor, context):
+        if not isinstance( descriptor.getContent(), (atapi.BaseContent, atapi.BaseFolder) ):
+            return False
+        elif self.condition_text and not self.condition( context ):
+            return False
+        return True
 
     def process(self, descriptor, context):
         content = descriptor.getContent()
@@ -88,7 +96,8 @@ class ArchetypeContentRule(SimpleItem):
     def toXml(self):
         d = {'id':self.id,
              'product':'ATContentRule',
-             'factory':'addArchetypeContentRule' }             
+             'factory':'addArchetypeContentRule',
+             'condition':self.condition_text }             
         return xml_export_template%d
     
 

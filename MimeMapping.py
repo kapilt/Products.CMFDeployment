@@ -89,7 +89,7 @@ class MimeExtensionMapping(SimpleItem):
         self.ghost = ghost
         self.title = condition
         
-    def isValid(self, context):
+    def isValid(self, descriptor, context):
         return not not self.condition(context)
 
     def getExtension(self, context):
