@@ -149,17 +149,27 @@ CMFDeployment
      distributed here for convience (all such
      files can be found under CMFDeployment/lib)
 
-     - pypect:"http://pyexpect.sf.net" - Noah Spurrier (Python License)
+     - "pexpect":http://pexpect.sf.net - Noah Spurrier (Python License)
 
-     - policycaller:"http://cvs.zope.org/Products/Scheduler/methodcaller.py" (ZPL)
+     - "policycaller":http://cvs.zope.org/Products/Scheduler/methodcaller.py (ZPL)
 
-     - linuxproc:"http://www.zope.org/Members/mcdonc" (ZPL)
+     - "linuxproc":http://www.zope.org/Members/mcdonc (ZPL)
 
-     - LockFile:"http://www.list.org" (GPL)
+     - "LockFile":http://www.list.org (GPL)
+
+  Development Info
+  
+    - "General Project Info and Wiki":http://projects.objectrealms.net/projects/cmfdeployment
+
+    - "Users Mailing List":https://lists.objectrealms.net/mailman/listinfo/cmfdeployment
+    
+    - "Changes Mailing List":https://lists.objectrealms.net/mailman/listinfo/cmfdeployment-changes
+    
+    - "Project Bug Tracking":http://bugs.objectrealms.net    
 
   License and Copyright
      
-    - @ kapil thangavelu 2002-2003
+    - @ kapil thangavelu 2002-2004
 
     - "GPL":http://www.fsf.org
 
