@@ -48,14 +48,8 @@
       <div id="portal-top" i18n:domain="plone" >
 
         <a class="hiddenStructure"
-           tal:attributes="href string:${current_page_url}#documentContent"
+           tal:attributes="href string:#documentContent"
            i18n:translate="label_skiptocontent">Skip to content</a>
-
-    <!-- I don't think that site actions will be useful
-           <div metal:use-macro="here/global_siteactions/macros/site_actions">
-             Site-wide actions (Contact, Sitemap, Help, Style Switcher etc)
-           </div>
-    -->
 
            <a metal:use-macro="here/global_logo/macros/portal_logo">
              The portal logo, linked to the portal root
