@@ -178,6 +178,8 @@ CMFDeployment
     "Kapil Thangavelu":mailto://k_vertigo@objectrealms.net - Author
 
     "Tahara Yusei":tahara * timedia.co.jp - Patches for Plone2/CMF 1.4
+  
+    "Calvin Hendryx-Parker": calvinhp * sixfeetup.com - Deployment Skin, Use Cases, and Sponsoring
 
     I'd like to thank alan runyaga for much dicussion
     and feedback on this tool. It has benefited greatly 
