@@ -30,17 +30,21 @@ $Id: $
 
 import os, sys, timeif __name__ == '__main__':    execfile(os.path.join(sys.path[0], 'framework.py'))
     
-from Testing import ZopeTestCasefrom Products.PloneTestCase.PloneTestCase from PloneTestCaseZopeTestCase.installProduct('CMFDeployment')
+from Testing import ZopeTestCasefrom Products.CMFPlone.tests.PloneTestCase import PloneTestCase
+ZopeTestCase.installProduct('CMFDeployment')
 
 import unittest
+from StringIO import StringIO
 from types import StringType, NoneType
+from Products.CMFCore.utils import getToolByName
 from Products.CMFDeployment.Descriptor import ContentDescriptor
 from Products.CMFDeployment import DeploymentProductHome
 
-class PolicyImportExportTests( ZopeTestCase.ZopeTestCase ):
+class PolicyImportExportTests( PloneTestCase ):
 
     def afterSetUp(self): 
-        pass
+        installer = getToolByName(self.portal, 'portal_quickinstaller')
+        installer.installProduct('CMFDeployment')
         
     def beforeTearDown(self):
         pass
@@ -48,13 +52,40 @@ class PolicyImportExportTests( ZopeTestCase.ZopeTestCase ):
     def testImport(self):
         policy_file = os.path.join( DeploymentProductHome, 'examples', 'plone.xml') 
         fh = open( policy_file )
-
+        deployment_tool = getToolByName(self.portal, 'portal_deployment')
+        deployment_tool.addPolicy( policy_xml=fh )
+        fh.close()
+        # do some sanity checks
+        assert 'plone_example' in deployment_tool.objectIds()
+   
+    def testExport(self):
+        self.testImport()
+        dtool = getToolByName(self.portal, 'portal_deployment')
+        import pdb; pdb.set_trace()
+        from AccessControl import getSecurityManager
+        self.login('portal_owner')
+        xml = dtool.plone_example.policy_xml()     
+        policy_file = os.path.join( DeploymentProductHome, 'examples', 'plone.xml') 
+        fh = open(policy_file)
+        fs = fh.read()
+        fh.close()
         
+        print "*"*20, "\nXport"
+        print xml
+        print "*"*20, "\nSample"
+        print fs
+        return xml
+        
+    def XtestIOCycle(self):
+        xml = StringIO( self.testExport() )
+        dtool = getToolByName(self.portal, 'portal_deployment')
+        dtool.manage_delObjects(['plone_example'])
+        dtool.addPolicy( policy_xml = xml )
 
 
 def test_suite():
     suite = unittest.TestSuite()
-    #suite.addTest(unittest.makeSuite(ResolverTests))
+    suite.addTest(unittest.makeSuite(PolicyImportExportTests))
     return suite
 
 if __name__ == '__main__':

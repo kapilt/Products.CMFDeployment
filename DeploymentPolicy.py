@@ -84,7 +84,7 @@ class DeploymentPolicy(Folder):
     identification = DTMLFile('ui/ContentIdentification', globals())
     _active = 1
     policy_xml = DTMLFile('ui/PolicyExport', globals())
-    
+
     icon = 'misc_/CMFDeployment/policy.png'
     
     def __init__(self, id):

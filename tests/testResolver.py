@@ -1,4 +1,3 @@
-
 ##################################################################
 #
 # (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
