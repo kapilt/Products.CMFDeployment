@@ -62,7 +62,7 @@ class ContentStorage:
     
     def __call__(self, descriptor):
         """
-        store a rendered content object on the filesystem
+        store a rendered content object on the filesystem.
         """
 
         # sometimes we want to have content in the uri db
@@ -77,7 +77,7 @@ class ContentStorage:
         descriptors = descriptor.getDescriptors()
 
         if content_path.endswith(sep):
-            log.warning('invalid content path detected %s .. fixing'%content_path)
+            log.warning('invalid content path detected %s ... fixing'%content_path)
             content_path = content_path[:-1]
 
         for descriptor in descriptors:
@@ -105,6 +105,8 @@ class ContentStorage:
         if not rendered:
             return
 
+        log.debug("storing content %s at %s"%(descriptor.content_url, location))
+        
         fh = open(location, 'w')
         try:
             fh.write(rendered)

@@ -240,12 +240,10 @@ class SiteChainSkin(SimpleItem):
         portal.changeSkin( self.skin_name )
         
     def unlock(self):
-
-        if not self._v_active:
-            return
         portal = getToolByName(self, 'portal_url').getPortalObject()
-        portal.changeSkin( self._v_saved_skin_name )
-        self._v_active = None        
+        skins = portal.portal_skins
+        skin_name = self._v_saved_skin_name or skins.getDefaultSkin()
+        portal.changeSkin( skin_name )
         self._v_saved_skin_name = None
 
         

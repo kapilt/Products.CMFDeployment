@@ -30,6 +30,7 @@ from Products.CMFCore import CMFCorePermissions
 from Products.CMFCore.Expression import Expression
 from Products.CMFCore import utils
 
+from Acquisition import aq_inner, aq_parent
 from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
 from Globals import DTMLFile, InitializeClass
@@ -87,7 +88,7 @@ class ArchetypeContentRule(SimpleItem):
             child_descriptors = True
 
         descriptor.setRenderMethod('view')
-        if descriptor.isContentFolderish():
+        if child_descriptors or descriptor.isContentFolderish():
             descriptor.setFileName( "%s/index.html"%content.getId() )
         else:
             descriptor.setFileName( self.getResourceName( content ) )
@@ -98,6 +99,7 @@ class ArchetypeContentRule(SimpleItem):
         schema = content.Schema()
         content_path = content.absolute_url(1)
         factory = None
+        parent = aq_parent(aq_inner(content))
         for field in schema.filterFields():
             if isinstance( field, (atapi.ImageField, atapi.FileField)):
                 value = field.get( content )
@@ -114,10 +116,8 @@ class ArchetypeContentRule(SimpleItem):
             descriptor.setRenderMethod('index_html')
             descriptor.setBinary( True )
             resource_name = self.getResourceName( value )
-            if isinstance( content, atapi.BaseFolder):
-                descriptor.setFileName( "%s/%s"%(content.getId(), resource_name ))
-            else:
-                descriptor.setFileName( "%s_%s"%(content.getId(), resource_name ))
+            descriptor.setFileName( "%s/%s"%(content.getId(), resource_name ))
+
             yield descriptor
 
     def getResourceName(self, content):

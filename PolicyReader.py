@@ -134,6 +134,8 @@ class PolicyReader(MetaReader):
     def startMasteringmime(self, attrs):
         mimes = self.policy.mastering.setdefault('mimes', [])
         mime = PolicyNode(attrs)
+        if mime.has_key('ghost'):
+            mime['ghost'] = int(mime.ghost)
         mimes.append(mime)
 
     def startSkins(self, attrs):

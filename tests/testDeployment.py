@@ -60,6 +60,8 @@ CLEAN_DEPLOY_DIR=True
 
 def setupContentTree( portal ):
 
+    portal.portal_catalog.indexObject( portal )
+
     portal.invokeFactory('Folder', 'news')
     portal.news.invokeFactory('Document','index_html')
     
@@ -206,9 +208,10 @@ class DeploymentTests( PloneTestCase ):
         lines = output.strip().split('\n')
         if not lines:
             return
-            
+
+        print "Files with Link Errors"
         for line in lines:
-            print line
+            print " ", line
                 
 
 def test_suite():

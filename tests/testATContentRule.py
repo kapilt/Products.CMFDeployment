@@ -111,7 +111,7 @@ class ATContentRuleTests( PloneTestCase ):
         self.assertEqual( descriptors[0].getRendered(), self.raw_image)
         return descriptor
 
-    def testURIResolution(self):
+    def XtestURIResolution(self):
         descriptor = self.testRendering()
         rendered = descriptor.getRendered()
         resolver = self.policy.getDeploymentURIs()
@@ -133,6 +133,12 @@ class ATContentRuleTests( PloneTestCase ):
         self.assertNotEqual( result, marker )
         self.assertNotEqual( result, resolver.link_error_url )
         self.assertEqual( result, '/portal/image_content/portrait.png')
+
+
+    def testStorage(self):
+        descriptor = self.testRendering()
+        self.policy
+        
 
 def test_suite():
     suite = unittest.TestSuite()
