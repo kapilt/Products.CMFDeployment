@@ -35,32 +35,9 @@ CMFDeployment
 
     - and many more.
 
-  Changes Summary 
-
-    The ChangeLog has more detailed information.
-
-    Since Beta1
-
-    - Comprehensive Configuration Guide
-    
-    - A sample policy, thats suitable for deploying static copies of
-      a basic plone site.
-
-    - Memory optimization
-
-    - Histories now save statistics and Logs from policy execution
-
-    - Lots of fixes to the uri resolver, with a suite of unit tests
-
-    - Better support for composite content types
-
-    - More powerful filtering capabilities
-
   Todo Before 1.0
 
     - testing
-
-    - integrate configuration guide into online help 
 
   Installation
 
@@ -143,11 +120,10 @@ CMFDeployment
 
   Libraries
    
-     This Product is distributed with the following
-     third party modules which are included here
-     under their original license terms, and are 
-     distributed here for convience (all such
-     files can be found under CMFDeployment/lib)
+     This Product is distributed with the following third party modules 
+     which are included here under their original license terms, and are 
+     distributed here for convience (all such files can be found under 
+     CMFDeployment/lib)
 
      - "pexpect":http://pexpect.sf.net - Noah Spurrier (Python License)
 
@@ -177,16 +153,17 @@ CMFDeployment
 
     "Kapil Thangavelu":mailto://k_vertigo@objectrealms.net - Author
 
+    "Alan Runyan": www.runyaga.com - Moral Support and Discussions
+
+    "CounterSign" : www.countersign.com - Sponsoring Development
+
     "Tahara Yusei":tahara * timedia.co.jp - Patches for Plone2/CMF 1.4
   
     "Calvin Hendryx-Parker": calvinhp * sixfeetup.com - Deployment Skin, Use Cases, and Sponsoring
-
-    I'd like to thank alan runyaga for much dicussion
-    and feedback on this tool. It has benefited greatly 
-    from his insights and wisdom.
 
     I'd like to thank my employer for allowing
     me to opensource this tool that was developed at
     their cost. Without companies and clients such as 
     them the open source world would be a much poorer 
     place.
+

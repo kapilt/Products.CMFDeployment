@@ -112,9 +112,10 @@ class ArchetypeContentRule(SimpleItem):
             if factory is None:
                 factory = DescriptorFactory( self.getDeploymentPolicy() )
             descriptor = factory( value )
-            # xxx this isn't actually used :-( but it needs to be resolvable
-            # file objects get special treatment.  the system will work without
-            # but through a spurious log message.
+            # xxx this isn't actually used for rendering, but it needs to be resolvable,
+            # else a spurious log message gets generated (No render method). in the actual
+            # rendering process file objects get special treatment, as their contents are
+            # transferred directly to the storage layer.
             descriptor.setRenderMethod('index_html')
             descriptor.setBinary( True )
             resource_name = self.getResourceName( value )
@@ -152,6 +153,14 @@ class ArchetypeContentRule(SimpleItem):
     
 
 InitializeClass(ArchetypeContentRule)
+
+###################################################
+# The Rest of this are a simple content type and a simple
+# content container both of which have images in their
+# schema, their an example of the types of content this
+# rule was designed to address, and are used in this
+# rule's unit tests.
+###################################################
 
 ContentSchema = atapi.BaseSchema + atapi.Schema((
     atapi.ImageField('portrait',

@@ -45,7 +45,7 @@ class DeploymentTool(UniqueObject, Folder):
     manage_options = (
 
         {'label':'Policies',
-         'action':'manage_main'}
+         'action':'manage_main'},
         
         {'label':'Overview',
          'action':'overview'},

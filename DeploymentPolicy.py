@@ -24,7 +24,7 @@ Purpose: Organizes Content in a Deployment Target Structure
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 8/10/2002
-$Id: $
+$Id$
 """
 
 import DefaultConfiguration
@@ -132,10 +132,16 @@ class DeploymentPolicy(Folder):
         """ """
         if not self.isActive():
             return
+     
+	# set the changed flag so the portal isn't evicted from
+        # the zodb cache during garbage collection which would cause
+        # its volatiles leading to skin issues during rendering.
+        portal = getToolByName( self, 'portal_url').getPortalObject()
+        portal._p_changed = 1
 
         histories = self.getDeploymentHistory()
         history = histories.makeHistory()
-    
+
         Log.attachLogMonitor(history)
         try:
             strategy = self.getDeploymentStrategy().getStrategy()
