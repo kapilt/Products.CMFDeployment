@@ -25,7 +25,7 @@ Purpose: das deployment tool
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 8/10/2002
-$Id: $
+$Id$
 """
 
 
@@ -43,12 +43,12 @@ class DeploymentTool(UniqueObject, Folder):
     security.declareObjectProtected(CMFCorePermissions.ManagePortal)
 
     manage_options = (
-        
-        {'label':'Overview',
-         'action':'overview'},
 
         {'label':'Policies',
          'action':'manage_main'}
+        
+        {'label':'Overview',
+         'action':'overview'},
 
 #        {'label':'Log',
 #         'action':'%s/manage_workspace'%DefaultConfiguration.DeploymentLogging},
