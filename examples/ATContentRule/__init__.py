@@ -1,3 +1,24 @@
+##################################################################
+#
+# (C) Copyright 2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# All Rights Reserved
+#
+# This file is part of CMFDeployment.
+#
+# CMFDeployment is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# CMFDeployment is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with CMFDeployment; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+##################################################################
 """
 $Id: $
 """
@@ -6,6 +27,7 @@ from Products.Archetypes import public as atapi
 from Products.CMFDeployment.Descriptor import DescriptorFactory
 from Products.CMFDeployment.DeploymentInterfaces import IContentRule
 
+from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
 from Globals import DTMLFile, InitializeClass
 
@@ -23,11 +45,11 @@ def addArchetypeContentRule(self,
     add an archetype rule
     """
     atrule = ArchetypeContentRule(id)
-    self._setObject(atrule)
+    self._setObject(id, atrule)
     if RESPONSE is not None:
         return RESPONSE.redirect('manage_workspace')
     
-addArchetypeContentRuleForm = DTMLFile('ui/ArchtypesContentRuleAddForm', globals())
+addArchetypeContentRuleForm = DTMLFile('ui/ArchetypeContentRuleAddForm', globals())
 
 class ArchetypeContentRule(SimpleItem):
 
@@ -78,7 +100,7 @@ def initialize(context):
         ArchetypeContentRule,
         permission = 'Add Content Rule',
         constructors = ( addArchetypeContentRuleForm,
-                         addArchetypeContentRule )
+                         addArchetypeContentRule ),
         visibility = None
         )
         
