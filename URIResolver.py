@@ -29,7 +29,9 @@ $Id: $
 
 import re
 import string
-import unittest
+import pprint
+
+
 
 
 from Acquisition import aq_base
@@ -186,8 +188,7 @@ class URIResolver:
         elif u.startswith('#'):
             return
 
-        # non http browser protocols
-        # XXX optimize me
+        # non http browser protocols XXX optimize me
         elif u.startswith('mailto:'):
             return
         elif u.startswith('ftp:'):
@@ -206,6 +207,9 @@ class URIResolver:
             return
         elif u.startswith('mms:'):
             return
+        elif u.startswith('javascript:'):
+            return
+    
         
         # possibly a relative url
         else:            
@@ -279,6 +283,11 @@ class URIResolver:
 
     def __getitem__(self, key):
         return self.uris[key]
+
+    def pprint(self):
+        pprint.pprint(dict(self.uris.items()))
+            
+        
 
 def extend_relative_path(path):
     "extend '..' path"

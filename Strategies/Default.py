@@ -108,7 +108,7 @@ def DefaultStrategy(self):
         gc_counter = 0
         
         # add in content from directory views
-
+        
         # handle directory view merging...        
         directory_contents = views.getContent()
         map(uri_resolver.addResource, directory_contents)        

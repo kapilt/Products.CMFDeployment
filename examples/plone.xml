@@ -49,6 +49,12 @@
 
     <!-- executed in order and order is important -->
 
+    <mime id="Folder"
+          filter_expr="python: object.portal_type == 'Folder'"
+          ext_expr="python: '%s/index.html'%object.getId()"
+          view_method="index_html"
+          />
+
     <mime id="IndexDocument"
           filter_expr="python: object.getId()=='index_html'"
           ext_expr="python: 'index.html'"

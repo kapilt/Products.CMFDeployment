@@ -1,6 +1,7 @@
+
 from cStringIO import StringIO
 from Products.CMFCore.utils import getToolByName
-from Products.CMFDeployment import deployment_globals
+from Products.CMFDeployment import DeploymentProductHome
 from Products.CMFDeployment import DeploymentTool
 from Products.CMFCore.DirectoryView import addDirectoryViews
 
@@ -13,7 +14,7 @@ def install(self):
     self._setObject(ob.getId(), ob)
 
     if 'deployment_templates' not in skinstool.objectIds():
-        addDirectoryViews(skinstool, 'skins', deployment_globals)
+        addDirectoryViews(skinstool, 'skins', DeploymentProductHome)
         out.write("Added 'deployment_templates' directory view to portal_skins\n")
 
     skins = skinstool.getSkinSelections()
@@ -25,4 +26,4 @@ def install(self):
     else:
         out.write("Plone Deployment skin already setup\n")
 
-    return 2
+    return out.getvalue()

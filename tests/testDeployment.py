@@ -43,6 +43,9 @@ from Products.CMFDeployment import DeploymentProductHome
 
 TESTDEPLOYDIR = os.path.join( DeploymentProductHome, 'tests', 'deploy')
 
+# these too settings operate together
+LEAVE_DEPLOY_DIR=True
+CLEAN_DEPLOY_DIR=True
 
 def setupContentTree( portal ):
 
@@ -56,12 +59,12 @@ def setupContentTree( portal ):
     <a href="../about">About Us</a>
     
     # absolute url
-    <a href="/about/contact/index_html">Contact Us</a>
-    <a href="/about/contact">Jobs - You Wish!</a>    
+    <a href="/portal/about/contact/index_html">Contact Us</a>
+    <a href="/portal/about/contact">Jobs - You Wish!</a>    
     
     # test self referencing content
     <a href="./index_html"> My Self </a>
-    <a href="/news">My Self aliased</a>
+    <a href="/portal/news">My Self aliased</a>
     <a href=".">My Self</a>
     
     </body>
@@ -77,12 +80,12 @@ def setupContentTree( portal ):
     <html><body>
     Case Studies
     
-    case studies... <a href="/logo.gif"> Logo </a>
+    case studies... <a href="/portal/logo.gif"> Logo </a>
     we eaten at millions of mcdonalds...
 
     Dig our Cool JavaScript 
-    <javascript src="/plone_javascripts.js"/>
-    <img src="/vera.jpg"> logo </src>
+    <javascript src="/portal/plone_javascripts.js"/>
+    <img src="/portal/vera.jpg"> logo </src>
     <img src="../vera.jpg"> logo </src>    
     </body>
     </html>
@@ -122,6 +125,9 @@ class DeploymentTests( PloneTestCase ):
     def afterSetUp(self): 
         self.loginPortalOwner()
         setupContentTree(self.portal)
+
+        if os.path.exists( TESTDEPLOYDIR ) and CLEAN_DEPLOY_DIR:
+            shutil.rmtree( TESTDEPLOYDIR )
         
         if not os.path.exists( TESTDEPLOYDIR ):
             os.mkdir( TESTDEPLOYDIR )
@@ -140,9 +146,8 @@ class DeploymentTests( PloneTestCase ):
         get_transaction().commit(1)
         
     def beforeTearDown(self):
-        if os.path.exists( TESTDEPLOYDIR ):
-            pass
-            #shutil.rmtree( TESTDEPLOYDIR )
+        if os.path.exists( TESTDEPLOYDIR ) and not LEAVE_DEPLOY_DIR:
+            shutil.rmtree( TESTDEPLOYDIR )
 
     def testDeploy(self):
         # push the content to the fs
@@ -150,7 +155,7 @@ class DeploymentTests( PloneTestCase ):
         deployment_tool.plone_example.execute()
         
         status, output = commands.getstatusoutput(
-            "grep -rn deploy_link_error %s/*"%TESTDEPLOYDIR
+            "grep -rl deploy_link_error %s/*"%TESTDEPLOYDIR
             )
             
         if status:

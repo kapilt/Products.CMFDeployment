@@ -72,12 +72,6 @@ class PolicyImportExportTests( PloneTestCase ):
         fs = fh.read()
         fh.close()
         
-        print "*"*20, "\nXport"
-        print xml
-        print "*"*20, "\nSample"
-        print fs
-        return xml
-        
     def testIOCycle(self):
         xml = StringIO( self.testExport() )
         dtool = getToolByName(self.portal, 'portal_deployment')

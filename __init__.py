@@ -42,11 +42,9 @@ import ContentIdentification
 import DeploymentStrategy
 import Descriptor
 
-deployment_globals = globals()
-
 DeploymentProductHome = package_home( globals() )
+
 registerDirectory('skins', globals())
-registerDirectory('skins/deployment_templates', globals())
 
 methods = {
     'ContentDeploymentProtocolIds':ContentDeployment.getProtocolNames,
