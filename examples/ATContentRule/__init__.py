@@ -95,7 +95,7 @@ class ArchetypeContentRule(SimpleItem):
                 value = field.get( content )
             else:
                 continue
-            if not value:
+            if not value or isinstance(value, str):
                 continue
             if factory is None:
                 factory = DescriptorFactory( self.getDeploymentPolicy() )
