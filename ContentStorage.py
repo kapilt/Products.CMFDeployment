@@ -117,14 +117,17 @@ class ContentStorage:
         if not rendered:
             return
 
-        try:         
-            if content.Format().split('/')[0]=='text':
-                fh = open(location, 'w')
-            else:
-                fh = open(location, 'wb')
-        except:
-	    log.error("Could not open file for storage %s %s"%(location, descriptor.getContent().getPortalTypeName()))
-	    return
+        fh = open(location, 'w')
+
+#### remove windows compatiblity for the moment        
+##         try:         
+##             if content.Format().split('/')[0]=='text':
+
+##             else:
+##                 fh = open(location, 'wb')
+##         except:
+## 	    log.error("Could not open file for storage %s %s"%(location, descriptor.getContent().getPortalTypeName()))
+## 	    return
         try:
             fh.write(rendered)
         finally:
