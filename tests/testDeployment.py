@@ -59,14 +59,26 @@ def setupContentTree( portal ):
     <a href="../about">About Us</a>
     
     # absolute url
-    <a href="/portal/about/contact/index_html">Contact Us</a>
     <a href="/portal/about/contact">Jobs - You Wish!</a>    
+
+    # javascript url
+    <a href="javascript:this.print()">Print Me</a>    
+
+    # mailto url
+    <a href="mailto:deployment@example.com">Print Me</a>    
     
     # test self referencing content
     <a href="./index_html"> My Self </a>
     <a href="/portal/news">My Self aliased</a>
     <a href=".">My Self</a>
     
+    # test anchor link inside of page
+    <a href="#furtherdown">Down the page</a>
+    
+    this is some more text
+    
+    <a name="furtherdown"></a>
+    here is stuff that is further down the page.
     </body>
     </html>
     """
@@ -80,7 +92,7 @@ def setupContentTree( portal ):
     <html><body>
     Case Studies
     
-    case studies... <a href="/portal/logo.gif"> Logo </a>
+    case studies... <a href="/portal/logo.jpg"> Logo </a>
     we eaten at millions of mcdonalds...
 
     Dig our Cool JavaScript 
