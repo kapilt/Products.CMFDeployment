@@ -39,6 +39,7 @@
     <restricted id="mimetypes_registry" />
     <restricted id="archetype_tool" />
     <restricted id="uid_catalog" />
+    <restricted id="reference_catalog" />
 
   </organization>
   
