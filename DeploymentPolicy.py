@@ -128,7 +128,7 @@ class DeploymentPolicy(Folder):
     def isActive(self):
         return self._active
 
-    def execute(self, RESPONSE):
+    def execute(self, RESPONSE=None):
         """ """
         if not self.isActive():
             return
@@ -145,8 +145,10 @@ class DeploymentPolicy(Folder):
             
         history.recordStatistics(display)
         histories.attachHistory(history)
-        
-        return "<html><pre>%s</pre></body</html>"%display
+
+        if RESPONSE:
+            return "<html><pre>%s</pre></body</html>"%display
+        return True
 
     def manage_afterAdd(self, item, container):
         import DefaultConfiguration

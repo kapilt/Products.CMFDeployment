@@ -84,7 +84,6 @@ class PolicyImportExportTests( PloneTestCase ):
         dtool.manage_delObjects(['plone_example'])
         dtool.addPolicy( policy_xml = xml )
 
-
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(PolicyImportExportTests))
