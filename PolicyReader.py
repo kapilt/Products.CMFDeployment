@@ -173,10 +173,11 @@ DEFAULT_RULE_PRODUCT = 'CMFDeployment'
 DEFAULT_RULE_FACTORY = 'addMimeMapping'
 DEFAULT_RULE_FACTORY_MAP = {
     'ext_expr':'extension_expression',
-    'filter_exp':'condition'
+    'filter_expr':'condition'
     }
 
 def remap_default_rule_factory( m ):
+    import pdb; pdb.set_trace()
     for key, factory_key in DEFAULT_RULE_FACTORY_MAP.items():
         value = m.get(key, '')
         m[factory_key] = value
