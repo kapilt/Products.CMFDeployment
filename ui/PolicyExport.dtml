@@ -1,0 +1,64 @@
+<DeploymentPolicy id="<dtml-var getId>">
+
+  <identification>
+   <dtml-let identification="getContentIdentification()">
+    <dtml-in "identification.filters.objectValues()">
+     <dtml-with sequence-item>
+      <filter id="<dtml-var getId>" 
+              expr="<dtml-var expression_text>"/>
+     </dtml-with>
+    </dtml-in>
+   </dtml-let>
+  </identification>
+
+  
+  <strategy id="<dtml-var "getDeploymentStrategy().strategy_id">" />
+
+  <skins>
+    <dtml-in "getContentDirectoryViews().getDirectoryViewMap().items()">
+      <directory view_path="<dtml-var sequence-key>"
+                 deploy_path="<dtml-var "_['sequence-item'][1]">"
+                 source_path="<dtml-var "_['sequence-item'][0]">" />
+    </dtml-in>
+  </skins>
+
+ <dtml-with "getContentOrganization().structure">
+ 
+  <organization 
+    cmf_mount="<dtml-var cmf_mount_point>" 
+    fs_mount="<dtml-var mount_point>">
+    
+    <dtml-in "restricted">
+      <restricted id="<dtml-var sequence-item>" />
+    </dtml-in>
+    
+  </organization>
+  
+</dtml-with>  
+  
+ <dtml-with getContentMastering>
+  <dtml-if "site_user.userid and site_user.udb_path">
+   <chain_user user="<dtml-var "site_user.userid">"  udb_path="<dtml-var "site_user.udb_path">"/>
+  </dtml-if>
+  
+  <mastering skin="<dtml-var "site_skin.skin_name">">
+
+    <!-- executed in order and order is important -->
+
+    <dtml-in "mime.objectValues()">
+      <dtml-with sequence-item>
+      
+         <mime id="<dtml-var getId>"
+               filter_expr="<dtml-var condition_text>"
+               ext_expr="<dtml-var extension_text>"
+               view_method="<dtml-var view_method>" />
+               
+      </dtml-with>
+    </dtml-in>
+
+  </mastering>
+  
+ </dtml-with>
+
+</DeploymentPolicy>
+
