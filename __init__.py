@@ -31,6 +31,7 @@ import DeploymentTool
 import utils
 from Globals import package_home
 from Products.CMFCore.utils import ToolInit
+from Products.CMFCore.DirectoryView import registerDirectory
 
 tools = (DeploymentTool.DeploymentTool,)
 
@@ -41,7 +42,11 @@ import ContentIdentification
 import DeploymentStrategy
 import Descriptor
 
+deployment_globals = globals()
+
 DeploymentProductHome = package_home( globals() )
+registerDirectory('skins', globals())
+registerDirectory('skins/deployment_templates', globals())
 
 methods = {
     'ContentDeploymentProtocolIds':ContentDeployment.getProtocolNames,
