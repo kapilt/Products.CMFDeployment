@@ -70,17 +70,14 @@ class ContentStorage:
         # of an error during rendering or based on configuration.
         if descriptor.isGhost(): 
             return 
-        
-        content_path = self.structure.getContentPathFromDescriptor(
-                                                         descriptor
-                                                         )
+
         descriptors = descriptor.getDescriptors()
 
-        if content_path.endswith(sep):
-            log.warning('invalid content path detected %s ... fixing'%content_path)
-            content_path = content_path[:-1]
-
         for descriptor in descriptors:
+            content_path = self.structure.getContentPathFromDescriptor( descriptor )
+            if content_path.endswith(sep):
+                log.warning('invalid content path detected %s ... fixing'%content_path)
+                content_path = content_path[:-1]
             self.storeDescriptor( content_path, descriptor )
 
         return True
