@@ -45,7 +45,7 @@
   
   <!-- <chain_user user="plone"  udb_path="/plone/acl_users" /> -->
 
-  <mastering skin="Plone Default">
+  <mastering skin="Plone Deployment">
 
     <!-- executed in order and order is important -->
 
