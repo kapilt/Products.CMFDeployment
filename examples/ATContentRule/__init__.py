@@ -116,7 +116,7 @@ class ArchetypeContentRule(SimpleItem):
             descriptor.setRenderMethod('index_html')
             descriptor.setBinary( True )
             resource_name = self.getResourceName( value )
-            descriptor.setFileName( "%s/%s"%(content.getId(), resource_name ))
+            descriptor.setFileName( resource_name )
 
             yield descriptor
 
