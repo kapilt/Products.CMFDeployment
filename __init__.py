@@ -41,6 +41,7 @@ import ContentDeployment
 import ContentIdentification
 import DeploymentStrategy
 import Descriptor
+import MimeMapping
 
 DeploymentProductHome = package_home( globals() )
 
@@ -62,5 +63,12 @@ def initialize(context):
     utils.registerIcon('identify.png')
     utils.registerIcon('protocol.png')     
 
+    context.registerClass(
+        MimeMapping.MimeExtensionMapping,
+        permission = 'Add Content Rule',
+        constructors = ( MimeMapping.addMappingForm,
+                         MimeMapping.addMimeMapping ),
+        visibility = None
+        )
+        
     context.registerHelp()
-     

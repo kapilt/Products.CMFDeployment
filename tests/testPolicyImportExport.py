@@ -28,10 +28,14 @@ $Id: $
 
 """
 
-import os, sys, timeif __name__ == '__main__':    execfile(os.path.join(sys.path[0], 'framework.py'))
+import os, sys, time
+if __name__ == '__main__':
+    execfile(os.path.join(sys.path[0], 'framework.py'))
     
-from Testing import ZopeTestCasefrom Products.CMFPlone.tests.PloneTestCase import PloneTestCase
-ZopeTestCase.installProduct('CMFDeployment')
+from Testing import ZopeTestCase
+from Products.CMFPlone.tests.PloneTestCase import PloneTestCase
+
+ZopeTestCase.installProduct('CMFDeployment')
 
 import unittest
 from StringIO import StringIO
@@ -71,6 +75,7 @@ class PolicyImportExportTests( PloneTestCase ):
         fh = open(policy_file)
         fs = fh.read()
         fh.close()
+        return fs
         
     def testIOCycle(self):
         xml = StringIO( self.testExport() )

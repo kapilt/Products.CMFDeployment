@@ -26,16 +26,47 @@ License: GPL
 Created: 8/10/2002
 $Id: $
 """
-from Namespace import *
+
+from OFS.ObjectManager import IFAwareObjectManager
+
 from Products.CMFCore.Expression import Expression
 from Products.PageTemplates.Expressions import SecureModuleImporter, getEngine
-from ExpressionContainer import ExpressionContainer
 
+from Namespace import *
+from ExpressionContainer import ExpressionContainer
+from DeploymentInterfaces import IContentRule
+
+addMappingForm = DTMLFile('ui/MimeExtensionMappingAddForm', globals())
+
+def addMimeMapping(self, id, extension_expression, condition, view_method, ghost=0, RESPONSE=None):
+    """ """
+    mapping = MimeExtensionMapping(id=id,
+                                   extension_expression=extension_expression,
+                                   condition=condition,
+                                   view_method=view_method,
+                                   ghost=ghost)
+
+    self._setObject(id, mapping)
+
+    if RESPONSE is not None:
+        RESPONSE.redirect('manage_main')
+        
+xml_export_template = """
+<mime id="%(id)s"
+      product="%(product)s"
+      factory="%(factory)s"
+      filter_expr="%(filter_expr)s"
+      ext_expr="%(ext_expr)s"
+      view_method="%(view_method)s" />
+"""
+               
 class MimeExtensionMapping(SimpleItem):
 
     meta_type = 'Mime Extension Mapping'
 
     view_method = ''
+
+    __implements__ = (IContentRule,)
 
     manage_options = (
         {'label':'Mapping',
@@ -47,7 +78,7 @@ class MimeExtensionMapping(SimpleItem):
         )
     
     editMappingForm = DTMLFile('ui/MimeExtensionMappingEditForm', globals())
-    
+
     def __init__(self, id, extension_expression, condition, view_method, ghost):
         self.id = id
         self.extension = Expression(extension_expression)
@@ -70,7 +101,7 @@ class MimeExtensionMapping(SimpleItem):
     def process(self, descriptor, context):
         """
         process a content descriptor, applying the rules specified by
-        this deployment rule.
+        this deployment rule. 
         """
         extension = self.getExtension( context )
         descriptor.setExtension( extension )
@@ -93,7 +124,22 @@ class MimeExtensionMapping(SimpleItem):
         if RESPONSE is not None:
             RESPONSE.redirect('../manage_main')
 
-class MimeMappingContainer(ExpressionContainer):
+
+    #################################
+    def toXml(self):
+
+        d = { 'id':self.id,
+              'view_method':self.view_method,
+              'ext_expr':self.extension_text,
+              'filter_expr':self.condition_text,
+              'product':'CMFDeployment',
+              'factory':'addMimeMapping' }
+             
+        return xml_export_template%d
+             
+    
+
+class MimeMappingContainer(ExpressionContainer, IFAwareObjectManager):
 
     meta_type = 'Mime Mapping Container'
 
@@ -108,29 +154,15 @@ class MimeMappingContainer(ExpressionContainer):
          'action':'../../overview'}
         )
 
-    addMappingForm = DTMLFile('ui/MimeExtensionMappingAddForm', globals())
-
-    all_meta_types = (
-        {'name':MimeExtensionMapping.meta_type,
-         'action':'addMappingForm'},
-        )
-
-    def __init__(self, id):
+    all_meta_types = IFAwareObjectManager.all_meta_types
+    _product_interfaces = ( IContentRule, )
+    
+    def __init__(self, id, title=''):
         self.id = id
-
-    def addMimeMapping(self, id, extension_expression, condition, view_method, ghost=0, RESPONSE=None):
-        """ """
-        mapping = MimeExtensionMapping(id=id,
-                                       extension_expression=extension_expression,
-                                       condition=condition,
-                                       view_method=view_method,
-                                       ghost=ghost)
-
-        self._setObject(id, mapping)
-
-        if RESPONSE is not None:
-            RESPONSE.redirect('manage_main')
+        self.title = title or id
         
+    def addMimeMapping(self, *args, **kw):
+        return self.manage_addProduct['CMFDeployment'].addMimeMapping(*args, **kw)
 
 def getMimeExprContext(object, portal):
     

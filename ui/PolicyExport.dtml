@@ -47,12 +47,7 @@
 
     <dtml-in "mime.objectValues()">
       <dtml-with sequence-item>
-      
-         <mime id="<dtml-var getId>"
-               filter_expr="<dtml-var condition_text>"
-               ext_expr="<dtml-var extension_text>"
-               view_method="<dtml-var view_method>" />
-               
+	 <dtml-var toXml>
       </dtml-with>
     </dtml-in>
 

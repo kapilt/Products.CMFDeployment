@@ -86,6 +86,22 @@ class IContentIdentification(Interface):
         identified for deployment
         """
 
+class IContentRule(Interface):
+    """
+    a content rule describes how content is prepared and deployed.
+    """
+
+    def isValid( context ):
+        """
+        does this content rule match the content context
+        """
+
+    def process( descriptor, context ):
+        """
+        apply this content rule to the content context storing
+        results on the content descriptor
+        """
+
 class IContentSource(Interface):
 
     def getContent():
