@@ -87,7 +87,7 @@ class ArchetypeContentRule(SimpleItem):
             child_descriptors = True
 
         descriptor.setRenderMethod('view')
-        if child_descriptors or descriptor.isContentFolderish():
+        if descriptor.isContentFolderish():
             descriptor.setFileName( "%s/index.html"%content.getId() )
         else:
             descriptor.setFileName( self.getResourceName( content ) )
@@ -113,7 +113,11 @@ class ArchetypeContentRule(SimpleItem):
             # but through a spurious log message.
             descriptor.setRenderMethod('index_html')
             descriptor.setBinary( True )
-            descriptor.setFileName( self.getResourceName( value ) )
+            resource_name = self.getResourceName( value )
+            if isinstance( content, atapi.BaseFolder):
+                descriptor.setFileName( "%s/%s"%(content.getId(), resource_name ))
+            else:
+                descriptor.setFileName( "%s_%s"%(content.getId(), resource_name ))
             yield descriptor
 
     def getResourceName(self, content):

@@ -21,6 +21,12 @@
 ##################################################################
 """
 Purpose: Unitests for Site Export
+
+***
+These tests now require installation of example ATContentRule Product
+and Archetypes.
+***
+
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 12/29/2002
@@ -28,10 +34,15 @@ $Id: $
 
 """
 
-import os, sys, time, shutil, commandsif __name__ == '__main__':    execfile(os.path.join(sys.path[0], 'framework.py'))
-    
-from Testing import ZopeTestCasefrom Products.CMFPlone.tests.PloneTestCase import PloneTestCase
-ZopeTestCase.installProduct('CMFDeployment')
+import os, sys, time, shutil, commandsif __name__ == '__main__':
+    execfile(os.path.join(sys.path[0], 'framework.py'))
+from Testing import ZopeTestCase
+from Products.CMFPlone.tests.PloneTestCase import PloneTestCase
+ZopeTestCase.installProduct('CMFDeployment')
+ZopeTestCase.installProduct('MimetypesRegistry')
+ZopeTestCase.installProduct('PortalTransforms')
+ZopeTestCase.installProduct('Archetypes')
+ZopeTestCase.installProduct('ATContentRule')
 
 import unittest
 from StringIO import StringIO
@@ -52,12 +63,12 @@ def setupContentTree( portal ):
     portal.invokeFactory('Folder', 'news')
     portal.news.invokeFactory('Document','index_html')
     
-    news_index_content = """\
+    news_index_content = '''\
     <html>
     <body>
     # relative url
     <a href="../about">About Us</a>
-    
+
     # absolute url
     <a href="/portal/about/contact">Jobs - You Wish!</a>    
 
@@ -81,14 +92,14 @@ def setupContentTree( portal ):
     here is stuff that is further down the page.
     </body>
     </html>
-    """
+    '''
     
     portal.news.index_html.edit(text_format='html', text=news_index_content)
     portal.invokeFactory('Folder', 'about')
     
     
     portal.about.invokeFactory( 'Document', 'index_html')
-    about_index_content = """\
+    about_index_content = '''
     <html><body>
     Case Studies
     
@@ -101,7 +112,7 @@ def setupContentTree( portal ):
     <img src="../vera.jpg"> logo </src>    
     </body>
     </html>
-    """    
+    '''
     
     portal.about.index_html.edit(text_format="html", text=about_index_content)
     portal.about.invokeFactory('Document', 'contact')
@@ -129,14 +140,17 @@ def setupContentTree( portal ):
     content = str(logo)
     portal.invokeFactory('Image', 'vera.jpg')
     portal['vera.jpg'].edit(file=content)
-    
 
+
+    portal.events.invokeFactory('Sample Image Content', 'image_test')
+    fh = open( os.path.join( DeploymentProductHome, 'www', 'identify.png'))
+    portal.events['image_test'].setPortrait( fh )        
+    fh.close()
     
 class DeploymentTests( PloneTestCase ):
 
     def afterSetUp(self): 
         self.loginPortalOwner()
-        setupContentTree(self.portal)
 
         if os.path.exists( TESTDEPLOYDIR ) and CLEAN_DEPLOY_DIR:
             shutil.rmtree( TESTDEPLOYDIR )
@@ -145,8 +159,11 @@ class DeploymentTests( PloneTestCase ):
             os.mkdir( TESTDEPLOYDIR )
 
         installer = getToolByName(self.portal, 'portal_quickinstaller')
+        installer.installProduct('ATContentRule')        
         installer.installProduct('CMFDeployment')
 
+        setupContentTree(self.portal)
+        
         policy_file = os.path.join( DeploymentProductHome, 'examples', 'plone.xml') 
         fh = open( policy_file )
         deployment_tool = getToolByName(self.portal, 'portal_deployment')
@@ -156,6 +173,13 @@ class DeploymentTests( PloneTestCase ):
         structure.mount_point = TESTDEPLOYDIR
         fh.close()
         get_transaction().commit(1)
+
+        rules = policy.getContentMastering().mime
+        rules.manage_addProduct['ATContentRule'].addArchetypeContentRule(
+            id = "at_image_content",
+            condition="python: object.portal_type == 'Sample Image Content'"
+            )
+        
         
     def beforeTearDown(self):
         if os.path.exists( TESTDEPLOYDIR ) and not LEAVE_DEPLOY_DIR:
@@ -164,7 +188,13 @@ class DeploymentTests( PloneTestCase ):
     def testDeploy(self):
         # push the content to the fs
         deployment_tool = getToolByName(self.portal, 'portal_deployment')
-        deployment_tool.plone_example.execute()
+        try:
+            deployment_tool.plone_example.execute()
+        except:
+            import pdb, sys
+            ec, e, tb = sys.exc_info()
+            print ec, e
+            pdb.post_mortem(tb)
         
         status, output = commands.getstatusoutput(
             "grep -rl deploy_link_error %s/*"%TESTDEPLOYDIR

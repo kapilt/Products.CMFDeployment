@@ -32,7 +32,7 @@ from Interface import Base as Interface
 from Log import LogFactory
 from Statistics import IOStatistics
 
-from os import sep, path
+from os import sep, path, mkdir
 log = LogFactory('Content Storage')
 
 class IContentStorage(Interface):
@@ -79,21 +79,16 @@ class ContentStorage:
         # for now.. XXX the underlying issue is that the structure is
         # already generated and now we possibly need to push new directories
         # into the structure.
+        #        if content_path.endswith(sep):
+        #            log.debug('EGAGS')
+        #            content_path = content_path[:-1]
 
-        if content_path.endswith(sep):
-            #log.debug('EGAGS')
-            content_path = content_path[:-1]
 
-        if not path.exists(content_path):
-            if not os.path.startswith( self.structure.mount_point ):
-                log.warning( 'content directory %s does not exist for %s'%(content_path, descriptor.content_url))
-                return
-            # xxx nested content, not supported.. but it would break here.
-            os.mkdir( content_path )
-            
         for descriptor in descriptors:
-            return self.storeDescriptor( content_path, descriptor )
+            self.storeDescriptor( content_path, descriptor )
 
+        return True
+    
     store = __call__
     
     def storeDescriptor(self, content_path, descriptor ):
@@ -103,13 +98,17 @@ class ContentStorage:
         content = descriptor.getContent()
         rendered = descriptor.getRendered()
 
+        # creates directories as needed below mount point
+        if not self.createParentDirectories( location ):
+            return
+            
         #log.debug('storing location  %s, format %s size %d'%(location,
         #                                                     descriptor.getContent().Format(),
         #                                                     len(rendered)
         #                                             )
         #          )
         
-        
+
         self.stats( location, len(rendered) )
 
         rendered = self.filters.filter(descriptor, rendered, location)
@@ -132,5 +131,27 @@ class ContentStorage:
             fh.write(rendered)
         finally:
             fh.close()
+
+    def createParentDirectories(self, location ):
+        """
+        creates parent directories as needed below mount point
+        for the given location
+        """
+        directory = path.dirname( location )
+        if path.exists( directory ):
+            return True
+        if not location.startswith( self.structure.mount_point ):
+            log.warning( 'invalid store location %s'%(location))
+            return False
+        log.debug("creating parent directories for location %s"%location)
+        components = directory.split(sep)
+        for i in range( 2, len(components)+1 ):
+            ppath = sep.join( components[:i] )
+            if not path.exists( ppath ):
+                mkdir( ppath )
+        return True
+                        
+        
+
             
 
