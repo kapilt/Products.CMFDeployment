@@ -62,6 +62,13 @@
           view_method="index_html"
           />
 
+<!-- Example of adding the plone root object to the policy
+    <mime id="PloneSite"
+          filter_expr="python: object.portal_type == 'Plone Site'"
+	  ext_expr="python: 'index.html'"
+	  view_method="index_html"
+	  />
+-->
     <mime id="IndexDocument"
           filter_expr="python: object.getId()=='index_html'"
           ext_expr="python: 'index.html'"
@@ -85,6 +92,7 @@
 	  ext_expr="python: '%s.html'%object.getId()"
 	  view_method=""
 	  />
+
 
   </mastering>
 
