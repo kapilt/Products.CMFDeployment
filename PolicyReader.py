@@ -177,7 +177,6 @@ DEFAULT_RULE_FACTORY_MAP = {
     }
 
 def remap_default_rule_factory( m ):
-    import pdb; pdb.set_trace()
     for key, factory_key in DEFAULT_RULE_FACTORY_MAP.items():
         value = m.get(key, '')
         m[factory_key] = value
