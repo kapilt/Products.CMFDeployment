@@ -1,3 +1,4 @@
+
 ##################################################################
 #
 # (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
@@ -25,14 +26,18 @@ Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 12/29/2002
 $Id: $
+
+write unit test for
+< type="text/css" media="screen"> @import url(http://localhost:8080/plone/plone.css);</style>    
+
 """
+
+import os, sys, timeif __name__ == '__main__':    execfile(os.path.join(sys.path[0], 'framework.py'))from Testing import ZopeTestCaseZopeTestCase.installProduct('CMFDeployment')
 
 import unittest
 from types import StringType, NoneType
-#from Products.CMFDeployment.Descriptor import ContentDescriptor
-#from Products.CMFDeployment.URIResolver import resolve_relative, URIResolver, uri_regex, _marker
-from Descriptor import ContentDescriptor
-from URIResolver import resolve_relative, URIResolver, uri_regex, _marker
+from Products.CMFDeployment.Descriptor import ContentDescriptor
+from Products.CMFDeployment.URIResolver import resolve_relative, URIResolver, test_uri_regex, test_css_regex, _marker
 
 class Content:
 
@@ -46,10 +51,14 @@ class Content:
         raise "bg"
 
     def getFileName(self):
+    	if self.id.endswith('css'): 
+    	    return self.id
+
         if getattr(self, 'isAnObjectManager', 0):
             if self.id:
                 return '%s/index.html'%self.id
             return "index.html"
+        
         return "%s.html"%self.id
 
 class FolderContent(Content):
@@ -58,11 +67,12 @@ class FolderContent(Content):
 class CompositeContent(FolderContent):
     isCompositeContent = 1  # hardcodejust for testing, config in organization
 
+
 class ContentDB:
 
     root = FolderContent('/', """
     <css @import="http://www.example.com/style/site.css" />
-    
+
     <image href="/images/bar.gif">bar</image>
     This is a test <a href="/reptiles/snake">snake</a>
     This is a test <a href="mammals/elephant">snake</a>
@@ -87,6 +97,13 @@ class ContentDB:
     This is a test <a href="http://www.example.com/reptiles/snake">snake</a>   
     """)
     
+    alligator = Content("/reptiles/alligator", """
+    <style type="text/css" media="screen"> @import url(/style/site.css);</style> 
+    
+    This is a test of the css uri resolver
+    """
+    )
+
     #################################
     mammals  = FolderContent("/mammals", "")
     elephant = Content("/mammals/elephant","""
@@ -94,7 +111,6 @@ class ContentDB:
     
     whale = Content("/mammals/whale", """
     """)
-
 
     loch_ness= CompositeContent("/reptiles/loch_ness", """
     This is a test <a href="snake">snake</a>   
@@ -106,7 +122,6 @@ class ContentDB:
     bar_image = Content("/images/bar.gif", "")
     style = FolderContent("/style", "")
     style_image = Content("/style/site.css", "")
-
 
 class DescriptorDB:
     pass
@@ -171,6 +186,17 @@ class ResolveURITests(BaseResolverTests):
             segments.insert(0, self.resolver.target_path)
             self.assertEqual('/'.join(segments), self.resolver[c.absolute_url(1)])
 
+    def testResolverCSSImport(self):
+        """
+        test css importer
+        """
+        resource = getDescriptor( "alligator" )
+        curi = resource.getContent().absolute_url(1)
+        uri = '/style/site.css'
+        
+        nu = self.resolver.resolveURI(uri, curi, 0)
+        self.assertEqual(nu, '/deploy/style/site.css')
+        
     def testResolverURI(self):
         # identity
         r = getDescriptor('root')
@@ -281,6 +307,7 @@ class ResolveURITests(BaseResolverTests):
         self.assertEqual(nu, '/deploy/reptiles/snake.html')
 
 
+
 class ResolverTests(BaseResolverTests):
 
     def testResolve(self):
@@ -296,7 +323,7 @@ class ResolverTests(BaseResolverTests):
             '/deploy/reptiles/lizard.html'
             )
             
-        uris = uri_regex.findall(rendered_target)        
+        uris = test_uri_regex.findall(rendered_target)        
         self.assertEqual(len(uris), len(expected))
 
         for u in uris:
@@ -314,7 +341,7 @@ class ResolverTests(BaseResolverTests):
             '/deploy/reptiles/snake.html',
             )
             
-        uris = uri_regex.findall(rendered_target)        
+        uris = test_uri_regex.findall(rendered_target)        
         self.assertEqual(len(uris), len(expected))
 
         for u in uris:
@@ -332,7 +359,7 @@ class ResolverTests(BaseResolverTests):
             '/deploy/reptiles/lizard.html',
             )            
 
-        uris = uri_regex.findall(rendered_target)        
+        uris = test_uri_regex.findall(rendered_target)        
         self.assertEqual(len(uris), len(expected))
 
         for u in uris:
@@ -348,12 +375,26 @@ class ResolverTests(BaseResolverTests):
             '/deploy/reptiles/snake.html',
             '/deploy/reptiles/lizard.html',
             )            
-
-        uris = uri_regex.findall(rendered_target)        
+        uris = test_uri_regex.findall(rendered_target)
         self.assertEqual(len(uris), len(expected))
 
         for u in uris:
             assert u in expected
+            
+    def testResolve5(self):
+        d = getDescriptor('alligator')
+        self.resolver.resolve(d)
+        rendered_target = d.getRendered()
+        expected = (
+            '/deploy/style/site.css',
+            )
+
+        uris = test_css_regex.findall(rendered_target)        
+        self.assertEqual(len(uris), len(expected))
+
+        for u in uris:
+            assert u in expected
+            
         
 class RelativeResolutionTests(unittest.TestCase):
 
@@ -432,7 +473,8 @@ def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(RelativeResolutionTests))
     suite.addTest(unittest.makeSuite(ResolveURITests))
+    suite.addTest(unittest.makeSuite(ResolverTests))
     return suite
 
 if __name__ == '__main__':
-    unittest.main()
+    framework() 

@@ -11,4 +11,6 @@ how it should be displayed when deployed, and how it should be deployed </p>
 <input type="submit" value="Execute Policy">
 </form>
 
+<p>Download Policy as <a href="policy_xml">XML</a></p>
+
 <dtml-var manage_page_footer>

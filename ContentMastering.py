@@ -195,10 +195,10 @@ class SiteChainSkin(SimpleItem):
     _v_active = None
     _v_saved_skin_data = None
 
-    enable = 1
+    enable = 1    
     
     def __init__(self):
-        self.skin_name = None
+        self.skin_name = None 
 
     def edit(self, enable, skin_name):
         
@@ -231,7 +231,9 @@ class SiteChainSkin(SimpleItem):
 
         self._v_saved_skin_data = None
         self._v_active = None
-
+        
+    def manage_afterAdd(self, item, container):
+        self.skin_name  = getToolByName(self, 'portal_skins').getDefaultSkin()	
 
 class InvalidUserDatabase(AttributeError): pass
 

@@ -101,9 +101,8 @@ class PolicyReader(MetaReader):
 
     def startIdentfilter(self, attrs):
         filters = self.policy.ident.setdefault('filters', [])
-        if PolicyNode.has_key(attrs):
-            filter = PolicyNode(attrs)
-            filters.append(filter)
+        filter = PolicyNode(attrs)
+        filters.append(filter)
 
     def startOrganization(self, attrs):
         organization = PolicyNode(attrs)

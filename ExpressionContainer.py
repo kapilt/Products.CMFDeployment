@@ -22,14 +22,11 @@
 """
 Purpose: utilize ordered folder if available to provide for
           explicit ordering of expressions (filter, mime).
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003          
+Author: kapil thangavelu <k_vertigo@objectrealms.net> 
 $Id: $
 """
 
-try:
-    from Products.OrderedFolder.OrderedFolder import OrderedFolder
-except:
-    from OFS.Folder import Folder as OrderedFolder
+from OFS.OrderedFolder import OrderedFolder
 
 class ExpressionContainer(OrderedFolder):
     pass

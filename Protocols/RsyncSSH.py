@@ -29,7 +29,7 @@ $Id: $
 
 from Products.CMFDeployment.DeploymentInterfaces import IDeploymentProtocol
 from Products.CMFDeployment.lib import pexpect
-from ProtocolError import ProtocolError
+from Products.CMFDeployment.DeploymentExceptions import ProtocolError
 from cStringIO import StringIO
 
 class RsyncSshProtocol:

@@ -386,5 +386,6 @@ def resolve_relative(content_url, relative_url, content_folderish_p=0):
     return resolved
 
 url_regex = re.compile("""(?P<url>(?:href=|src=|@import)\s*["']\s*(.*?)["'])""")
-uri_regex = re.compile('''(?:href=|src=|@import)\s*["']\s*(.*?)["']''')
-css_regex  = re.compile("""(?P<url>url\(['"]\s*(.*?)['"]\))""")
+test_uri_regex = re.compile('''(?:href=|src=|@import)\s*["']\s*(.*?)["']''')
+css_regex  = re.compile("""(?P<url>url\(['"]{0,1}\s*(.*?)['"]{0,1}\))""")
+test_css_regex  = re.compile("""url\(['"]{0,1}\s*(?P<url>.*?)['"]{0,1}\)""")

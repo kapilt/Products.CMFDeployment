@@ -20,44 +20,42 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ##################################################################
 """
-Purpose: Initialize and Register the Deployment Tool
+Purpose: Unitests for Polixy Xml Import Export
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
-Created: 8/10/2002
+Created: 12/29/2002
 $Id: $
+
 """
 
-import DeploymentTool
-import utils
-from Globals import package_home
-from Products.CMFCore.utils import ToolInit
+import os, sys, timeif __name__ == '__main__':    execfile(os.path.join(sys.path[0], 'framework.py'))
+    
+from Testing import ZopeTestCasefrom Products.PloneTestCase.PloneTestCase from PloneTestCaseZopeTestCase.installProduct('CMFDeployment')
 
-tools = (DeploymentTool.DeploymentTool,)
+import unittest
+from types import StringType, NoneType
+from Products.CMFDeployment.Descriptor import ContentDescriptor
+from Products.CMFDeployment import DeploymentProductHome
 
-import ContentOrganization
-import ContentMastering
-import ContentDeployment
-import ContentIdentification
-import DeploymentStrategy
-import Descriptor
+class PolicyImportExportTests( ZopeTestCase.ZopeTestCase ):
 
-DeploymentProductHome = package_home( globals() )
+    def afterSetUp(self): 
+        pass
+        
+    def beforeTearDown(self):
+        pass
 
-methods = {
-    'ContentDeploymentProtocolIds':ContentDeployment.getProtocolNames,
-    'ContentDeploymentStrategyIds':DeploymentStrategy.getStrategyNames
-    }
+    def testImport(self):
+        policy_file = os.path.join( DeploymentProductHome, 'examples', 'plone.xml') 
+        fh = open( policy_file )
 
-def initialize(context):
+        
 
-    ToolInit('CMF Deployment',
-             tools=tools,
-             product_name='CMFDeployment',
-             icon='tool.png').initialize(context)
 
-    utils.registerIcon('policy.png')
-    utils.registerIcon('identify.png')
-    utils.registerIcon('protocol.png')     
+def test_suite():
+    suite = unittest.TestSuite()
+    #suite.addTest(unittest.makeSuite(ResolverTests))
+    return suite
 
-    context.registerHelp()
-     
+if __name__ == '__main__':
+    framework() 
