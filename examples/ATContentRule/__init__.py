@@ -26,11 +26,16 @@ $Id: $
 from Products.Archetypes import public as atapi
 from Products.CMFDeployment.Descriptor import DescriptorFactory
 from Products.CMFDeployment.DeploymentInterfaces import IContentRule
+from Products.CMFCore import CMFCorePermissions
 from Products.CMFCore.Expression import Expression
+from Products.CMFCore import utils
 
 from AccessControl import ClassSecurityInfo
 from OFS.SimpleItem import SimpleItem
 from Globals import DTMLFile, InitializeClass
+
+
+PROJECT_NAME = "ATContentRule"
 
 xml_export_template = """
 <mime id="%(id)s"
@@ -103,7 +108,78 @@ class ArchetypeContentRule(SimpleItem):
 
 InitializeClass(ArchetypeContentRule)
 
+ContentSchema = atapi.BaseSchema + atapi.Schema((
+    atapi.ImageField('portrait',
+               mode='rw',
+               accessor='getPortrait',
+               mutator='setPortrait',
+               max_size=(150,150),
+               required=0,
+               widget=atapi.ImageWidget(
+                   label='Portrait',
+                   label_msgid='label_portrait',
+                   description="To add or change the portrait: click the "
+                       "\"Browse\" button; select a picture of yourself. "
+                       "Recommended image size is 75 pixels wide by 100 "
+                       "pixels tall.",
+                   description_msgid='help_portrait',
+                   i18n_domain='plone',
+                   ),
+               ),
+    ))
+
+
+class SampleImageSchemaContent( atapi.BaseContent ):
+
+    schema = ContentSchema
+    archetype_name = portal_type = meta_type = "Sample Image Content"
+
+atapi.registerType( SampleImageSchemaContent, PROJECT_NAME)
+
+
+FolderSchema = atapi.BaseFolderSchema + atapi.Schema((
+    atapi.ImageField('portrait',
+               mode='rw',
+               accessor='getPortrait',
+               mutator='setPortrait',
+               max_size=(150,150),
+               required=0,
+               widget=atapi.ImageWidget(
+                   label='Portrait',
+                   label_msgid='label_portrait',
+                   description="To add or change the portrait: click the "
+                       "\"Browse\" button; select a picture of yourself. "
+                       "Recommended image size is 75 pixels wide by 100 "
+                       "pixels tall.",
+                   description_msgid='help_portrait',
+                   i18n_domain='plone',
+                   ),
+               ),
+    ))
+
+class SampleImageSchemaFolder( atapi.BaseFolder ):
+
+    schema = FolderSchema
+    archetype_name = portal_type = meta_type = "Sample Image Folder"
+
+atapi.registerType( SampleImageSchemaFolder, PROJECT_NAME)
+
+
 def initialize(context):
+
+    content_types, constructors, ftis = atapi.process_types(
+        atapi.listTypes( PROJECT_NAME ),
+        PROJECT_NAME
+        )
+
+    utils.ContentInit(
+        PROJECT_NAME + ' Content',
+        content_types      = content_types,
+        permission         = CMFCorePermissions.AddPortalContent,
+        extra_constructors = constructors,
+        fti                = ftis,
+        ).initialize(context)
+    
 
     context.registerClass(
         ArchetypeContentRule,
