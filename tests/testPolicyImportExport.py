@@ -59,11 +59,13 @@ class PolicyImportExportTests( PloneTestCase ):
         assert 'plone_example' in deployment_tool.objectIds()
    
     def testExport(self):
+        """
+        Running the export of the policy
+        """
+        # Viewing the policy requires manage portal permission
+        self.loginPortalOwner()
         self.testImport()
         dtool = getToolByName(self.portal, 'portal_deployment')
-        import pdb; pdb.set_trace()
-        from AccessControl import getSecurityManager
-        self.login('portal_owner')
         xml = dtool.plone_example.policy_xml()     
         policy_file = os.path.join( DeploymentProductHome, 'examples', 'plone.xml') 
         fh = open(policy_file)
@@ -76,7 +78,7 @@ class PolicyImportExportTests( PloneTestCase ):
         print fs
         return xml
         
-    def XtestIOCycle(self):
+    def testIOCycle(self):
         xml = StringIO( self.testExport() )
         dtool = getToolByName(self.portal, 'portal_deployment')
         dtool.manage_delObjects(['plone_example'])
