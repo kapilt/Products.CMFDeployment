@@ -83,16 +83,16 @@ class ResolveFolderURITests(PloneTestCase):
         import pdb; pdb.set_trace();
         resolver.addResource( descriptor )
         
-        resolver.source_host = 'http://localhost'
-        resolver.mount_path = '/'
+        resolver.source_host = 'http://www.example.com'
+        resolver.mount_path = '/portal'
         resolver.mount_path = '/deploy'
         
         content_url = descriptor.getSourcePath() or descriptor.getContentURL()        
         marker = object()
 
-        result = resolver.resolveURI( 'http://localhost/folderwithindex/',
+        result = resolver.resolveURI( 'http://www.example.com/portal/folderwithindex/',
                                       content_url,
-                                      False,
+                                      True,
                                       marker
                                       )
 
