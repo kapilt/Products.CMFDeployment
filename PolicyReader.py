@@ -28,6 +28,8 @@ $Id: $
 from xml.sax import make_parser, ContentHandler
 from UserDict import UserDict
 
+from ZPublisher.mapply import mapply
+
 marker = []
 class PolicyNode(UserDict):
     reserved = ('data',)
@@ -167,6 +169,19 @@ def read_policy(file):
     parser.parse(file)
     return reader.getPolicy()
 
+DEFAULT_RULE_PRODUCT = 'CMFDeployment'
+DEFAULT_RULE_FACTORY = 'addMimeMapping'
+DEFAULT_RULE_FACTORY_MAP = {
+    'ext_expr':'extension_expression',
+    'filter_exp':'condition'
+    }
+
+def remap_default_rule_factory( m ):
+    for key, factory_key in DEFAULT_RULE_FACTORY_MAP.items():
+        value = m.get(key, '')
+        m[factory_key] = value
+    return m
+
 def make_policy(portal, policy_node):
  
     import DefaultConfiguration
@@ -186,13 +201,16 @@ def make_policy(portal, policy_node):
     mastering = getattr(policy, DefaultConfiguration.ContentMastering)    
     
     for m in policy_node.mastering.mimes:
-        mastering.mime.addMimeMapping(m.id,
-                                      m.ext_expr,
-                                      m.filter_expr,
-                                      m.view_method,
-                                      m.setdefault('ghost',0)
-                                      )
-
+        product = m.get('product', DEFAULT_RULE_PRODUCT)
+        factory = m.get('factory', DEFAULT_RULE_FACTORY)
+        
+        if (product, factory) == (DEFAULT_RULE_PRODUCT, DEFAULT_RULE_FACTORY):
+            m.setdefault('ghost',0)
+            m = remap_default_rule_factory( m )
+            
+        factory = getattr(mastering.mime.manage_addProduct[product], factory)
+        mapply(factory, keyword=m)
+        
     ## chain stuff
     deployment_skin = policy_node.mastering.skin.strip()
     
