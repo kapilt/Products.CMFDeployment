@@ -61,6 +61,10 @@ class ResolveFolderURITests(PloneTestCase):
         
         self.policy = policy = deployment_tool.getPolicy('plone_example')
         self.rules = policy.getContentMastering().mime
+        self.resolver = self.policy.getDeploymentURIs()
+        self.resolver.source_host = 'http://www.example.com'
+        self.resolver.mount_path = '/portal'
+        self.resolver.target_path = '/deploy'
         
     def beforeTearDown(self):
         self.rules = None
@@ -79,25 +83,20 @@ class ResolveFolderURITests(PloneTestCase):
         mastering.tearDown()
 
         rendered = descriptor.getRendered()
-        resolver = self.policy.getDeploymentURIs()
         import pdb; pdb.set_trace();
-        resolver.addResource( descriptor )
-        
-        resolver.source_host = 'http://www.example.com'
-        resolver.mount_path = '/portal'
-        resolver.mount_path = '/deploy'
+        self.resolver.addResource( descriptor )
         
         content_url = descriptor.getSourcePath() or descriptor.getContentURL()        
         marker = object()
 
-        result = resolver.resolveURI( 'http://www.example.com/portal/folderwithindex/',
+        result = self.resolver.resolveURI( 'http://www.example.com/portal/folderwithindex/',
                                       content_url,
                                       True,
                                       marker
                                       )
 
         self.assertNotEqual( result, marker )
-        self.assertNotEqual( result, resolver.link_error_url )
+        self.assertNotEqual( result, self.resolver.link_error_url )
         self.assertEqual( result, '/deploy/folderwithindex/index.html')
         
 def test_suite():
