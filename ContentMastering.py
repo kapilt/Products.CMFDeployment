@@ -140,6 +140,10 @@ class ContentMastering(Folder):
         # get child descriptors if any
         descriptors = descriptor.getDescriptors()
 
+        # sometimes the skindata can disappear mid request
+        if not self.portal_url.getPortalObject()._v_skindata:
+            self.site_skin._setSkin()
+
         for descriptor in descriptors:
             self.renderContent( descriptor )
 
@@ -172,10 +176,9 @@ class ContentMastering(Folder):
             else:
                 descriptor.setRendered(render())
         except:
-            raise
             log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
             descriptor.setGhost(1) # ghostify it        
-
+            raise
     #################################
     def setup(self):
         #self.site_root.lock()
@@ -199,7 +202,7 @@ class SiteChainSkin(SimpleItem):
     id = 'site_skin'
     
     _v_active = None
-    _v_saved_skin_data = None
+    _v_saved_skin_name = None
 
     enable = 1    
     
@@ -212,7 +215,6 @@ class SiteChainSkin(SimpleItem):
         self.skin_name = skin_name
 
     def lock(self):
-
         if not self.enable or self._v_active or not self.skin_name:
             log.debug('deployment skin not enabled')
             return
@@ -220,23 +222,32 @@ class SiteChainSkin(SimpleItem):
         portal = getToolByName(self, 'portal_url').getPortalObject()
         skins  = getToolByName(self, 'portal_skins')
         
-        req = getattr(self, 'REQUEST', {})
-        self._v_saved_skin_data = portal._v_skindata
-        portal._v_skindata = (req,
-                              skins.getSkinByName(self.skin_name),
-                              {})
+        if not self.skin_name in skins.getSkinSelections():
+            raise RuntimeError("Invalid Skin for Deployment %s"%self.skin_name)
+
+        try:
+            request = self.REQUEST
+        except AttributeError:
+            request = {}
+        
+        self._v_saved_skin_name = portal.getSkinNameFromRequest(request) \
+                                  or skins.getDefaultSkin()
+        portal.changeSkin( self.skin_name )
         self._v_active = 1
+
+    def _setSkin(self):
+        portal = getToolByName(self, 'portal_url').getPortalObject()
+        portal.changeSkin( self.skin_name )
         
     def unlock(self):
 
         if not self._v_active:
             return
-
         portal = getToolByName(self, 'portal_url').getPortalObject()
-        portal._v_skindata = self._v_saved_skin_data
+        portal.changeSkin( self._v_saved_skin_name )
+        self._v_active = None        
+        self._v_saved_skin_name = None
 
-        self._v_saved_skin_data = None
-        self._v_active = None
         
     def manage_afterAdd(self, item, container):
         self.skin_name  = getToolByName(self, 'portal_skins').getDefaultSkin()	
