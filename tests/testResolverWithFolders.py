@@ -20,10 +20,10 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ##################################################################
 """
-Purpose: Unitests for URIResolver
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+Purpose: Unitests for testing resolution between folders and the portal root
+Author: Calvin Hendryx-Parker <calvin@sixfeetup.com> @2004
 License: GPL
-Created: 12/29/2002
+Created: 1/2/2004
 $Id: $
 """
 
@@ -78,11 +78,11 @@ class ResolveFolderURITests(PloneTestCase):
         self.policy = None
         self.resolver = None
 
-    def addResource(self, obj):
+    def addResource(self, obj, type):
         factory = DescriptorFactory( self.policy )
         descriptor = factory( obj )
         context = getMimeExprContext( obj, self.portal)
-        descriptor = self.rules.Folder.process( descriptor, context )
+        descriptor = self.rules[type].process( descriptor, context )
         mastering = self.policy.getContentMastering()
         mastering.setup()
         mastering.cook( descriptor )
@@ -92,8 +92,8 @@ class ResolveFolderURITests(PloneTestCase):
         return descriptor
 
     def testSimpleFolderWithIndexURIResolution(self):
-        folderwithindex = self.addResource(self.folderwithindex)
-        folderwithindex_index = self.addResource(self.folderwithindex.index_html)
+        folderwithindex = self.addResource(self.folderwithindex, 'Folder')
+        folderwithindex_index = self.addResource(self.folderwithindex.index_html, 'IndexDocument')
         
         content_url = folderwithindex.getSourcePath() or folderwithindex.getContentURL()        
         marker = object()
@@ -109,7 +109,7 @@ class ResolveFolderURITests(PloneTestCase):
         self.assertEqual( result, '/deploy/folderwithindex/index.html')
 
     def testSimpleFolderWithoutIndexURIResolution(self):
-        folderwithoutindex = self.addResource(self.folderwithoutindex)
+        folderwithoutindex = self.addResource(self.folderwithoutindex, 'Folder')
         
         content_url = folderwithoutindex.getSourcePath() or folderwithoutindex.getContentURL()        
         marker = object()
@@ -125,9 +125,9 @@ class ResolveFolderURITests(PloneTestCase):
         self.assertEqual( result, '/deploy/folderwithoutindex/index.html')
 
     def testLinkFromFolderWithoutIndex2FolderWithIndex(self):
-        folderwithoutindex = self.addResource(self.folderwithoutindex)
-        folderwithindex = self.addResource(self.folderwithindex)
-        folderwithindex_index = self.addResource(self.folderwithindex.index_html)
+        folderwithoutindex = self.addResource(self.folderwithoutindex, 'Folder')
+        folderwithindex = self.addResource(self.folderwithindex, 'Folder')
+        folderwithindex_index = self.addResource(self.folderwithindex.index_html, 'IndexDocument')
         
         content_url = folderwithoutindex.getSourcePath() or folderwithoutindex.getContentURL()        
         marker = object()
@@ -142,13 +142,13 @@ class ResolveFolderURITests(PloneTestCase):
         self.assertEqual( result, '/deploy/folderwithindex/index.html')
 
     def testLinkFromFolder2Root(self):
-        portalroot = self.addResource(self.portal)
-        portalroot_index = self.addResource(self.portalindex)
-        folderwithoutindex = self.addResource(self.folderwithoutindex)
+        portalroot = self.addResource(self.portal, 'PloneSite')
+        portalroot_index = self.addResource(self.portalindex, 'IndexDocument')
+        folderwithoutindex = self.addResource(self.folderwithoutindex, 'Folder')
         
         content_url = folderwithoutindex.getSourcePath() or folderwithoutindex.getContentURL()        
         marker = object()
-        result = self.resolver.resolveURI( 'http://www.example.com/portal/index.html',
+        result = self.resolver.resolveURI( 'http://www.example.com/portal/',
                                       content_url,
                                       True,
                                       marker
