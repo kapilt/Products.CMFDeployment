@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002 Kapil Thangavelu <kvthan@wm.edu>
+# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.

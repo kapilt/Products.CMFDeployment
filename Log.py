@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -29,7 +29,7 @@ Description:
 
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003          
 License: GPL
-CVS: $Id: Log.py,v 1.3 2003/02/28 05:03:22 k_vertigo Exp $
+$Id: $
 """
 
 from zLOG import register_subsystem, LOG

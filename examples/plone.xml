@@ -36,12 +36,15 @@
     <restricted id="Members" />
     <restricted id="content_type_registry" />
     <restricted id="acl_users" />
+    <restricted id="mimetypes_registry" />
+    <restricted id="archetype_tool" />
+    <restricted id="uid_catalog" />
 
   </organization>
   
   <!-- <chain_user user="plone"  udb_path="/plone/acl_users" /> -->
 
-  <mastering skin="plone_xp">
+  <mastering skin="Plone Default">
 
     <!-- executed in order and order is important -->
 

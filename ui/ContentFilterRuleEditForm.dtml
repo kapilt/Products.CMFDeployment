@@ -12,7 +12,7 @@
 <tr><td>Filter </td>
     <td> <select name="script_id">
          <dtml-in listFilterScripts>
-         <option value="<dtml-var sequence_item>"><dtml-var sequence_item></option>
+         <option value="<dtml-var sequence-item>"><dtml-var sequence-item></option>
          </dtml-in>
     </td>
 

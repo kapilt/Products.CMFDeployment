@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,10 +21,10 @@
 ##################################################################
 """
 Purpose: Update Intra Content URL References
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 8/10/2002
-CVS: $Id: URIResolver.py,v 1.3 2003/02/28 05:03:22 k_vertigo Exp $
+$Id: $
 """
 
 import re
@@ -204,6 +204,8 @@ class URIResolver:
             return
         elif u.startswith('aol:'):
             return
+        elif u.startswith('mms:'):
+            return
         
         # possibly a relative url
         else:            
@@ -236,7 +238,9 @@ class URIResolver:
             return
 
         r = descriptor.getRendered()
-        uris = unique( filter( lambda u: u[1], url_regex.findall(r) ) )
+        uris = unique( filter( lambda u: u[1], (url_regex.findall(r) +\
+                                                css_regex.findall(r))
+                                                ) )
         content_folderish_p = descriptor.content_folderish_p and not \
                               descriptor.composite_content_p
         
@@ -275,6 +279,16 @@ class URIResolver:
 
     def __getitem__(self, key):
         return self.uris[key]
+
+def extend_relative_path(path):
+    "extend '..' path"
+    path_list = path.strip().split('/')
+    mark = '..'
+    while path_list.count(mark):
+        index = path_list.index(mark)
+        del path_list[index]
+        del path_list[index-1]
+    return '/'.join(path_list)
 
 def clstrip(string, character):
     # specialized (c)haracter (l)eft strip, leaves one occurence
@@ -373,3 +387,4 @@ def resolve_relative(content_url, relative_url, content_folderish_p=0):
 
 url_regex = re.compile("""(?P<url>(?:href=|src=|@import)\s*["']\s*(.*?)["'])""")
 uri_regex = re.compile('''(?:href=|src=|@import)\s*["']\s*(.*?)["']''')
+css_regex  = re.compile("""(?P<url>url\(['"]\s*(.*?)['"]\))""")

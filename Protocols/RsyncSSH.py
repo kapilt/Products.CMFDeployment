@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002 Kapil Thangavelu <kvthan@wm.edu>
+# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,14 +21,16 @@
 ##################################################################
 """
 Purpose: Transfer Deployed Content to Deployment Server
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 9/10/2002
-CVS: $Id: RsyncSSH.py,v 1.2 2003/01/09 07:58:59 k_vertigo Exp $
+$Id: $
 """
 
 from Products.CMFDeployment.DeploymentInterfaces import IDeploymentProtocol
-from Products.CMFDeployment.lib import pypect
+from Products.CMFDeployment.lib import pexpect
+from ProtocolError import ProtocolError
+from cStringIO import StringIO
 
 class RsyncSshProtocol:
 
@@ -56,9 +58,7 @@ class RsyncSshProtocol:
             #"u", # update, don't overwrite new files, i don't need this
             ]
 
-        short_arg_options = [
-            ("e", "ssh")  # ssh 
-            ]
+        short_arg_options = [("e", "ssh")]
 
         # mainly aggressive deletion options
         # for retraction. Also some partial options
@@ -73,7 +73,10 @@ class RsyncSshProtocol:
             ]
 
         short = "-%s"%''.join(short_noarg_options)
-        short_arg = "%s"%' '.join( map( lambda k,v: "-%s %s"%(k,v), short_arg_options))
+        short_arg_list = []
+        for k, v in short_arg_options:
+            short_arg_list.append('-%s %s' % (k, v))
+        short_arg = ' '.join(short_arg_list)
         long_options = "%s"%' '.join(long_options)
         all_options = ' '.join( (short, short_arg, long_options) )
         #################################
@@ -85,11 +88,22 @@ class RsyncSshProtocol:
             local_directory,
             "%s@%s:%s"%( user, host, remote_directory)
             )
-    
-        conn = pypect.spawn(rendered_command)
-        conn.expect('password:')
-        conn.sendline(pass_)
-        conn.expect_eof(30) # 30 s timeout
-        
-        if conn.isAlive():
+
+        log = StringIO()
+        conn = pexpect.spawn(rendered_command)
+        conn.setlog(log)
+        try:
+            conn.expect_exact(['password:', 'Enter passphrase'])
+        except pexpect.EOF:
             conn.kill(1)
+            log.seek(0)
+            raise ProtocolError, log.read()
+        conn.sendline(pass_)
+        conn.expect(pexpect.EOF, 30) # 30 s timeout
+        
+        if conn.isalive():
+            conn.kill(1)
+
+        if conn.exitstatus != 0:
+            log.seek(0)
+            raise ProtocolError, log.read()

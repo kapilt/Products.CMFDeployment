@@ -1,1 +1,1 @@
-CMFDeployment 1.0.0-beta3
+CMFDeployment 1.0.0-b3-branch-1

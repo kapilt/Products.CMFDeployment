@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002 Kapil Thangavelu <kvthan@wm.edu>
+# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,32 +21,40 @@
 ##################################################################
 """
 Purpose: Transfer Deployed Content to Deployment Server
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 9/10/2002
-CVS: $Id: __init__.py,v 1.2 2003/01/09 07:58:59 k_vertigo Exp $
+$Id: $
 """
 # deployment protocol implementation directory
 
 #################################
 # simple global protocol registry    
 
-_protocols = {}
-def registerProtocol(name, protocol):
-    global _protocols
-    _protocols[name]=protocol
+class ProtocolDatabase:
 
-def getProtocolNames(context=None):
-    global _protocols
-    return _protocols.keys()
+    def __init__(self):
+        self._protocols = {}
 
-def getProtocol(name):
-    global _protocols
-    return _protocols[name]()
+    def registerProtocol(self, name, protocol):
+        self._protocols[name]=protocol
+
+    def getProtocolNames(self, context=None):
+        return self._protocols.keys()
+
+    def getProtocol(self, name):
+        return self._protocols[name]
+
+_protocols = ProtocolDatabase()
+
+registerProtocol = _protocols.registerProtocol
+getProtocolNames = _protocols.getProtocolNames
+getProtocol = _protocols.getProtocol
+
 
 #################################
 # protocol implementation
 
-import RsyncSSH
+from RsyncSSH import RsyncSshProtocol
+registerProtocol('rsync_ssh', RsyncSshProtocol())
 
-registerProtocol('rsync_ssh', RsyncSSH)

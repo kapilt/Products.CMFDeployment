@@ -16,7 +16,7 @@
 <td><select name="strategy_id">
         <dtml-in ContentDeploymentStrategyIds prefix="type">
 	<dtml-if "type_item==this().strategy_id">
-   	  <option value="<dtml-var type_item>"><dtml-var type_item></option>	
+   	  <option value="<dtml-var type_item>" selected><dtml-var type_item></option>	
 	<dtml-else>
  	  <option value="<dtml-var type_item>"><dtml-var type_item></option>
 	</dtml-if>

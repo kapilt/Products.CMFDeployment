@@ -167,6 +167,8 @@ CMFDeployment
 
     "Kapil Thangavelu":mailto://k_vertigo@objectrealms.net - Author
 
+    "Tahara Yusei":tahara * timedia.co.jp - Patches for Plone2/CMF 1.4
+
     I'd like to thank alan runyaga for much dicussion
     and feedback on this tool. It has benefited greatly 
     from his insights and wisdom.

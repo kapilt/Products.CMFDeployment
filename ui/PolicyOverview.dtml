@@ -7,6 +7,8 @@
 <p> Defines, what content should be deployed, what structure it should be deployed on to,
 how it should be displayed when deployed, and how it should be deployed </p>
 
-<a href="execute">Execute Policy</a>
+<form action="execute" method="POST">
+<input type="submit" value="Execute Policy">
+</form>
 
 <dtml-var manage_page_footer>

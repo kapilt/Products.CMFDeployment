@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -29,8 +29,8 @@ Persistent URI Database
 
  additional notes on normalization/resolution in URIResolver.py
 
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
-CVS: $Id: ContentURI.py,v 1.3 2003/02/28 05:03:21 k_vertigo Exp $
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+$Id: $
 License: GPL
 
 """

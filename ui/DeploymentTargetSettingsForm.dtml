@@ -24,8 +24,8 @@
 <tr><td>Protocol</td>
     <td><select name="protocol">
         <dtml-in ContentDeploymentProtocolIds prefix="type">
-	<dtml-if "type_item==this().getProtocol()">
-   	  <option value="<dtml-var type_item>"><dtml-var type_item></option>	
+	<dtml-if "type_item==protocol">
+   	  <option value="<dtml-var type_item>" selected><dtml-var type_item></option>	
 	<dtml-else>
  	  <option value="<dtml-var type_item>"><dtml-var type_item></option>
 	</dtml-if>

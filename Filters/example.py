@@ -1,7 +1,7 @@
 """
 an example content filter. content filters are executed over matched
 content immediately before storage.
-CVS: $Id: example.py,v 1.1 2003/02/28 05:04:19 k_vertigo Exp $
+$Id: $
 """
 
 from registry import registerFilter

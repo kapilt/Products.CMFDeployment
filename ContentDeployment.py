@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -24,10 +24,10 @@ Purpose: Defines Mechanisms and Data needed
          to transport content from zope server
          fs to deployment target(s).
 
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 8/10/2002
-CVS: $Id: ContentDeployment.py,v 1.4 2003/02/28 05:03:20 k_vertigo Exp $
+$Id: $
 """
 
 from Namespace import *
@@ -111,6 +111,11 @@ class DeploymentTarget(SimpleItem):
     security.declareProtected(CMFCorePermissions.ManagePortal, 'getProtocol')
     def getProtocol(self):
         return getProtocol(self.protocol)
+
+    security.declareProtected(CMFCorePermissions.ManagePortal, 'getDirectory')
+    def getDirectory(self):
+        return self.remote_directory
+
 
 class ContentDeployment(Folder):
 

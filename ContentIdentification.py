@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -24,7 +24,7 @@ Purpose: Identify Content that should be deployed
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
 License: GPL
 Created: 8/10/2002
-CVS: $Id: ContentIdentification.py,v 1.4 2003/02/28 05:03:21 k_vertigo Exp $
+$Id: $
 """
 
 from Namespace import *
@@ -206,10 +206,10 @@ class ContentExpressionFilterContainer(ExpressionContainer):
          'action':'manage_main'},
         
         {'label':'Content Identification',
-         'action':'../../overview'},
+         'action':'../overview'},
         
         {'label':'Policy',
-         'action':'../../../overview'},        
+         'action':'../../overview'},        
         )
         
     all_meta_types = (

@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002 Kapil Thangavelu <kvthan@wm.edu>
+# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -26,19 +26,27 @@
 import Default
 import Incremental
 
-_strategies = {}
 
-def registerStrategy(name, protocol):
-    global _strategies
-    _strategies[name]=protocol
+class StrategyDatabase:
 
-def getStrategyNames(context=None):
-    global _strategies
-    return _strategies.keys()
+    def __init__(self):
+        self._strategies = {}
 
-def getStrategy(name):
-    global _strategies
-    return _strategies[name]
+    def registerStrategy(self, name, protocol):
+        self._strategies[name]=protocol
+
+    def getStrategyNames(self, context=None):
+        return self._strategies.keys()
+
+    def getStrategy(self, name):
+        return self._strategies[name]
+
+
+_strategies = StrategyDatabase()
+
+registerStrategy = _strategies.registerStrategy
+getStrategyNames = _strategies.getStrategyNames
+getStrategy = _strategies.getStrategy
 
 registerStrategy('default', Default.DefaultStrategy)
 registerStrategy('incremental', Incremental.IncrementalStrategy)

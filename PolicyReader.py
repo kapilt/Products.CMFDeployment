@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,9 +21,8 @@
 ##################################################################
 """
 Purpose: read an xml serialization of a deployment policy into python objects
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
-CVS: $Id: PolicyReader.py,v 1.3 2003/02/28 05:03:22 k_vertigo Exp $
-
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+$Id: $
 """
 
 from xml.sax import make_parser, ContentHandler
@@ -33,8 +32,13 @@ marker = []
 class PolicyNode(UserDict):
     reserved = ('data',)
 
-    def __getattr__(self, name):
+    def __hasattr__(self, name):
+        v = self.__dict__.get(name, marker)
+        if v is marker:
+            return self.data.has_key(name)
+        return True
 
+    def __getattr__(self, name):
         v = self.__dict__.get(name, marker)
         if v is marker:
             return self.data[name]
@@ -97,8 +101,9 @@ class PolicyReader(MetaReader):
 
     def startIdentfilter(self, attrs):
         filters = self.policy.ident.setdefault('filters', [])
-        filter = PolicyNode(attrs)
-        filters.append(filter)
+        if PolicyNode.has_key(attrs):
+            filter = PolicyNode(attrs)
+            filters.append(filter)
 
     def startOrganization(self, attrs):
         organization = PolicyNode(attrs)
@@ -173,8 +178,9 @@ def make_policy(portal, policy_node):
     policy = getattr(deployment_tool, policy_node.id)
     
     identification = getattr(policy, DefaultConfiguration.ContentIdentification)
-    for f in policy_node.ident.filters:
-        identification.filters.addFilter(f.id, f.expr)
+    if hasattr(policy_node.ident, 'filters'):
+        for f in policy_node.ident.filters:
+            identification.filters.addFilter(f.id, f.expr)
 
 
     ## mastering setup

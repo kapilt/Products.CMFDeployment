@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002 Kapil Thangavelu <k_vertigo@objectrealms.net
+# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -38,13 +38,14 @@ we reimplement some of content mastering here, as the semantics
 needed for fs types are much different than normal content objects..
 of course i'm doing this while sleepy so refactoring latter is an option ;-)
 
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
-CVS: $Id: ContentDirectoryViews.py,v 1.3 2003/02/28 05:03:21 k_vertigo Exp $
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+$Id: $
 License: GPL
 
 """
 
 import os
+import types
 
 from Globals import HTML
 from AccessControl import getSecurityManager
@@ -55,7 +56,7 @@ from Products.CMFCore.DirectoryView import DirectoryView
 from Namespace import *
 from Log import LogFactory
 from Descriptor import ContentDescriptor, DescriptorFactory
-from URIResolver import clstrip
+from URIResolver import clstrip, extend_relative_path
 
 from DeploymentExceptions import InvalidDirectoryView
 
@@ -99,7 +100,6 @@ class ContentDirectoryView(SimpleItem):
         source_path - the path that directory view appears relative to mount root,
            when doing uri resolution.
         """
-        
         if self.isValidDirectoryView(view_path):
             self._view_map[view_path.strip()] = (source_path.strip(), deployment_path.strip())
         else:
@@ -116,9 +116,12 @@ class ContentDirectoryView(SimpleItem):
         """
         for e in entries:
             if self.isValidDirectoryView(e.view_path):
-                self._view_map[e.view_path.strip()] = (e.source_path.strip(), e.deploy_path.strip())                
+                if not (e.source_path.strip() and e.deploy_path.strip()):
+                    del self._view_map[e.view_path.strip()]
+                else:
+                    self._view_map[e.view_path.strip()] = (e.source_path.strip(), e.deploy_path.strip())
             else:
-                raise InvalidDirectoryView("%s is not valid"%str(view_path))
+                raise InvalidDirectoryView("%s is not valid"%str(e.view_path))
                 
         if RESPONSE is not None:
             RESPONSE.redirect('directory_view_settings')
@@ -141,12 +144,12 @@ class ContentDirectoryView(SimpleItem):
             dv = self.getDirectoryView(k)
             content = dv.objectValues()
             source_path, deploy_path = v
-            
+
             uris = self.getDeploymentPolicy().getDeploymentURIs()
             vhost_path = uris.vhost_path
             
             # get rid of trailing and leading slashes and join to base path
-            source_path = clstrip('/'.join( (vhost_path, base_path, '/'.join(filter(None, source_path.split('/'))))), '/')
+            source_path = extend_relative_path(clstrip('/'.join( (vhost_path, base_path, '/'.join(filter(None, source_path.split('/'))))), '/'))
             deploy_path = '/'.join(filter(None, deploy_path.split('/')))
             
             for c in content:
@@ -165,7 +168,7 @@ class ContentDirectoryView(SimpleItem):
     def isValidDirectoryView(self, path):
         """
         check to see if path is a portal_skin relative path
-        leading to a directory view.
+        leading to a directory view or objectmanager.
         """
         skins = getToolByName(self, 'portal_skins')
         components = filter(None, path.split('/'))
@@ -177,6 +180,8 @@ class ContentDirectoryView(SimpleItem):
             else:
                 return 0
         if hasattr(aq_base(d), '_isDirectoryView'):
+            return 1
+        elif getattr(aq_base(d), 'isAnObjectManager'):
             return 1
         return 0
 
@@ -243,12 +248,16 @@ _fs_cookers = {}
 
 def fs_dtml_cooker(self, descriptor, object):
 
-    object._updateFromFS()
+    if object.meta_type.startswith('Filesystem'):
+        object._updateFromFS()
     
     security = getSecurityManager()
     security.addContext(self)
+
+    portal = getToolByName(object, 'portal_url').getPortalObject()
+
     try:
-        r = apply(HTML.__call__, (object, None, self.REQUEST))
+        r = HTML.__call__(object, None, portal)
         descriptor.setRendered(r)
     finally:
         security.removeContext(self)
@@ -261,10 +270,32 @@ def fs_image_cooker(self, descriptor, object):
 def fs_zpt_cooker(self, descriptor, object):
 
     descriptor.setRendered(object())
-    
-_fs_cookers['Filesystem Image']=fs_image_cooker
-_fs_cookers['Filesystem DTML Method']=fs_dtml_cooker
-_fs_cookers['Filesystem Page Template']=fs_zpt_cooker
+
+def fs_file_cooker(self, descriptor, object):
+
+    suffix = object.content_type.split('/')[0]
+    if suffix in ('image', 'audio', 'video'):
+        descriptor.setBinary(1)
+    descriptor.setRendered(object._readFile(0))
+
+def file_cooker(self, descriptor, object):
+
+    descriptor.setBinary(1)
+    if isinstance(object.data, types.StringType):
+        data = object.data
+    else:
+        data = str(object.data)
+    descriptor.setRendered(data)
+
+
+_fs_cookers['Filesystem Image'] = fs_image_cooker
+_fs_cookers['Filesystem DTML Method'] = fs_dtml_cooker
+_fs_cookers['Filesystem Page Template'] = fs_zpt_cooker
+_fs_cookers['Filesystem File'] = fs_file_cooker
+_fs_cookers['Image'] = file_cooker
+_fs_cookers['DTML Method'] = fs_dtml_cooker
+_fs_cookers['Page Template'] = fs_zpt_cooker
+_fs_cookers['File'] = file_cooker
 
 
 def cook(self, descriptor):
@@ -279,6 +310,7 @@ def cook(self, descriptor):
         descriptor.setGhost(1)
         log.warning("couldn't find cooker for %s meta_type for %s id"%(mt,object.getId()))
         return
+
     try:
         render(self, descriptor, object)
     except:

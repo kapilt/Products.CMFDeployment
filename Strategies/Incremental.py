@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -25,7 +25,7 @@ Purpose: Default Strategy for Policy Execution
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
 License: GPL
 Created: 10/10/2002
-CVS: $Id: Incremental.py,v 1.2 2003/02/28 05:03:23 k_vertigo Exp $
+$Id: $
 """
 
 from common import *

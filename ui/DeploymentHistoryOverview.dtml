@@ -10,7 +10,7 @@
 <table>
 <tr><th>Deployment Dates</th></tr>
 
-<dtml-in getHistories>
+<dtml-in getHistories sort=timeTime reverse>
 
 <tr><td><dtml-var "_['sequence-item'].row_display()"></td></tr>
 </dtml-in>

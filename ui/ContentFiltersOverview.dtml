@@ -13,7 +13,7 @@ Content Filtering is currently  <dtml-if enabled> Enabled <dtml-else> Disabled <
 
 Set Filtering Status <select name="enable_flag:int"> 
                      <option value="0">disabled</option>
-                     <option value="1">enabled</option>
+                     <option value="1" <dtml-if "enabled">selected</dtml-if>>enabled</option>
                      </select>
 
 <input type="submit" value="set status" />
