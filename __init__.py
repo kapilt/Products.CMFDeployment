@@ -71,4 +71,3 @@ def initialize(context):
         visibility = None
         )
         
-    context.registerHelp()

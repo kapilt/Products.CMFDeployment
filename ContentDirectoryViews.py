@@ -296,11 +296,14 @@ _fs_cookers['Filesystem Image'] = fs_image_cooker
 _fs_cookers['Filesystem DTML Method'] = fs_dtml_cooker
 _fs_cookers['Filesystem Page Template'] = fs_zpt_cooker
 _fs_cookers['Filesystem File'] = fs_file_cooker
+# for instance space directory views
 _fs_cookers['Image'] = file_cooker
 _fs_cookers['DTML Method'] = fs_dtml_cooker
 _fs_cookers['Page Template'] = fs_zpt_cooker
 _fs_cookers['File'] = file_cooker
 
+def registerDVRenderer( meta_type, renderer ):
+    _fs_cookers[ meta_type ] = renderer
 
 def cook(self, descriptor):
 
