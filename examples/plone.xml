@@ -1,0 +1,70 @@
+<DeploymentPolicy id="plone_example">
+
+  <identification>
+
+    <filter id="no_members" 
+            expr="python: not memento.getPath().find('Members')+1" />
+
+    <!--
+    <filter id="review_state"
+            expr="python: memento.review_state in ('published','revision_draft', 'revision_submitted')" />
+    -->
+
+  </identification>
+
+  <strategy id="default" />
+
+  <skins>
+
+    <directory view_path="/plone_images"
+               deploy_path="/images"
+               source_path="/" />
+
+    <directory view_path="/plone_styles"
+               deploy_path="/css"
+               source_path="/" />
+   
+    <directory view_path="/plone_ecmascript"
+ 	       deploy_path="/javascript"
+	       source_path="/" />
+
+  </skins>
+
+  <organization cmf_mount="/" 
+		fs_mount="*/examples" >
+
+    <restricted id="Members" />
+    <restricted id="content_type_registry" />
+    <restricted id="acl_users" />
+
+  </organization>
+  
+  <!-- <chain_user user="plone"  udb_path="/plone/acl_users" /> -->
+
+  <mastering skin="plone_xp">
+
+    <!-- executed in order and order is important -->
+
+    <mime id="Document"
+          filter_expr="python: object.portal_type == 'Document'"
+          ext_expr="python: '%s.html'%object.getId()"
+          view_method=""
+          />
+
+    <mime id="Image"
+          filter_expr="python: object.portal_type == 'Image'"
+          ext_expr="python: object.getId()"
+          view_method=""
+          />
+
+    <mime id="Event"
+          filter_expr="python: object.portal_type == 'Event'"
+	  ext_expr="python: '%s.html'%object.getId()"
+	  view_method=""
+	  />
+
+  </mastering>
+
+</DeploymentPolicy>
+
+

@@ -1,0 +1,26 @@
+<dtml-var manage_page_header>
+
+<h2> Content Filter Rule (<dtml-var getId>)</h2>
+
+
+<form action="editRule" method="POST">
+<table>
+
+<tr><td>Condition Expression</td>
+    <td><input type="text" name="condition" value="<dtml-var condition_text>" size="100"></td></tr>
+
+<tr><td>Filter </td>
+    <td> <select name="script_id">
+         <dtml-in listFilterScripts>
+         <option value="<dtml-var sequence_item>"><dtml-var sequence_item></option>
+         </dtml-in>
+    </td>
+
+<tr><td colspan="2">
+    <input type="submit" value="Edit Filter"> </td></tr>
+
+</table>
+
+</form>
+
+<dtml-var manage_page_footer>

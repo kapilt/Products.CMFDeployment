@@ -1,0 +1,43 @@
+<dtml-var manage_page_header>
+
+<h2> Edit Deployment Target </h2>
+
+<form action="edit" method="POST">
+<table>
+
+<tr><td>User</td>
+    <td><input type="text" name="user" value="<dtml-var getUser>"></td></tr>
+
+<tr><td>Password</td>
+    <td><input type="password" name="password"></td></tr>
+
+<tr><td>Password Confirm</td>
+    <td><input type="password" name="password_confirm"></td></tr>
+
+<tr><td>Host</td>
+    <td><input type="text" name="host" value="<dtml-var getHost>"></td></tr>
+
+<tr><td>Target Directory</td>
+    <td><input type="text" name="remote_directory" value="<dtml-var remote_directory>">
+    </td></tr>
+
+<tr><td>Protocol</td>
+    <td><select name="protocol">
+        <dtml-in ContentDeploymentProtocolIds prefix="type">
+	<dtml-if "type_item==this().getProtocol()">
+   	  <option value="<dtml-var type_item>"><dtml-var type_item></option>	
+	<dtml-else>
+ 	  <option value="<dtml-var type_item>"><dtml-var type_item></option>
+	</dtml-if>
+        </dtml-in>
+        </select>
+    </td></tr>
+
+<tr><td colspan="2">
+    <input type="submit" value="Edit Deployment Target"> </td></tr>
+
+</table>
+
+</form>
+
+<dtml-var manage_page_footer>
