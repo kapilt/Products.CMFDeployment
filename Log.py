@@ -58,7 +58,6 @@ class ComponentLogging:
 
     def write(self, msg, level):
         record_p, zlog_p = configuration.getConfigurationFor(self._component)
-
         if record_p or level >= OVERRIDE_THRESHOLD_LEVEL:
             monitors = getMonitors()
             for m in monitors:

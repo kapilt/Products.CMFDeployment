@@ -84,6 +84,7 @@ class ArchetypeContentRule(SimpleItem):
         for rd in resource_descriptors:
             descriptor.addChildDescriptor( rd )
         descriptor.setRenderMethod('view')
+        descriptor.setFileName( self.getResourceName( content ) )
         return descriptor
 
     def getSchemaResources( self, content):
@@ -105,7 +106,23 @@ class ArchetypeContentRule(SimpleItem):
             # but through a spurious log message.
             descriptor.setRenderMethod('index_html')
             descriptor.setBinary( True )
+            descriptor.setFileName( self.getResourceName( value ) )
             yield descriptor
+
+    def getResourceName(self, content):
+        cid = content.getId()
+        if '.' in cid:
+            return cid
+        elif hasattr(content, 'content_type') and content.content_type:
+            if callable(content.content_type):
+                content_type = content.content_type()
+            else:
+                content_type = content.content_type
+            major, minor = content_type.split('/')
+            if major == 'text' and minor == 'plain':
+                minor = 'html'
+            return "%s.%s"%(cid, minor)
+        raise RuntimeError("Could not Determine Extension")
 
     def toXml(self):
         d = {'id':self.id,

@@ -156,7 +156,7 @@ class ContentMastering(Folder):
                                                  
         if render is None:
             try:
-                log.error(" couldn't find render method for %s"%( str(descriptor.content_url), str(c.getPortalTypeName()) ))
+                log.error(" couldn't find render method for %s %s"%( str(descriptor.content_url), str(c.getPortalTypeName()) ))
             except Exception, e:
                 print e
                       
@@ -172,7 +172,8 @@ class ContentMastering(Folder):
             else:
                 descriptor.setRendered(render())
         except:
-            log.error('Error While Rendering %s'%(str(c.getPhysicalPath())))
+            raise
+            log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
             descriptor.setGhost(1) # ghostify it        
 
     #################################

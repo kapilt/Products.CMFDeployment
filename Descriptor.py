@@ -38,7 +38,7 @@ class DescriptorFactory:
 
     def __call__(self, content):
         d = ContentDescriptor(content)
-        d.content_url = content.absolute_url(relative=1)
+        d.content_url = content.absolute_url_path()
         d.content_folderish_p = getattr(aq_base(content), 'isAnObjectManager', 0)
         d.composite_content_p = self.is_composite(content.getPortalTypeName())
         return d

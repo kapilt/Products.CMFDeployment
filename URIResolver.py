@@ -99,29 +99,21 @@ class URIResolver:
         self.uris = OOBTree()
 
     def addResource(self, descriptor):
-        
-        relative_url = descriptor.getSourcePath()
-        
-        if relative_url is None:
-            if self.vhost_path:
-                relative_url = vhost_path_fix(descriptor.content_url,
-                                              self.vhost_path)
-            else:
-                relative_url = descriptor.content_url
-        
+
+        for descriptor in descriptor.getDescriptors():
+            self._addResource( descriptor )
+
+    def _addResource(self, descriptor):
+
+        relative_url = descriptor.getSourcePath() or descriptor.content_url
         content_path = descriptor.getContentPath()
         
         if content_path is None:
-            if self.vhost_path:
-                mlen = len(vhost_path_fix(self.mount_path, self.vhost_path))
-            else:
-                mlen = len(self.mount_path)
+            mlen = len(self.mount_path)
                 
-            # minus last path segemnt
-            
+            # minus last path segment
             # find the path segment            
             url_context  = relative_url[:relative_url.rfind('/')]
-            
             content_path = url_context[mlen:]
 
         content_path = normalize('/'.join( (self.target_path,
@@ -243,8 +235,13 @@ class URIResolver:
         # we need some sort of policy decision
         """
 
-        if descriptor.isBinary() or descriptor.isGhost():
-            return
+        for descriptor in descriptor.getDescriptors():
+            if descriptor.isBinary() or descriptor.isGhost():
+                continue
+            self._resolveDescriptor( descriptor )
+
+    def _resolveDescriptor(self, descriptor ):
+
 
         r = descriptor.getRendered()
         uris = unique( filter( lambda u: u[1], (url_regex.findall(r) +\
@@ -254,9 +251,6 @@ class URIResolver:
                               descriptor.composite_content_p
         
         content_url = descriptor.getSourcePath() or descriptor.getContentURL()
-        
-        if self.vhost_path:
-            content_url = vhost_path_fix(content_url, self.vhost_path)
         
         count = 0
         total_count = 0
@@ -330,20 +324,6 @@ def unique(lst):
         d[l]=None
     return d.keys()
 
-####################################
-# this is a fix for zope's that don't have a proper
-# absolute_url(1), due to odd setups. it is a hack.
-####################################
-
-def vhost_path_fix(relative, prefix=''):
-    
-    if not prefix:
-        return relative
-    
-    if relative[0]=='/':
-        return prefix + relative
-    else:
-        return "%s/%s"%(prefix, relative)
 
 ####################################
 
