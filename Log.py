@@ -29,7 +29,7 @@ Description:
 
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003          
 License: GPL
-$Id: $
+$Id$
 """
 
 from zLOG import register_subsystem, LOG
