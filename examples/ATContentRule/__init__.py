@@ -81,10 +81,17 @@ class ArchetypeContentRule(SimpleItem):
     def process(self, descriptor, context):
         content = descriptor.getContent()
         resource_descriptors = self.getSchemaResources( content )
+        child_descriptors = False
         for rd in resource_descriptors:
             descriptor.addChildDescriptor( rd )
+            child_descriptors = True
+
         descriptor.setRenderMethod('view')
-        descriptor.setFileName( self.getResourceName( content ) )
+        if child_descriptors or descriptor.isContentFolderish():
+            descriptor.setFileName( "%s/index.html"%content.getId() )
+        else:
+            descriptor.setFileName( self.getResourceName( content ) )
+            
         return descriptor
 
     def getSchemaResources( self, content):
