@@ -90,7 +90,9 @@ class ContentStorage:
                 return
             # xxx nested content, not supported.. but it would break here.
             os.mkdir( content_path )
-        return self.storeDescriptor( content_path, descriptor )
+            
+        for descriptor in descriptors:
+            return self.storeDescriptor( content_path, descriptor )
 
     store = __call__
     
