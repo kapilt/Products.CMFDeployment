@@ -20,7 +20,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ##################################################################
 """
-$Id: $
+$Id$
 """
 
 from Products.Archetypes import public as atapi
@@ -42,12 +42,12 @@ xml_export_template = """
 <mime id="%(id)s"
       product="%(product)s"
       factory="%(factory)s"
-      condition="%(factory)s" />
+      condition="%(condition)s" />
 """
 
 def addArchetypeContentRule(self,
                             id,
-                            condition='',
+                            condition,
                             RESPONSE = None
                             ):
     """
@@ -68,9 +68,11 @@ class ArchetypeContentRule(SimpleItem):
 
     security = ClassSecurityInfo()
 
-    def __init__(self, id, title='', condition=''):
-        self.condition_text = condition
+    def __init__(self, id, condition):
+        self.id = id
         self.condition = Expression( condition )
+        self.condition_text = condition
+        self.title = condition
 
     def isValid(self, descriptor, context):
         if not isinstance( descriptor.getContent(), (atapi.BaseContent, atapi.BaseFolder) ):
@@ -116,6 +118,7 @@ class ArchetypeContentRule(SimpleItem):
             descriptor.setRenderMethod('index_html')
             descriptor.setBinary( True )
             resource_name = self.getResourceName( value )
+            #descriptor.setFileName("%s/%s"%(content.getId(), resource_name) )
             descriptor.setFileName( resource_name )
 
             yield descriptor
@@ -132,6 +135,10 @@ class ArchetypeContentRule(SimpleItem):
             major, minor = content_type.split('/')
             if major == 'text' and minor == 'plain':
                 minor = 'html'
+            if major == 'text' and minor == 'structured':
+                minor = 'html'
+            if major == 'text' and minor == 'x-rst':
+                minor = 'html'
             return "%s.%s"%(cid, minor)
         raise RuntimeError("Could not Determine Extension")
 
@@ -139,7 +146,8 @@ class ArchetypeContentRule(SimpleItem):
         d = {'id':self.id,
              'product':'ATContentRule',
              'factory':'addArchetypeContentRule',
-             'condition':self.condition_text }             
+             'condition':self.condition_text }
+
         return xml_export_template%d
     
 
@@ -225,4 +233,4 @@ def initialize(context):
                          addArchetypeContentRule ),
         visibility = None
         )
-        
+
