@@ -24,7 +24,7 @@ Purpose: general utility functions
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 8/10/2002
-$Id: $
+$Id$
 """
 
 
@@ -53,7 +53,7 @@ def registerIcon(filename):
 def file2string(o):
     """ transform a zope file object into a string """
     
-    (start,end) = (0,o.getSize())
+    (start,end) = (0,o.get_size())
     data = o.data
     if type(data) is type(''): #StringType
         return data[start:end]
