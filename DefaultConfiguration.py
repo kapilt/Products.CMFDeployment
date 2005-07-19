@@ -94,11 +94,21 @@ def add_filter(policy):
     ob = KlassContentFilters(ContentFilters)
     policy._setObject(ContentFilters, ob)
         
-_funcs = [add_structure, add_identification, add_mastering,
-          add_deployment, add_view, add_history,
-          add_strategy, add_uris, add_filter]
+_add_funcs = [
+    ( ContentOrganization, add_structure ),
+    ( ContentIdentification, add_identification ),
+    ( ContentMastering, add_mastering ),
+    ( ContentDeployment, add_deployment ),
+    ( ContentDirectoryViews, add_view ),
+    ( DeploymentHistory, add_history ),
+    ( DeploymentStrategy, add_strategy ),
+    ( ContentURIs, add_uris ),
+    ( ContentFilters, add_filter ),
+    ]
 
 def install(deployment_policy):
     global _funcs
-    for f in _funcs:
+    for id, f in _add_funcs:
+        if id in deployment_policy.objectIds():
+            continue
         f(deployment_policy)
