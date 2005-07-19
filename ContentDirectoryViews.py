@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net
+# (C) Copyright 2002-2005 Kapil Thangavelu <k_vertigo@objectrealms.net
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -49,6 +49,7 @@ import types
 
 from Globals import HTML
 from AccessControl import getSecurityManager
+from OFS.OrderedFolder import OrderedFolder
 
 from Products.CMFCore.utils import getToolByName
 from Products.CMFCore.DirectoryView import DirectoryView
@@ -62,7 +63,51 @@ from DeploymentExceptions import InvalidDirectoryView
 
 log = LogFactory('Directory Views')
 
-class ContentDirectoryView(SimpleItem):
+class DirectoryViewRule( SimpleItem ):
+
+    meta_type = "Directory View Rule"
+    security = ClassSecurityInfo()
+    
+    manage_options = (
+        
+        {'label':'Settings',
+         'action':'manage_settings'},
+        
+        )
+
+    security.declareProtected(CMFCorePermissions.ManagePortal, ('manage_settings') )
+    manage_settings = DTMLFile('ui/DirectoryViewRuleEditForm', globals())
+
+    def __init__(self, id, view_path, source_path, deployment_path ):
+        self.id = id
+        self.view_path = view_path.strip()
+        self.source_path = source_path.strip()
+        self.deployment_path = deployment_path.strip()
+        self.setTitle()
+        
+    def setTitle(self, *args):
+        self.title = "%s -> %s -> %s"%( self.view_path,
+                                                        self.source_path,
+                                                        self.deployment_path )
+
+    security.declareProtected(CMFCorePermissions.ManagePortal, 'edit')
+    def edit(self, view_path, source_path, deployment_path, RESPONSE=None):
+        cdv = self.getParentNode()
+        if not cdv.isValidDirectoryView( view_path.strip() ):
+            raise InvalidDirectoryView("%s is not valid"%str(view_path)) 
+        self.view_path = view_path.strip()
+        self.source_path = source_path.strip()
+        self.deployment_path = deployment_path.strip()
+        self.setTitle()
+
+        if RESPONSE is not None:
+            cdv = self.getParentNode()
+            return RESPONSE.redirect("%s/manage_main"%cdv.absolute_url())
+        
+InitializeClass( DirectoryViewRule )
+
+
+class ContentDirectoryView(OrderedFolder):
     """
     implements merging of directory views into a deployment
     """
@@ -74,44 +119,66 @@ class ContentDirectoryView(SimpleItem):
     manage_options = (
         
         {'label':'Settings',
-         'action':'directory_view_settings'},
+         'action':'manage_main'},
 
         {'label':'Policy',
          'action':'../overview'},
 
         )
 
-    security.declareProtected(CMFCorePermissions.ManagePortal, 'directory_view_settings')
-    directory_view_settings = DTMLFile('ui/ContentDirectoryViewEditForm', globals())
+    all_meta_types = (
+        {'name':DirectoryViewRule.meta_type,
+         'action':'addDirectoryViewRuleForm'},
+         
+        )
+
+    #security.declareProtected(CMFCorePermissions.ManagePortal, 'directory_view_settings')
+    #directory_view_settings = DTMLFile('ui/ContentDirectoryViewEditForm', globals())
+    
+    security.declareProtected(CMFCorePermissions.ManagePortal, 'addDirectoryViewRuleForm')    
+    addDirectoryViewRuleForm = DTMLFile('ui/ContentDirectoryAddViewRuleEditForm', globals())
         
     def __init__(self, id):
         self.id = id
-        # dv path relative to portal_skins -> deployment path 
-        self._view_map = PersistentMapping()
 
-    security.declareProtected(CMFCorePermissions.ManagePortal, 'addContentDirectoryView')
-    def addContentDirectoryView(self, view_path, source_path, deployment_path, RESPONSE=None):
+    security.declareProtected(CMFCorePermissions.ManagePortal, 'addDirectoryViewRule')
+    def addDirectoryViewRule(self, id, view_path, source_path, deployment_path, RESPONSE=None):
         """
-        add a directory to the map, after verifying the
-        the view_path.
+        add a directory view to the listing of deployable skin directories, after
+        verifying the the view_path. 
         
         view_path - dv path relative to portal_skin
         deployment_path - path to deploy to relative to d. root
         source_path - the path that directory view appears relative to mount root,
            when doing uri resolution.
         """
-        if self.isValidDirectoryView(view_path):
-            self._view_map[view_path.strip()] = (source_path.strip(), deployment_path.strip())
-        else:
+
+        # XXX is this really nesc, i think not the functionality is self
+        # contained to this module, we should allow deployments of the
+        # view path multiple times, also needs mod in policy export.dtml
+        view_path = view_path.strip()
+        if self.isConflictingDirectoryView( view_path ):
+            raise InvalidDirectoryView("View Path already exists")
+        
+        if not self.isValidDirectoryView( view_path ):
             raise InvalidDirectoryView("%s is not valid"%str(view_path))
 
+        self._setObject( id,
+                         DirectoryViewRule( id,
+                                            view_path,
+                                            source_path,
+                                            deployment_path )
+                         )
 
         if RESPONSE is not None:
             RESPONSE.redirect('directory_view_settings')
 
     security.declareProtected(CMFCorePermissions.ManagePortal, 'getContentDirectoryViewMap')
     def getDirectoryViewMap(self):
-        return dict(self._view_map.items())
+        d = {}
+        for dvr in self.objectValues():
+            d[dvr.view_path] = ( dvr.source_path, dvr.deployment_path )
+        return d
 
     security.declareProtected(CMFCorePermissions.ManagePortal, 'editContentDirectoryViews')
     def editContentDirectoryViews(self, entries, RESPONSE=None):
@@ -144,10 +211,10 @@ class ContentDirectoryView(SimpleItem):
         mp = self.getDeploymentPolicy().getContentOrganization().getActiveStructure().getCMFMountPoint()
         base_path = '/'.join(mp.getPhysicalPath())
         
-        for k,v in self._view_map.items():
-            dv = self.getDirectoryView(k)
+        for dvr in self.objectValues():
+            dv = self.getDirectoryView(dvr.view_path)
             content = dv.objectValues()
-            source_path, deploy_path = v
+            source_path, deploy_path = dvr.source_path, dvr.deployment_path 
 
             uris = self.getDeploymentPolicy().getDeploymentURIs()
             vhost_path = uris.vhost_path
@@ -189,6 +256,16 @@ class ContentDirectoryView(SimpleItem):
             return 1
         return 0
 
+    security.declarePrivate('isConflictingDirectoryView')
+    def isConflictingDirectoryView(self, view_path):
+        """
+        see adddirectory view for details
+        """
+        for dvr in self.objectValues():
+            if dvr.view_path == view_path:
+                return 1
+        return 0
+
     security.declarePrivate('getDirectoryView')
     def getDirectoryView(self, path):
         """
@@ -221,13 +298,11 @@ class ContentDirectoryView(SimpleItem):
         if a directory view is deployed onto a new directory
         in the deployment, it needs to be attached to the
         deployment structure. this amounts to a limited
-        form of structure remapping, so its good prep work
-        for doing it latter with real content.
+        form of structure remapping.
         """
         
-        for v in self._view_map.values():
-            
-            components = filter(None, v[1].split('/'))
+        for dvr in self.objectValues():
+            components = filter(None, dvr.deployment_path.split('/'))
             
             if not components:
                 continue # merging into root
@@ -247,6 +322,9 @@ class ContentDirectoryView(SimpleItem):
         cook(self, descriptor)
 
 InitializeClass(ContentDirectoryView)
+
+
+    
     
 _fs_cookers = {}
 

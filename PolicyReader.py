@@ -264,7 +264,9 @@ def make_policy(portal, policy_node, id=None, title=None):
     directory_views = getattr(policy, DefaultConfiguration.ContentDirectoryViews)
 
     for sd in policy_node.skins.directories:
-	directory_views.addContentDirectoryView(
+        id = sd.get('id', sd.view_path.replace('/',''))
+	directory_views.addDirectoryViewRule(
+                                id,
 				sd.view_path, 
 				sd.source_path, 
 				sd.deploy_path
