@@ -270,10 +270,15 @@ class SiteChainUser(SimpleItem):
         self.userid = user
         
         try:
-            udb = self.unrestrictedTraverse(udb_path)
-            assert udb.id == 'acl_users'
+            if udb_path == 'special':
+                # don't allow people to gain more special privileges
+                # then what they have.
+                assert user in ('nobody')
+            else:
+                udb = self.unrestrictedTraverse(udb_path)
+                assert udb.id == 'acl_users'
         except:
-            raise InvalidUserDatabase(" invalid user database ")
+            raise InvalidUserDatabase(" invalid user database or user ")
         
         self.udb_path = udb_path
         
@@ -285,7 +290,7 @@ class SiteChainUser(SimpleItem):
         
         from AccessControl import User
         from AccessControl.SecurityManagement import newSecurityManager
-        from AccessControl.SpecialUsers import system
+        from AccessControl import SpecialUsers
 
         # we can restore the existing user latter if need be, we don't for now.
         current_user = getSecurityManager().getUser()
@@ -293,8 +298,13 @@ class SiteChainUser(SimpleItem):
         current_userid = current_user.getId()
 
         # get the new user
-        udb = self.unrestrictedTraverse(self.udb_path)
-        user = udb.getUser(self.userid).__of__(udb)
+        
+        if self.udb_path == 'special':
+            user = getattr( SpecialUsers, self.userid )
+            user = user.__of__( self.unrestrictedTraverse('/') )
+        else:             
+            udb = self.unrestrictedTraverse(self.udb_path)
+            user = udb.getUser(self.userid).__of__(udb)
 
         # sign on the new user
         try: req = self.REQUEST
