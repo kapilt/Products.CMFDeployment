@@ -23,7 +23,7 @@
 Purpose: utilize ordered folder if available to provide for
           explicit ordering of expressions (filter, mime).
 Author: kapil thangavelu <k_vertigo@objectrealms.net> 
-$Id: $
+$Id$
 """
 
 from OFS.OrderedFolder import OrderedFolder

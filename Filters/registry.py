@@ -25,7 +25,7 @@ Purpose: Filter Registry
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 8/10/2002
-$Id: $
+$Id$
 """
 import inspect
 

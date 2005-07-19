@@ -1,3 +1,4 @@
+<dtml-call "RESPONSE.setHeader('Content-Type', 'text/xml')">
 <DeploymentPolicy id="<dtml-var getId>">
 
   <identification>

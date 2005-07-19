@@ -24,7 +24,7 @@ Purpose: Transfer Deployed Content to Deployment Server
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 9/10/2002
-$Id: $
+$Id$
 """
 # deployment protocol implementation directory
 

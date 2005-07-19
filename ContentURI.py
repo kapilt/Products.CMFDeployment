@@ -30,7 +30,7 @@ Persistent URI Database
  additional notes on normalization/resolution in URIResolver.py
 
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
-$Id: $
+$Id$
 License: GPL
 
 """

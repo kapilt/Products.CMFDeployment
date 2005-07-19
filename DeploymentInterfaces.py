@@ -24,7 +24,7 @@ Purpose: interfaces for the deployment system
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
 License: GPL
 Created: 8/10/2002
-$Id: $
+$Id$
 """
 
 from Interface import Base as Interface

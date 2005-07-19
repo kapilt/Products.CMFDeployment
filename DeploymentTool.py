@@ -36,7 +36,8 @@ from PolicyReader import read_policy, make_policy
 class DeploymentTool(UniqueObject, Folder):
 
     id = 'portal_deployment'
-    
+
+    title = "Controls how content can be deployed to external systems"
     meta_type = 'Deployment Tool'
     
     security = ClassSecurityInfo()
@@ -69,7 +70,7 @@ class DeploymentTool(UniqueObject, Folder):
 
         if policy_xml:
             policy_node = read_policy(policy_xml)
-            policy = make_policy(self, policy_node)
+            policy = make_policy(self, policy_node,  policy_id, policy_title)
             policy_id = policy.getId()
         else:
             self._setObject(policy_id, DeploymentPolicy(policy_id))
