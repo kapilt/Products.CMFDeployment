@@ -26,7 +26,7 @@ Purpose: ttw configured component logging
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2003-2004
 License: GPL
 Created: 1/3/2004
-$Id: $
+$Id$
 """
 
 import Log

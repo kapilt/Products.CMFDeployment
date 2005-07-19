@@ -22,7 +22,7 @@
 """
 Purpose: read an xml serialization of a deployment policy into python objects
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
-$Id: $
+$Id$
 """
 
 from xml.sax import make_parser, ContentHandler
@@ -184,14 +184,21 @@ def remap_default_rule_factory( m ):
         m[factory_key] = value
     return m
 
-def make_policy(portal, policy_node):
+def make_policy(portal, policy_node, id=None, title=None):
  
     import DefaultConfiguration
     from App.Common import package_home
-    
+
     deployment_tool = portal.portal_deployment
-    deployment_tool.addPolicy(policy_node.id, policy_node.id)
-    policy = getattr(deployment_tool, policy_node.id)
+    
+    if id:
+        title = title or ''
+        deployment_tool.addPolicy( id, title )
+    else:
+        id = policy_node.id
+        deployment_tool.addPolicy( policy_node.id, policy_node.id)
+        
+    policy = getattr(deployment_tool, id)
     
     identification = getattr(policy, DefaultConfiguration.ContentIdentification)
     if hasattr(policy_node.ident, 'filters'):

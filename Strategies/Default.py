@@ -25,7 +25,7 @@ Purpose: Default Strategy for Policy Execution
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 10/10/2002
-$Id: $
+$Id$
 """
 
 from common import *

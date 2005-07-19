@@ -24,7 +24,7 @@ Purpose: File System Directory Proxies and Modeling
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003          
 License: GPL
 Created: 8/10/2002
-$Id: $
+$Id$
 """
 
 import os

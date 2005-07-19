@@ -1,7 +1,7 @@
 """
 an example content filter. content filters are executed over matched
 content immediately before storage.
-$Id: $
+$Id$
 """
 
 from registry import registerFilter

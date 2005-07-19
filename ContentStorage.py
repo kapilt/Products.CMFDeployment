@@ -25,7 +25,7 @@ Purpose: Stores Rendered Content on the FileSystem
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 8/10/2002
-$Id: $
+$Id$
 """
 
 from Interface import Base as Interface

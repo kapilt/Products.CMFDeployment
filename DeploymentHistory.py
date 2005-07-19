@@ -24,7 +24,7 @@
 Purpose: Simple History storage... to be expanded
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
-$Id: $
+$Id$
 
 """
 from Namespace import *

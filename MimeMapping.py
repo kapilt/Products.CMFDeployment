@@ -24,7 +24,7 @@ Purpose: Mime Mappings are used to map extensions onto content objects
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
 License: GPL
 Created: 8/10/2002
-$Id: $
+$Id$
 """
 
 from OFS.ObjectManager import IFAwareObjectManager

@@ -39,7 +39,7 @@ needed for fs types are much different than normal content objects..
 of course i'm doing this while sleepy so refactoring latter is an option ;-)
 
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
-$Id: $
+$Id$
 License: GPL
 
 """
