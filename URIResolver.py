@@ -124,7 +124,8 @@ class URIResolver:
 
         if relative_url[0] != '/':
             relative_url = '/'+relative_url
-        
+
+        log.debug("add %s -> %s"%(relative_url, content_path))
         self.uris[relative_url]=content_path
 
         if descriptor.isContentFolderish():
@@ -134,7 +135,7 @@ class URIResolver:
         self.uris[normalize(relative_url+'/view', '/')]=content_path
 
         
-    def resolveURI(self, u, content_url, content_folderish_p, default=_marker):
+    def resolveURI(self, u, content_url, content_folderish_p, default=_marker, content=None):
         """
         determine a replacement for a url u, found in the body
         of a rendered content object with content_url.
@@ -147,6 +148,8 @@ class URIResolver:
         returns None if url doesn't need replacement. returns default
         if replacement not found.
         """
+
+        rnu = None
         
         if not u:
             return
@@ -203,15 +206,31 @@ class URIResolver:
         elif u.startswith('mms:'):
             return
         elif u.startswith('javascript:'):
-            return
-    
-        
+            return    
         # possibly a relative url
         else:            
             rnu = resolve_relative(content_url, u, content_folderish_p)
             nu = self.uris.get(rnu, default)
-            
+        # try some basic acquisition tricks, and assure that the acquired
+        # object is resolvable in the uri db.
+        if nu is _marker and content:
+            nu = self._resolveAcquired( content, u, rnu )
         return nu
+
+    def _resolveAcquired(self, content, url, relative_url ):
+        # if we acquire the object by id directly then and its being deployed
+        # then go ahead with the resolution
+        if relative_url:
+            url = relative_url
+        parts = url.split('/')
+        if not parts[-1] and parts[-2]:
+            oid = parts[-2]
+        else:
+            oid = parts[-1]
+        object = getattr( content, oid, None )
+        if not object:
+            return _marker
+        return  self.uris.get("/"+object.absolute_url(1), _marker)
     
     def resolve(self, descriptor):
 
@@ -258,7 +277,7 @@ class URIResolver:
         for l, u in uris:
             
             total_count += 1            
-            nu = self.resolveURI(u, content_url, content_folderish_p)
+            nu = self.resolveURI(u, content_url, content_folderish_p, content=descriptor.getContent())
             
             if nu is _marker:            
                 log.warning('unknown url (%s) from %s'%(u, content_url))
