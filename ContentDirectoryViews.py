@@ -171,7 +171,7 @@ class ContentDirectoryView(OrderedFolder):
                          )
 
         if RESPONSE is not None:
-            RESPONSE.redirect('directory_view_settings')
+            RESPONSE.redirect('manage_workspace')
 
     security.declareProtected(CMFCorePermissions.ManagePortal, 'getContentDirectoryViewMap')
     def getDirectoryViewMap(self):

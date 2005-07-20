@@ -83,8 +83,8 @@ def DefaultStrategy(self):
         content = source.getContent(mount_length=mlen)
         stats('retrieving content')
         mstats('content retrieval')
-        
-        log.debug('processing content loop %d'%len(content))
+
+        log.debug('processing content loop')
         
         for ci in content:
 
@@ -123,7 +123,6 @@ def DefaultStrategy(self):
         log.debug('mastering content %d'%len(descriptors))
 
         for d in descriptors:
-
             ci = d.getContent()
             #log.debug('%s mastering content (%s) '%(str(ci.absolute_url(1)), str(ci.portal_type)))
                 

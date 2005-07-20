@@ -30,12 +30,14 @@ $Id$
 
 from AccessControl import ClassSecurityInfo, Permissions, getSecurityManager
 from Acquisition import Implicit, aq_base, aq_inner, aq_parent
+import App.Undo
 from ComputedAttribute import ComputedAttribute
 from DateTime import DateTime
 from Globals import InitializeClass, DTMLFile, package_home
 from OFS.SimpleItem import SimpleItem
 from OFS.Folder import Folder
-from OFS.ObjectManager import ObjectManager
+from OFS.OrderedFolder import OrderedFolder
+from OFS.ObjectManager import ObjectManager, IFAwareObjectManager
 from Products.CMFCore.utils import UniqueObject, SimpleItemWithProperties, getToolByName
 from Products.CMFCore import CMFCorePermissions
 

@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2005 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,7 +21,7 @@
 ##################################################################
 """
 Purpose: Identify Content that should be deployed
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2005
 License: GPL
 Created: 8/10/2002
 $Id$
@@ -38,6 +38,8 @@ from ExpressionContainer import ExpressionContainer
 
 log = LogFactory('ContentIdentification')
 
+DEFAULT_CONTENT_SOURCE_ID = "portal_catalog_source"
+
 class ContentIdentification(Folder):
 
     meta_type = 'Content Identification'
@@ -47,21 +49,15 @@ class ContentIdentification(Folder):
     __implements__ = (IContentSource,)
 
     manage_options = (
-
-        {'label':'Overview',
-         'action':'overview'},
         
-        {'label':'Source',
-         'action':'source/source'},
-
-        {'label':'Filter Expressions',
+        {'label': 'Overview',
+         'action': 'overview' },
+        
+        {'label':'Sources',
+         'action':'sources/manage_main'},
+        
+        {'label':'Filters',
          'action':'filters/manage_main'},
-
-        {'label':'Filter Scripts',
-         'action':'scripts/manage_main'},        
-
-        {'label':'Policy',
-         'action':'../overview'}
         )
 
     security.declareProtected(Permissions.view_management_screens, 'overview')
@@ -74,22 +70,18 @@ class ContentIdentification(Folder):
 
     security.declarePrivate('getContent')
     def getContent(self, mount_length=0):
-
-        r = []
-        w = r.append
+        """
+        retrieve deployable content brains
+        """
         
         portal  = getToolByName(self, 'portal_url').getPortalObject()
-
-        content = self.source.getContent()
         filters = self.filters.objectValues()
-        scripts = self.scripts.objectValues()
-
         structure = self.getDeploymentPolicy().getContentOrganization().getActiveStructure()
         restricted = structure.restricted
         
         skip = 0
 
-        for c in content:
+        for c in self.sources.getContent():
             ## remove objects which reference restricted ids
             if mount_length:
                 path = c.getPath()[mount_length:]
@@ -104,69 +96,102 @@ class ContentIdentification(Folder):
                 continue
                                 
             fc = getFilterExprContext(c,portal)
-
-            for f in filters:
-                if not f.filter(fc):
-                    log.debug('Filtered Out (%s) (%s)->(%s)'%(f.getId(), c.portal_type, c.getPath()))
-                    skip = 1
-                    break
-            if skip:
-                skip = 0
-                continue
-
-            for s in scripts:
-                if not s(c):
+            
+            for f in self.filters.objectValues():
+                if f.meta_type == ContentFilter.meta_type:
+                    if not f.filter(fc):
+                        log.debug('Filtered Out (%s) (%s)->(%s)'%(f.getId(), c.portal_type, c.getPath()))
+                        skip = 1
+                        break
+                elif not f(c):
                     log.debug('Scripted Out (%s) (%s)->(%s)'%(s.getId(), c.portal_type, c.getPath()))
                     skip = 1
                     break
-
-            if skip:
-                skip = 0
-                continue
                         
-            # memory will explode :-(            
-            w(c)
-            
-        return r
+            yield c
 
     security.declarePrivate('manage_afterAdd')
     def manage_afterAdd(self, item, container):
-        self._setObject('source',  ContentSource('source'))
-        self._setObject('filters', ContentExpressionFilterContainer('filters'))
-        self._setObject('scripts', ContentScriptContainer('scripts'))
+        self._setObject('sources',  ContentSourceContainer('source'))
+        self._setObject('filters',  ContentFilterContainer('filters'))
 
 InitializeClass(ContentIdentification)
 
-## XXX Todo make this a Topic Container
-## we need zmi editable topics first        
-class ContentSource(SimpleItem):
 
-    meta_type = 'Content Source'
+#################################
+# Sources
+
+class ContentSourceContainer( OrderedFolder ):
+
+    meta_type = 'Content Source Container'
+
+    all_meta_types = IFAwareObjectManager.all_meta_types
+    _product_interfaces = ( IContentSource, )
+
+    manage_options = (
+        {'label':'Content Sources',
+         'action':'manage_main'},
+        ) + App.Undo.UndoSupport.manage_options    
+    
+    def __init__(self, id, title="Content Sources"):
+        self.id = id
+        self.title = title
+        
+    def getContent( self ):
+        for source in self.objectValues():
+            for c in source.getContent():
+                yield c
+
+    def manage_afterAdd(self, item, container):
+
+        if not DEFAULT_CONTENT_SOURCE_ID in self.objectIds():
+            self._setObject(
+                DEFAULT_CONTENT_SOURCE_ID,
+                PortalCatalogSource(DEFAULT_CONTENT_SOURCE_ID)
+                )
+                                                 
+
+InitializeClass( ContentSourceContainer )
+
+def addPortalCatalogSource( self,
+                            id=DEFAULT_CONTENT_SOURCE_ID,
+                            title='',
+                            RESPONSE=''):
+    """ riddle me this, why is a doc string here..
+        answer: bobo
+    """
+
+    self._setObject( id, PortalCatalogSource(id, title ) )
+
+    if RESPONSE:
+        RESPONSE.redirect('manage_workspace')
+
+addPortalCatalogSourceForm = DTMLFile('ui/IdentificationPortalCatalogSourceForm', globals() )
+
+class PortalCatalogSource(SimpleItem):
+
+    meta_type = 'Catalog Content Source'
 
     __implements__ = IContentSource
 
     manage_options = (
-
         {'label':'Source',
-         'action':'source'},
-        
-        {'label':'Content Identification',
-         'action':'../overview'},
-        
-        {'label':'Policy',
-         'action':'../../overview'},                 
+         'action':'source'},        
         )
-
+    
     source = DTMLFile('ui/ContentSourceView', globals())
 
-    def __init__(self, id):
+    def __init__(self, id, title='retrieves content from portal_catalog'):
         self.id = id
-
+        self.title = title
+        
     def getContent(self):
         catalog = getToolByName(self, 'portal_catalog')
         objects = catalog()
-
         return objects
+
+#################################
+# Filters
 
 class ContentFilter(SimpleItem):
 
@@ -176,7 +201,7 @@ class ContentFilter(SimpleItem):
     filter_manage_options = (
         {'label':'Edit Filter',
          'action':'manage_editContentFilter'},
-        )
+        ) + App.Undo.UndoSupport.manage_options
 
     manage_options = filter_manage_options + SimpleItem.manage_options
     manage_editContentFilter = DTMLFile('ui/ContentExpFilterEditForm', globals())
@@ -195,30 +220,32 @@ class ContentFilter(SimpleItem):
         self.expression = Expression(expression_text)
         if REQUEST is not None:
             REQUEST.RESPONSE.redirect(self.absolute_url()+'/manage_main')
-        
 
-class ContentExpressionFilterContainer(ExpressionContainer):
+InitializeClass( ContentFilter )
 
-    meta_type = 'Expression Filter Container'
+
+class ContentFilterContainer( OrderedFolder ):
+
+    meta_type = 'Identification Filter Container'
     
     manage_options = (
-        {'label':'Filter Expressions',
+        {'label':'Content Filters',
          'action':'manage_main'},
+        ) + App.Undo.UndoSupport.manage_options
         
-        {'label':'Content Identification',
-         'action':'../overview'},
-        
-        {'label':'Policy',
-         'action':'../../overview'},        
-        )
-        
-    all_meta_types = (
+    content_filter_constructor_info = (
         {'name':ContentFilter.meta_type,
-        'class':ContentFilter,
-        'permission':CMFCorePermissions.ManagePortal,
-        'action':'addFilterForm'},
+         'class':ContentFilter,
+         'permission':CMFCorePermissions.ManagePortal,
+         'action':'addFilterForm'},
         )
-    
+
+    def all_meta_types(self):
+        import Products
+        meta_types = [m for m in Products.meta_types if m['name']=='Script (Python)']
+        meta_types.extend( self.content_filter_constructor_info )
+        return meta_types
+        
     addFilterForm = DTMLFile('ui/ExpressionFilterAddForm', globals())
     
     def __init__(self, id):
@@ -229,27 +256,6 @@ class ContentExpressionFilterContainer(ExpressionContainer):
         self._setObject(id, ContentFilter(id, text))
         if REQUEST is not None:
             REQUEST.RESPONSE.redirect('manage_main')
-
-class ContentScriptContainer(ExpressionContainer):
-
-    meta_type = 'Script Container'
-
-    manage_options = (
-        {'label':'Filter Scripts',
-         'action':'manage_main'},
-        
-        {'label':'Content Identification',
-         'action':'../overview'},
-        
-        {'label':'Policy',
-         'action':'../../overview'},        
-        )
-    
-
-    def all_meta_types(self):
-
-        import Products
-        return [m for m in Products.meta_types if m['name']=='Script (Python)']
 
 
 def getFilterExprContext(object_memento, portal):
