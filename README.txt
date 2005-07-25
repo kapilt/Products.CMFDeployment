@@ -80,12 +80,6 @@ CMFDeployment
 
     - click on the test tab to complete installation
 
-    Optionally, you can install iuveno's OrderedFolder product
-    to allow for explict ordering of filters, python scripts,
-    and mime mappings.  One warning, if your using OrderedFolder
-    in conjunction with exUserFolder, you need to patch OrderedFolder
-    to disable the dummy zbabel tags.
-
     Debian users will need to install the pyxml package. 
 
   Configuration
