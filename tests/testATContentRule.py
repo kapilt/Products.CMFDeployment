@@ -65,7 +65,7 @@ class ATContentRuleTests( PloneTestCase ):
         self.raw_image = fh.read()
         fh.close()
         
-        policy_file = os.path.join( DeploymentProductHome, 'examples', 'plone.xml')
+        policy_file = os.path.join( DeploymentProductHome, 'examples', 'policies', 'plone.xml')
         fh = open( policy_file )
         deployment_tool = getToolByName(self.portal, 'portal_deployment')
         deployment_tool.addPolicy( policy_xml=fh )

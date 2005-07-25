@@ -34,7 +34,8 @@ $Id: $
 
 """
 
-import os, sys, time, shutil, commandsif __name__ == '__main__':
+import os, sys, time, shutil, commands
+if __name__ == '__main__':
     execfile(os.path.join(sys.path[0], 'framework.py'))
 from Testing import ZopeTestCase
 from Products.CMFPlone.tests.PloneTestCase import PloneTestCase
@@ -166,7 +167,7 @@ class DeploymentTests( PloneTestCase ):
 
         setupContentTree(self.portal)
         
-        policy_file = os.path.join( DeploymentProductHome, 'examples', 'plone.xml') 
+        policy_file = os.path.join( DeploymentProductHome, 'examples', 'policies', 'plone.xml') 
         fh = open( policy_file )
         deployment_tool = getToolByName(self.portal, 'portal_deployment')
         deployment_tool.addPolicy( policy_xml=fh )

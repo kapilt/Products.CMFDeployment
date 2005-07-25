@@ -27,7 +27,12 @@ Created: 1/2/2004
 $Id: $
 """
 
-import os, sys, timeif __name__ == '__main__':    execfile(os.path.join(sys.path[0], 'framework.py'))from Testing import ZopeTestCasefrom Products.CMFPlone.tests.PloneTestCase import PloneTestCase
+import os, sys, time
+if __name__ == '__main__':
+    execfile(os.path.join(sys.path[0], 'framework.py'))
+
+from Testing import ZopeTestCase
+from Products.CMFPlone.tests.PloneTestCase import PloneTestCase
 
 ZopeTestCase.installProduct('CMFDeployment')
 
@@ -58,7 +63,7 @@ class ResolveFolderURITests(PloneTestCase):
         self.folderwithoutindex = self.portal.folderwithoutindex         
         self.folderwithindex.invokeFactory('Document', 'index_html')         
         
-        policy_file = os.path.join( DeploymentProductHome, 'examples', 'plone.xml')
+        policy_file = os.path.join( DeploymentProductHome, 'examples', 'policies', 'plone.xml')
         fh = open( policy_file )
         deployment_tool = getToolByName(self.portal, 'portal_deployment')
         deployment_tool.addPolicy( policy_xml=fh )

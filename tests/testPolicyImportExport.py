@@ -54,7 +54,7 @@ class PolicyImportExportTests( PloneTestCase ):
         pass
 
     def testImport(self):
-        policy_file = os.path.join( DeploymentProductHome, 'examples', 'plone.xml') 
+        policy_file = os.path.join( DeploymentProductHome, 'examples', 'policies', 'plone.xml') 
         fh = open( policy_file )
         deployment_tool = getToolByName(self.portal, 'portal_deployment')
         deployment_tool.addPolicy( policy_xml=fh )
@@ -71,7 +71,7 @@ class PolicyImportExportTests( PloneTestCase ):
         self.testImport()
         dtool = getToolByName(self.portal, 'portal_deployment')
         xml = dtool.plone_example.policy_xml()     
-        policy_file = os.path.join( DeploymentProductHome, 'examples', 'plone.xml') 
+        policy_file = os.path.join( DeploymentProductHome, 'examples', 'policies', 'plone.xml') 
         fh = open(policy_file)
         fs = fh.read()
         fh.close()
