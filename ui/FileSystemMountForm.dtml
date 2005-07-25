@@ -12,7 +12,7 @@ Existing Mount Point: <dtml-var mount_point>
 <br><br>
 
 <form action="setMountPoint" method="post">
-Mount Point: <input type="text" name="mount_point" value="<dtml-var "mount_point or ''">"><br>
+Mount Point: <input type="text" name="mount_point" size="80" value="<dtml-var "mount_point or ''">"><br>
 
 <input type="submit" value="Set Mount Point">
 
