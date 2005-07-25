@@ -26,4 +26,7 @@ def install(self):
     else:
         out.write("Plone Deployment skin already setup\n")
 
+    portal = self.portal_url.getPortalObject()
+    portal.portal_catalog.indexObject( portal )
+
     return out.getvalue()
