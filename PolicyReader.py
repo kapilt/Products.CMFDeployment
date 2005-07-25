@@ -142,6 +142,7 @@ class PolicyReader(MetaReader):
 	skins = PolicyNode(attrs)
 	self.policy.skins = skins
 	self.prefix='Skins'
+        self.policy.skins.setdefault('directories',[])
 
     def startSkinsdirectory(self, attrs):
 	dirs = self.policy.skins.setdefault('directories', [])
