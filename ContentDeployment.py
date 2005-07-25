@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2005 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -35,11 +35,82 @@ from DeploymentInterfaces import *
 from DeploymentExceptions import *
 from Protocols import getProtocolNames, getProtocol
 
+
+#################################
+# container for pluggable transports
+
+class ContentDeployment( OrderedFolder ):
+
+    meta_type = 'Content Deployment'
+
+    manage_options = (
+
+        {'label':'Overview',
+        'action':'overview'},
+
+        {'label':'Targets',
+         'action':'manage_main'},
+
+        {'label':'Policy',
+         'action':'../overview'},
+        
+        )
+
+    overview = DTMLFile('ui/ContentDeploymentOverview', globals())
+    
+    all_meta_types = IFAwareObjectManager.all_meta_types
+    _product_interfaces = ( IDeploymentTarget, )
+
+    security = ClassSecurityInfo()
+
+    def __init__(self, id):
+        self.id = id
+
+    def getProtocolTypes(self):
+        return getProtocolNames()
+
+    security.declarePrivate('deploy')
+    def deploy(self, structure):
+        for target in self.objectValues('Deployment Target'):
+            target.transport( structure )
+
+InitializeClass( ContentDeployment )
+
+
+#################################
+# basic pluggable transport
+
+addDeploymentTargetForm = DTMLFile('ui/DeploymentTargetAddForm', globals())
+
+def addDeploymentTarget(self,
+                        id,                            
+                        user,
+                        password,
+                        password_confirm,
+                        host,
+                        remote_directory,
+                        protocol,
+                        RESPONSE=None):
+    """ bobo publish string """
+    ob = DeploymentTarget(id)
+    self._setObject(id, ob)
+    ob = self._getOb(id)
+    ob.edit(user,
+            password,
+            password_confirm,
+            host,
+            protocol,
+            remote_directory)
+    
+    if RESPONSE is not None:
+        RESPONSE.redirect("%s/manage_workspace"%id)
+
+
 class DeploymentTarget(SimpleItem):
 
     __implements__ = IDeploymentTarget
 
-    meta_type = 'Deployment Target'
+    meta_type = 'Basic Pluggable Deployment Target'
     
     security = ClassSecurityInfo()
     
@@ -48,14 +119,9 @@ class DeploymentTarget(SimpleItem):
         {'label':'Settings',
          'action':'deployment_settings'},
 
-        {'label':'Targets',
-         'action':'../manage_main'},
-
         {'label':'Policy',
          'action':'../overview'},
 
-        {'label':'Tool',
-         'action':'../../overview'}
         )
 
     deployment_settings = DTMLFile('ui/DeploymentTargetSettingsForm', globals())
@@ -108,6 +174,11 @@ class DeploymentTarget(SimpleItem):
     def getHost(self):
         return self.host
 
+    security.declareProtected(CMFCorePermissions.ManagePortal, 'transfer')
+    def transfer(self, structure ):
+        protocol = self.getProtocol()
+        protocol.execute(target, structure)
+        
     security.declareProtected(CMFCorePermissions.ManagePortal, 'getProtocol')
     def getProtocol(self):
         return getProtocol(self.protocol)
@@ -116,61 +187,4 @@ class DeploymentTarget(SimpleItem):
     def getDirectory(self):
         return self.remote_directory
 
-
-class ContentDeployment(Folder):
-
-    meta_type = 'Content Deployment'
-
-    manage_options = (
-
-        {'label':'Overview',
-        'action':'overview'},
-
-        {'label':'Targets',
-         'action':'manage_main'},
-
-        {'label':'Policy',
-         'action':'../overview'},
-        
-        )
-
-    overview = DTMLFile('ui/ContentDeploymentOverview', globals())
-    addDeploymentTargetForm = DTMLFile('ui/DeploymentTargetAddForm', globals())
-    
-    all_meta_types = (
-        {'name':DeploymentTarget.meta_type,
-         'action':'addDeploymentTargetForm'},
-         
-        )
-
-    def __init__(self, id):
-        self.id = id
-
-    def addDeploymentTarget(self,
-                            id,                            
-                            user,
-                            password,
-                            password_confirm,
-                            host,
-                            remote_directory,
-                            protocol,
-                            RESPONSE=None):
-        """ """
-        ob = DeploymentTarget(id)
-        self._setObject(id, ob)
-        ob = self._getOb(id)
-        ob.edit(user, password, password_confirm, host, protocol, remote_directory)
-
-        if RESPONSE is not None:
-            RESPONSE.redirect("%s/manage_workspace"%id)
-
-    def getProtocolTypes(self):
-        return getProtocolNames()
-        
-    def deploy(self, structure):
-        for target in self.objectValues('Deployment Target'):
-            protocol = target.getProtocol()
-            protocol.execute(target, structure)
-
-    
-## moved to Protocols package
+InitializeClass( DeploymentTarget )

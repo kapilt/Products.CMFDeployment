@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2005 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -32,7 +32,9 @@ from Products.CMFDeployment.lib import pexpect
 from Products.CMFDeployment.DeploymentExceptions import ProtocolError
 from cStringIO import StringIO
 
-class RsyncSshProtocol:
+
+
+class RsyncSshProtocol(object):
 
     __implements__ = IDeploymentProtocol
 

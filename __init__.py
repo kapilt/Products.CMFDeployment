@@ -65,9 +65,17 @@ def initialize(context):
 
     context.registerClass(
         MimeMapping.MimeExtensionMapping,
-        permission = 'Add Content Rule',
+        permission = 'CMFDeploy: Add Content Rule',
         constructors = ( MimeMapping.addMappingForm,
                          MimeMapping.addMimeMapping ),
         visibility = None
+        )
+        
+    context.registerClass(
+        ContentDeployment.DeploymentTarget,
+        permission = 'CMFDeploy: Add Deployment Target',
+        constructors = ( ContentDeployment.addDeploymentTargetForm,
+                         ContentDeployment.addDeploymentTarget,
+                         ContentDeployment.getProtocolNames )
         )
         
