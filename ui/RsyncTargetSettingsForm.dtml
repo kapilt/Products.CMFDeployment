@@ -22,18 +22,6 @@
     <td><input type="text" name="remote_directory" value="<dtml-var remote_directory>">
     </td></tr>
 
-<tr><td>Protocol</td>
-    <td><select name="protocol">
-        <dtml-in ContentDeploymentProtocolIds prefix="type">
-	<dtml-if "type_item==protocol">
-   	  <option value="<dtml-var type_item>" selected><dtml-var type_item></option>	
-	<dtml-else>
- 	  <option value="<dtml-var type_item>"><dtml-var type_item></option>
-	</dtml-if>
-        </dtml-in>
-        </select>
-    </td></tr>
-
 <tr><td colspan="2">
     <input type="submit" value="Edit Deployment Target"> </td></tr>
 

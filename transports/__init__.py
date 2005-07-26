@@ -28,33 +28,36 @@ $Id$
 """
 # deployment protocol implementation directory
 
+import rsync
+import sitecopy
+
 #################################
 # simple global protocol registry    
 
-class ProtocolDatabase:
+## class ProtocolDatabase:
 
-    def __init__(self):
-        self._protocols = {}
+##     def __init__(self):
+##         self._protocols = {}
 
-    def registerProtocol(self, name, protocol):
-        self._protocols[name]=protocol
+##     def registerProtocol(self, name, protocol):
+##         self._protocols[name]=protocol
 
-    def getProtocolNames(self, context=None):
-        return self._protocols.keys()
+##     def getProtocolNames(self, context=None):
+##         return self._protocols.keys()
 
-    def getProtocol(self, name):
-        return self._protocols[name]
+##     def getProtocol(self, name):
+##         return self._protocols[name]
 
-_protocols = ProtocolDatabase()
+## _protocols = ProtocolDatabase()
 
-registerProtocol = _protocols.registerProtocol
-getProtocolNames = _protocols.getProtocolNames
-getProtocol = _protocols.getProtocol
+## registerProtocol = _protocols.registerProtocol
+## getProtocolNames = _protocols.getProtocolNames
+## getProtocol = _protocols.getProtocol
 
 
-#################################
-# protocol implementation
+## #################################
+## # protocol implementation
 
-from RsyncSSH import RsyncSshProtocol
-registerProtocol('rsync_ssh', RsyncSshProtocol())
+## from rsync import RsyncSshProtocol
+## registerProtocol('rsync_ssh', RsyncSshProtocol())
 

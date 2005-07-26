@@ -33,7 +33,7 @@ $Id$
 from Namespace import *
 from DeploymentInterfaces import *
 from DeploymentExceptions import *
-from transports import getProtocolNames, getProtocol
+
 
 #################################
 # container for pluggable transports
@@ -44,16 +44,13 @@ class ContentDeployment( OrderedFolder ):
 
     manage_options = (
 
-        {'label':'Overview',
-        'action':'overview'},
-
         {'label':'Targets',
          'action':'manage_main'},
 
-        {'label':'Policy',
-         'action':'../overview'},
+        {'label':'Overview',
+         'action':'overview'},
         
-        )
+        ) + App.Undo.UndoSupport.manage_options
 
     overview = DTMLFile('ui/ContentDeploymentOverview', globals())
     
@@ -77,113 +74,4 @@ InitializeClass( ContentDeployment )
 
 
 #################################
-# basic pluggable transport
-
-addDeploymentTargetForm = DTMLFile('ui/DeploymentTargetAddForm', globals())
-
-def addDeploymentTarget(self,
-                        id,                            
-                        user,
-                        password,
-                        password_confirm,
-                        host,
-                        remote_directory,
-                        protocol,
-                        RESPONSE=None):
-    """ bobo publish string """
-    ob = DeploymentTarget(id)
-    self._setObject(id, ob)
-    ob = self._getOb(id)
-    ob.edit(user,
-            password,
-            password_confirm,
-            host,
-            protocol,
-            remote_directory)
-    
-    if RESPONSE is not None:
-        RESPONSE.redirect("%s/manage_workspace"%id)
-
-
-class DeploymentTarget(SimpleItem):
-
-    __implements__ = IDeploymentTarget
-
-    meta_type = 'Basic Pluggable Deployment Target'
-    
-    security = ClassSecurityInfo()
-    
-    manage_options = (
-        
-        {'label':'Settings',
-         'action':'deployment_settings'},
-
-        {'label':'Policy',
-         'action':'../overview'},
-
-        )
-
-    deployment_settings = DTMLFile('ui/DeploymentTargetSettingsForm', globals())
-
-    def __init__(self, id):
-        self.id = id
-        self._user = None
-        self._password = None
-        self.host = None
-        self.protocol = None
-
-    security.declareProtected(CMFCorePermissions.ManagePortal, 'edit')
-    def edit(self,
-             user,
-             password,
-             password_confirm,
-             host,
-             protocol,
-             remote_directory,
-             RESPONSE=None):
-        """ """
-        self._user = user
-        
-        if password and password_confirm == password:
-            self._password = password
-        elif password:
-            raise CredentialError(" passwords do not match ")
-
-        self.host = host.strip()
-
-        if not protocol in getProtocolNames():
-            raise ProtocolError(" Invalid Protocol %s"%protocol)
-
-        self.protocol = protocol
-        self.remote_directory = remote_directory.strip()
-
-        if RESPONSE is not None:
-            RESPONSE.redirect('deployment_settings')
-
-    security.declareProtected(CMFCorePermissions.ManagePortal, 'getUser')
-    def getUser(self):
-        return self._user
-
-    # XXX fs dtml can access this
-    #security.declarePrivate('getPassword')
-    #def getPassword(self):
-    #    return self._password
-
-    security.declareProtected(CMFCorePermissions.ManagePortal, 'getHost')
-    def getHost(self):
-        return self.host
-
-    security.declareProtected(CMFCorePermissions.ManagePortal, 'transfer')
-    def transfer(self, structure ):
-        protocol = self.getProtocol()
-        protocol.execute(target, structure)
-        
-    security.declareProtected(CMFCorePermissions.ManagePortal, 'getProtocol')
-    def getProtocol(self):
-        return getProtocol(self.protocol)
-
-    security.declareProtected(CMFCorePermissions.ManagePortal, 'getDirectory')
-    def getDirectory(self):
-        return self.remote_directory
-
-InitializeClass( DeploymentTarget )
+# all transports/protocols/thingies moved to transport package

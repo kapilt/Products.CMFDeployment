@@ -29,12 +29,14 @@ $Id$
 
 from Products.CMFDeployment.DeploymentInterfaces import IDeploymentProtocol
 from Products.CMFDeployment.lib import pexpect
-from Products.CMFDeployment.DeploymentExceptions import ProtocolError
+from Products.CMFDeployment.DeploymentExceptions import ProtocolError, CredentialError
 from cStringIO import StringIO
 
+from Products.CMFDeployment.Namespace import *
+from Products.CMFDeployment.DeploymentInterfaces import *
 
 
-class RsyncSshProtocol(object):
+class RsyncSSHProtocol(object):
 
     __implements__ = IDeploymentProtocol
 
@@ -109,3 +111,102 @@ class RsyncSshProtocol(object):
         if conn.exitstatus != 0:
             log.seek(0)
             raise ProtocolError, log.read()
+
+
+addRsyncSSHTransportForm = DTMLFile('../ui/RsyncTransportAddForm', globals())
+
+
+def addRsyncSSHTransport(self,
+                      id,                            
+                      user,
+                      password,
+                      password_confirm,
+                      host,
+                      remote_directory,
+                      RESPONSE=None):
+    """ bobo publish string """
+    ob = RsyncSSHTransport( id )
+    self._setObject(id, ob)
+    ob = self._getOb(id)
+    ob.edit(user,
+            password,
+            password_confirm,
+            host,
+            remote_directory)
+    
+    if RESPONSE is not None:
+        RESPONSE.redirect("manage_main")
+
+
+class RsyncSSHTransport(SimpleItem):
+
+    __implements__ = IDeploymentTarget
+
+    meta_type = 'Rsync/SSH Target'
+    
+    security = ClassSecurityInfo()
+
+    _tprotocol = RsyncSSHProtocol()
+    
+    manage_options = (
+        
+        {'label':'Settings',
+         'action':'target_settings'},
+
+        ) + App.Undo.UndoSupport.manage_options
+
+    target_settings = DTMLFile('../ui/RsyncTargetSettingsForm', globals())
+
+    def __init__(self, id):
+        self.id = id
+        self._user = None
+        self._password = None
+        self.host = None
+
+    security.declareProtected(CMFCorePermissions.ManagePortal, 'edit')
+    def edit(self,
+             user,
+             password,
+             password_confirm,
+             host,
+             remote_directory,
+             RESPONSE=None):
+        """ """
+        self._user = user
+        
+        if password and password_confirm == password:
+            self._password = password
+        elif password:
+            raise CredentialError(" passwords do not match ")
+
+        self.host = host.strip()
+        self.remote_directory = remote_directory.strip()
+
+        if RESPONSE is not None:
+            RESPONSE.redirect('manage_workspace')
+
+    security.declareProtected(CMFCorePermissions.ManagePortal, 'getUser')
+    def getUser(self):
+        return self._user
+
+    security.declareProtected(CMFCorePermissions.ManagePortal, 'getHost')
+    def getHost(self):
+        return self.host
+
+    security.declareProtected(CMFCorePermissions.ManagePortal, 'transfer')
+    def transfer(self, structure ):
+        protocol = self.getProtocol()
+        protocol.execute(target, structure)
+        
+    security.declareProtected(CMFCorePermissions.ManagePortal, 'getProtocol')
+    def getProtocol(self):
+        return self._tprotocol
+
+    security.declareProtected(CMFCorePermissions.ManagePortal, 'getDirectory')
+    def getDirectory(self):
+        return self.remote_directory
+
+InitializeClass( RsyncSSHTransport )
+
+
+

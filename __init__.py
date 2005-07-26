@@ -42,13 +42,13 @@ import ContentIdentification
 import DeploymentStrategy
 import Descriptor
 import MimeMapping
+import transports
 
 DeploymentProductHome = package_home( globals() )
 
 registerDirectory('skins', globals())
 
 methods = {
-    'ContentDeploymentProtocolIds':ContentDeployment.getProtocolNames,
     'ContentDeploymentStrategyIds':DeploymentStrategy.getStrategyNames
     }
 
@@ -71,11 +71,19 @@ def initialize(context):
         visibility = None
         )
         
+    rsync = transports.rsync
     context.registerClass(
-        ContentDeployment.DeploymentTarget,
-        permission = 'CMFDeploy: Add Deployment Target',
-        constructors = ( ContentDeployment.addDeploymentTargetForm,
-                         ContentDeployment.addDeploymentTarget,
-                         ContentDeployment.getProtocolNames )
+        rsync.RsyncSSHTransport,
+        permission = 'CMFDeploy: Add Deployment Transport',
+        constructors = ( rsync.addRsyncSSHTransportForm,
+                         rsync.addRsyncSSHTransport )
         )
-        
+
+    sitecopy = transports.sitecopy
+    context.registerClass(
+        sitecopy.SiteCopyTransport,
+        permission = 'CMFDeploy: Add Deployment Transport',
+        constructors = ( sitecopy.addSiteCopyTransportForm,
+                         sitecopy.addSiteCopyTransport )
+        )
+    
