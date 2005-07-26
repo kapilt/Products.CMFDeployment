@@ -33,8 +33,7 @@ $Id$
 from Namespace import *
 from DeploymentInterfaces import *
 from DeploymentExceptions import *
-from Protocols import getProtocolNames, getProtocol
-
+from transports import getProtocolNames, getProtocol
 
 #################################
 # container for pluggable transports
