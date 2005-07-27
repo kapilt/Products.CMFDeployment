@@ -51,9 +51,6 @@ class DeploymentTool(UniqueObject, Folder):
         {'label':'Overview',
          'action':'overview'},
 
-#        {'label':'Log',
-#         'action':'%s/manage_workspace'%DefaultConfiguration.DeploymentLogging},
-
         )
 
     overview = DTMLFile('ui/ToolOverview', globals())

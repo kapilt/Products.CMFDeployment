@@ -35,7 +35,6 @@ ContentDirectoryViews = 'ContentDirectoryViews'
 ContentURIs           = 'ContentURIs'
 DeploymentHistory     = 'DeploymentHistory'
 DeploymentStrategy    = 'DeploymentStrategy'
-DeploymentLogging     = 'DeploymentLogConf'
 ContentFilters        = 'ContentFilters'
 
 from ContentOrganization import ContentOrganization as KlassContentOrganization
@@ -43,7 +42,6 @@ from ContentIdentification import ContentIdentification as KlassContentIdentific
 from ContentMastering import ContentMastering as KlassContentMastering
 from ContentDeployment import ContentDeployment as KlassContentDeployment
 from DeploymentHistory import DeploymentHistoryContainer as KlassDeploymentHistory
-from DeploymentLogging import DeploymentLogging as KlassDeploymentLogging
 from DeploymentStrategy import DeploymentStrategy as KlassDeploymentStrategy
 from ContentDirectoryViews import ContentDirectoryView as KlassContentDirectoryView
 from ContentURI import ContentURI as KlassContentURI
