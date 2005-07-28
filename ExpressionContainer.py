@@ -27,6 +27,42 @@ $Id$
 """
 
 from OFS.OrderedFolder import OrderedFolder
+from Products.PageTemplates.Expressions import SecureModuleImporter, getEngine
+
+from Namespace import Implicit, ClassSecurityInfo, InitializeClass
+
 
 class ExpressionContainer(OrderedFolder):
     pass
+
+def getDeployExprContext(object, portal):
+    
+    data = {
+        'object':       object,
+        'portal':       portal,
+        'nothing':      None,
+        'request':      getattr( object, 'REQUEST', None ),
+        'modules':      SecureModuleImporter,
+        'deploy':       DeploymentMimeUtilities.__of__(object)
+        }
+
+    return getEngine().getContext(data)    
+    
+class MimeUtilities(Implicit):
+
+    security = ClassSecurityInfo()
+    security.declareObjectPublic()
+    
+    __allow_access_to_unprotected_subobjects__ = 1
+
+    def has_index(self, obj):
+        return not not getattr(aq_base(obj), 'index_html', None)
+
+
+InitializeClass(MimeUtilities)
+DeploymentMimeUtilities = MimeUtilities()
+
+def registerDeploymentExprMethod(name, context_method):
+    assert isinstance(name, str)
+    assert not _MimeUtilities.__dict__.has_key(name),"duplicate registration %s"%name           
+    _MimeUtilities.__dict__[name]=context_method

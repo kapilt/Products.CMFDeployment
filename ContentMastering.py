@@ -31,7 +31,8 @@ $Id$
 from Namespace import *
 
 from DeploymentExceptions import InvalidSkinName
-from MimeMapping import MimeMappingContainer, getMimeExprContext
+from MimeMapping import MimeMappingContainer
+from ExpressionContainer import getDeployExprContext
 from utils import file2string
 
 from Log import LogFactory
@@ -120,7 +121,7 @@ class ContentMastering(Folder):
         """
         portal = getToolByName(self, 'portal_url').getPortalObject()
         c = descriptor.getContent()
-        ctx = getMimeExprContext(c, portal) 
+        ctx = getDeployExprContext(c, portal) 
         mappings = self.mime.objectValues()
         for m in mappings:
             if m.isValid(descriptor, ctx):
@@ -141,6 +142,8 @@ class ContentMastering(Folder):
         descriptors = descriptor.getDescriptors()
 
         # sometimes the skindata can disappear mid request
+        # xxx we now modify the portal root at the start to prevent
+        # volatile disappearance, so this should be unesc.
         if not self.portal_url.getPortalObject()._v_skindata:
             self.site_skin._setSkin()
 

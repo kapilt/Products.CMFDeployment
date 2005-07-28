@@ -51,7 +51,7 @@
 
     <mime id="Site"
           filter_expr="python: object.portal_type == 'Plone Site'"
-          ext_expr="python: '%s/index.html'%object.getId()"
+          ext_expr="string:index.html"
           view_method="index_html"
 	  ghost="1"
           />

@@ -47,8 +47,7 @@ from types import StringType, NoneType
 from Products.CMFCore.utils import getToolByName
 from Products.CMFDeployment.Descriptor import DescriptorFactory
 from Products.CMFDeployment import DeploymentProductHome
-
-from Products.CMFDeployment.MimeMapping import getMimeExprContext
+from Products.CMFDeployment.ExpressionContainer import getDeployExprContext
 
 class ATContentRuleTests( PloneTestCase ):
 
@@ -88,7 +87,7 @@ class ATContentRuleTests( PloneTestCase ):
     def testRule(self):
         factory = DescriptorFactory( self.policy )
         descriptor = factory( self.image_content )
-        context = getMimeExprContext( self.image_content, self.portal)
+        context = getDeployExprContext( self.image_content, self.portal)
         
         self.assertEqual(
             self.rules.at_image_content.isValid( descriptor, context),

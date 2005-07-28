@@ -43,7 +43,7 @@ from Products.CMFDeployment.Descriptor import DescriptorFactory
 from Products.CMFDeployment.URIResolver import resolve_relative, URIResolver, test_uri_regex, test_css_regex, _marker
 from Products.CMFCore.utils import getToolByName
 from Products.CMFDeployment import DeploymentProductHome
-from Products.CMFDeployment.MimeMapping import getMimeExprContext
+from Products.CMFDeployment.ExpressionContainer import getDeployExprContext
 
 
 class ResolveFolderURITests(PloneTestCase):
@@ -86,7 +86,7 @@ class ResolveFolderURITests(PloneTestCase):
     def addResource(self, obj, type):
         factory = DescriptorFactory( self.policy )
         descriptor = factory( obj )
-        context = getMimeExprContext( obj, self.portal)
+        context = getDeployExprContext( obj, self.portal)
         descriptor = self.rules[type].process( descriptor, context )
         mastering = self.policy.getContentMastering()
         mastering.setup()
@@ -147,7 +147,7 @@ class ResolveFolderURITests(PloneTestCase):
         self.assertEqual( result, '/deploy/folderwithindex/index.html')
 
     def testLinkFromFolder2Root(self):
-        portalroot = self.addResource(self.portal, 'PloneSite')
+        portalroot = self.addResource(self.portal, 'Site')
         portalroot_index = self.addResource(self.portalindex, 'IndexDocument')
         folderwithoutindex = self.addResource(self.folderwithoutindex, 'Folder')
         

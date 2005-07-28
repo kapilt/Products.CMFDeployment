@@ -29,10 +29,9 @@ $Id$
 """
 
 from Namespace import *
-from MimeMapping import getMimeExprContext
 from Log import LogFactory
 from Products.CMFCore.Expression import Expression
-from ExpressionContainer import ExpressionContainer
+from ExpressionContainer import ExpressionContainer, getDeployExprContext
 from Filters.registry import getFilter, listFilters
 
 log = LogFactory('Storage Filter')
@@ -70,7 +69,7 @@ class ContentFilter(Folder):
 
         portal  = getToolByName(self,'portal_url').getPortalObject()
         content = descriptor.getContent()
-        context = getMimeExprContext(content, portal)
+        context = getDeployExprContext(content, portal)
         
         for fr in self.rules.objectValues('Content Filter Rule'):
             if not fr.valid(context):
