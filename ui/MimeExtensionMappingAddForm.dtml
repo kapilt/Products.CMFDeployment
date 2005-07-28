@@ -3,7 +3,7 @@
 <h2> Add Mime Mapping </h2>
 
 
-<form action="addMimeMapping" method="POST">
+<form action="addContentRule" method="POST">
 <table>
 
 <tr><td>Id</td>

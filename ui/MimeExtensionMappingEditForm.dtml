@@ -1,5 +1,7 @@
 <dtml-var manage_page_header>
 
+<dtml-var manage_tabs>
+
 <h2> Edit Mime Mapping (<dtml-var getId>)</h2>
 
 

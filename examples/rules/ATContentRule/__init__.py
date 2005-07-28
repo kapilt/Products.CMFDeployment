@@ -114,7 +114,7 @@ class ArchetypeContentRule(SimpleItem):
             descriptor = factory( value )
             # xxx this isn't actually used :-( but it needs to be resolvable
             # file objects get special treatment.  the system will work without
-            # but through a spurious log message.
+            # but throw a spurious log message.
             descriptor.setRenderMethod('index_html')
             descriptor.setBinary( True )
             resource_name = self.getResourceName( value )
