@@ -288,7 +288,12 @@ CMF Deployment
 
          Ghost - if you want to add a content object to the URL
          database, but don't want it rendered or stored set ghost
-         to yes. This setting is rarely needed.
+         to yes. The common case for this option, is a folder
+ 	 which has a separate content object set for its default
+	 view, ie an index_html content object. in that case setting
+	 the ghost attribute on the folder ensures that urls pointing
+	 to the folder/index_html *and* just the folder are resolved
+	 properly.
        
        The TALES expressions for MimeMappings have these Context
        Values::
