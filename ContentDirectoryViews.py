@@ -32,7 +32,10 @@ and whether the contents should be cooked or used as is...
 content in directory views does get matched to the mimes
 system, the id is used directly as the filename.
 
-you can merge a single directory view more than once if need be.
+# 7/27/2005 - not sure that the following is still true, prolly not,
+# due to the use of portal skin relative path as a uniqueness factor
+# in the dv handling, which is explictly checked.
+# you can merge a single directory view more than once if need be.
 
 we reimplement some of content mastering here, as the semantics
 needed for fs types are much different than normal content objects..

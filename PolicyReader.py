@@ -173,7 +173,7 @@ def read_policy(file):
     return reader.getPolicy()
 
 DEFAULT_RULE_PRODUCT = 'CMFDeployment'
-DEFAULT_RULE_FACTORY = 'addMimeMapping'
+DEFAULT_RULE_FACTORY = 'addContentRule'
 DEFAULT_RULE_FACTORY_MAP = {
     'ext_expr':'extension_expression',
     'filter_expr':'condition'

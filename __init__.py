@@ -42,7 +42,10 @@ import ContentIdentification
 import DeploymentStrategy
 import Descriptor
 import MimeMapping
+
+import rules
 import transports
+
 
 DeploymentProductHome = package_home( globals() )
 
@@ -63,20 +66,13 @@ def initialize(context):
     utils.registerIcon('identify.png')
     utils.registerIcon('protocol.png')     
 
-    context.registerClass(
-        MimeMapping.MimeExtensionMapping,
-        permission = 'CMFDeploy: Add Content Rule',
-        constructors = ( MimeMapping.addMappingForm,
-                         MimeMapping.addMimeMapping ),
-        visibility = None
-        )
-        
     rsync = transports.rsync
     context.registerClass(
         rsync.RsyncSSHTransport,
         permission = 'CMFDeploy: Add Deployment Transport',
         constructors = ( rsync.addRsyncSSHTransportForm,
-                         rsync.addRsyncSSHTransport )
+                         rsync.addRsyncSSHTransport ),
+        visibility = None
         )
 
     sitecopy = transports.sitecopy
@@ -84,6 +80,18 @@ def initialize(context):
         sitecopy.SiteCopyTransport,
         permission = 'CMFDeploy: Add Deployment Transport',
         constructors = ( sitecopy.addSiteCopyTransportForm,
-                         sitecopy.addSiteCopyTransport )
+                         sitecopy.addSiteCopyTransport ),
+        visibility = None        
         )
-    
+
+
+    crule = rules.default
+
+    context.registerClass(
+        crule.MimeExtensionMapping,
+        permission = 'CMFDeploy: Add Content Rule',
+        constructors = ( crule.addContentRuleForm,
+                         crule.addContentRule ),
+        visibility = None
+        )
+        
