@@ -172,7 +172,11 @@ def read_policy(file):
     parser.parse(file)
     return reader.getPolicy()
 
-DEFAULT_RULE_PRODUCT = 'CMFDeployment'
+REMAP_TYPES = ( ( 'CMFDeployment', 'addContentRule' ),
+                ( 'CMFDeployment', 'addMimeMapping' ), )
+                
+
+DEFAULT_RULE_PRODUCT = 'CMFDeployment'    
 DEFAULT_RULE_FACTORY = 'addContentRule'
 DEFAULT_RULE_FACTORY_MAP = {
     'ext_expr':'extension_expression',
@@ -180,9 +184,15 @@ DEFAULT_RULE_FACTORY_MAP = {
     }
 
 def remap_default_rule_factory( m ):
+    delk = []
     for key, factory_key in DEFAULT_RULE_FACTORY_MAP.items():
         value = m.get(key, '')
         m[factory_key] = value
+        delk.append(key)
+
+    for dk in delk:
+        del m.data[dk]
+
     return m
 
 def make_policy(portal, policy_node, id=None, title=None):
@@ -214,13 +224,23 @@ def make_policy(portal, policy_node, id=None, title=None):
         # transparently map old policies to the expected format
         product = m.get('product', DEFAULT_RULE_PRODUCT)
         factory = m.get('factory', DEFAULT_RULE_FACTORY)
+        import pprint
+        print 'ee', product, factory
+        pprint.pprint(dict(m.items()))
         
-        if (product, factory) == (DEFAULT_RULE_PRODUCT, DEFAULT_RULE_FACTORY):
+        if (product, factory) in REMAP_TYPES:
+            print 'remapped'
             m.setdefault('ghost',0)
             m = remap_default_rule_factory( m )
+
+        pprint.pprint( dict( m.items() ) )
             
         factory = getattr(mastering.mime.manage_addProduct[product], factory)
-        mapply(factory, keyword=m)
+        md = dict(m)
+        if 'product' in md: del md['product']
+        if 'factory' in md: del md['factory']
+        factory( **md )
+        #mapply(factory, keyword=m)
         
     ## chain stuff
     deployment_skin = policy_node.mastering.skin.strip()

@@ -138,8 +138,14 @@ class DeploymentPolicy(Folder):
     
         Log.attachLogMonitor(history)
         try:
-            strategy = self.getDeploymentStrategy().getStrategy()
-            display = strategy(self)            
+            try:
+                strategy = self.getDeploymentStrategy().getStrategy()
+                display = strategy(self)
+            except:
+                import sys, pdb
+                ec, e, tb = sys.exc_info()
+                print ec, e
+                pdb.post_mortem( tb )
         finally:
             Log.detachLogMonitor(history)
             
