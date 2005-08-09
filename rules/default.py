@@ -146,7 +146,7 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
             descriptor.setRenderMethod( None ) # xxx redundant
         descriptor.setRenderMethod( self.view_method )
 
-        for cdesc in self.getChildDescriptors( context ):
+        for cdesc in self.getChildDescriptors( descriptor, context ):
             descriptor.addChildDescriptor( cdesc )
             
         return descriptor
