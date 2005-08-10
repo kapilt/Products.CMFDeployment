@@ -26,6 +26,14 @@ to a content rule, else they won't be deployed by the system. also its assumed
 that the dependency engine is injecting dependencies into a pipeline that
 has a processing segment that will stop introduction of duplicates.
 
+dependency injection via use of a dependency content source.
+
+a design goal is to keep the dependency manager as simple as possible, and
+thus stateless as previous experiments with automatic tracking of content
+have show it to be overly complex (at least without an event system ;-) ).
+descriptors are responsible for returning both dependencies and reverse
+dependencies. 
+
 there are a number of different policy considerations that need to be taken
 into account when dealing with dependencies, with an eye towards modeling
 default policies appropriately. policies govern how the dependencies are
@@ -51,6 +59,7 @@ dependencies are provided by the content descriptor and they are dynamic.
 ie they are queried from a descriptor.
 
 
+Author: Kapil Thangavelu <hazmat@objectrealms.net>
 $Id$
 """
 
