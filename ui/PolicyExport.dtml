@@ -19,7 +19,7 @@
      <dtml-with sequence-item>
       <directory id="<dtml-var id>"
 	         view_path="<dtml-var view_path>"
-                 deploy_path="<dtml-var deploy_path>"
+                 deploy_path="<dtml-var deployment_path>"
                  source_path="<dtml-var source_path>" />
      </dtml-with>
     </dtml-in>
