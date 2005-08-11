@@ -74,6 +74,12 @@ in the diagram of an execution pipeline below.
      +                                             +
   ContentMap -----------------------------IncrementalIndex
   
+
+Todo
+
+ - api for cleaning state from a descriptor [ and children ]
+   to make ready for serialization.
+
      
 $Id$
 """
@@ -84,6 +90,14 @@ from BTrees.Length import Length
 from BTrees.IOBTree import IOBTree
 from Products.PluginIndexes.common.PluggableIndex import PluggableIndexInterface
 
+#################################
+# pipeline processing of deletion records
+#
+#  - get and inject dependencies into queue
+#
+#  - remove from resolver
+#
+#  - remove from storage
 
 class DeletionRecord( object ):
     """
@@ -91,13 +105,16 @@ class DeletionRecord( object ):
 
      really a deletion descriptor
      
-     shouldn't be processed by
+     processed by deletion pipeline
     """
 
-    
+    def __init__(self, descriptor ):
+        self.descriptor = descriptor
+
 
 class DeletionSource( SimpleItem ):
     """
+    stores records for content deleted through the portal lifecycle.
     """
 
     def __init__(self, id, title=""):
@@ -116,9 +133,8 @@ class DeletionSource( SimpleItem ):
         self._records.append( record )
         self._p_changed = 1
 
-
-class DependencySource( SimpleItem ):
-    pass
+    def manage_beforeDelete( self, item, container):
+        # check on removal of incremental index
 
 
 class PolicyIncrementalIndex( SimpleItem ):
@@ -159,21 +175,40 @@ class PolicyIncrementalIndex( SimpleItem ):
         return self._index.get( documentId, default )
 
     def index_object( self, documentId, obj, threshold=None):
-        # policy execution directly populates through
-        # the recordObject api.
+        # policy execution directly populates through the
+        # recordObject api.
         return
 
     def unindex_object( self, documentId):
         if not self._index.has_key(documentId):
             return
+        
         dtool = getToolByName( self, 'portal_deployment')
         policy = dtool._getOb( policy_id )
 
+        sources = policy.getContentSources()
+        deletion_source = sources._getOb('deletion_source', None)
+        
+        if deletion_source is None:
+            return
+
+        content = self.getObjectFor( documentId )
+        rules = policy.getContentRules()
+        factory = DescriptorFactory( policy )
+        descriptor = factory( content )
+
+        if not rules.prepare( descriptor ):
+            # should still construct minimal deletion record
+            return
+
+        record = DeletionRecord( descriptor )
+        deletion_source.addRecord( record )
+        
         del self._index[documentId]
         self._length(-1)
 
     def _apply_index( request, cid=""):
-        # XXX
+        # XXX return emtpy ruleset?
         return None
 
     def numObjects(self):
