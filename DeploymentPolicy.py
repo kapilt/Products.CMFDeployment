@@ -132,10 +132,16 @@ class DeploymentPolicy(Folder):
         """ """
         if not self.isActive():
             return
+     
+	# set the changed flag so the portal isn't evicted from
+        # the zodb cache during garbage collection which would cause
+        # its volatiles leading to skin issues during rendering.
+        portal = getToolByName( self, 'portal_url').getPortalObject()
+        portal._p_changed = 1
 
         histories = self.getDeploymentHistory()
         history = histories.makeHistory()
-    
+
         Log.attachLogMonitor(history)
         try:
             strategy = self.getDeploymentStrategy().getStrategy()
