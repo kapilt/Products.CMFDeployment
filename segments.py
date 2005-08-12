@@ -207,6 +207,16 @@ class ContentProcessPipe( PipeSegment ):
         store( descriptor )
 
 
+#################################
+# pipeline - todo conditional matching on record or descriptor        
+# segment - uindex / dependency manager /
+
+class DeletionPipeline( object ):
+
+    def process( self, record ):
+        pass
+
+
 class DefaultPolicyPipeline( object ):
     
     step_factories = [ PipeEnvironmentInitializer,

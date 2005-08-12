@@ -31,33 +31,8 @@ dependency injection via use of a dependency content source.
 a design goal is to keep the dependency manager as simple as possible, and
 thus stateless as previous experiments with automatic tracking of content
 have show it to be overly complex (at least without an event system ;-) ).
-descriptors are responsible for returning both dependencies and reverse
-dependencies. 
-
-there are a number of different policy considerations that need to be taken
-into account when dealing with dependencies, with an eye towards modeling
-default policies appropriately. policies govern how the dependencies are
-handled by the system, some policy examples.
-
- - when an object's dependencies are modified, then the object will be
-   redeployed. [ default ]
-
- - when one of an object's dependencies is removed, then the object will
-   be have its workflow changed (with a filter preventing deployment).
-   [ policy ]
-   
-an object's dependencies model other objects that need to be deployed
-with an object. ie. a document with embedded media references, has
-dependencies on those other objects.
-
- - a container with contained objects, a common use case is a 
-
-reverse dependencies model the inverse relationship, if an object is
-modified those objects that it depends on also need redeployment.
-
-dependencies are provided by the content descriptor and they are dynamic.
-ie they are queried from a descriptor.
-
+so descriptors are responsible for returning both dependencies and reverse
+dependencies. this also eases consideration of dynamic dependencies.
 
 Author: Kapil Thangavelu <hazmat@objectrealms.net>
 $Id$
@@ -66,11 +41,72 @@ $Id$
 from Namespace import *
 from BTrees.OOBTree import OOBTree
 from BTrees.IOBTree import IOBTree
+from DeploymentInterfaces import IContentSource
 
-class Dependency( object ):
+class DependencySource( SimpleItem ):
+    """
+    """
+    
+    meta_type = "Dependency Source"
+    
+    __implements__ = IContentSource
+    
+    def __init__(self, id, title=""):
+        self.id = id
+        self.title = title
+        self._queue = []
 
-    __slots__ = ( 'orid', 'policy' )
+    def getContent(self):
+        return self.destructiveIter()
 
+    def destructiveIter(self):
+        for rec in self._queue:
+            yield rec
+        self._queue = []
+        
+    def addObject( self, object ):
+        self._queue.append( object )
+        self._p_changed = 1
+        
+InitializeClass( DependencySource )
+
+
+class DependencyManager( SimpleItem ):
+
+    def __init__(self, id, policy_id=None):
+        self.id = id
+        self.policy_id = policy_id
+        
+    def processDeploy( self, descriptor ):
+
+        dependencies = descriptor.getDependencies()
+        if not dependencies:
+            return
+
+        source = self.getDependencySource()
+        if not source:
+            return
+
+        # deploy objects that depend on descriptor
+        for rdep in descriptor.getReverseDependencies():
+            source.addObject( rdep )
+
+        # deploy objects that are needed by descriptor
+        for dep in descriptor.getDependencies():
+            source.addObject( dep )
+
+    def processRemoval( self, record ):
+        # XXX deletion record record deps on creation
+        pass
+    
+    def getDependencySource(self):
+        sources = self.getContentSources()
+        source = sources._getOb( 'dependency_source', None)
+        return source
+        
+InitializeClass( DependencyManager )        
+        
+            
 class BasePolicy( object ):
 
     def dependencyDeleted( self, descriptor, source, dependency ):
@@ -81,42 +117,7 @@ class BasePolicy( object ):
 
     def process( self, descriptor, dependency ):
         pass
-    
+
 class PolicyManager( object ):
     pass
 
-class DependencyManager( SimpleItem ):
-
-    def __init__(self):
-        self._rdepends = IOBTree()
-        self._depends  = IOBTree()
-
-    def addEntry( descriptor ):
-        dependencies = descriptor.getDependencies()
-        rid = self.getCatalogRID( descriptor.getContent() )
-
-        if not rid in self._depends:
-            dstore = OOBTree()
-            self._depends[rid] = dstore
-        else:
-            dstore = self._depends.get( rid )
-        
-        for d in dependencies:
-            drid = self.getCatalogRID( d )
-
-    def delEntry( self, rid ):
-        
-        if rid in self._depends:
-            del self._depends[ rid ]
-
-        if not rid in self._rdepends:
-            return
-
-        rdepends = self._rdepends[ rid ]
-        for rd in rdepends:
-            pass
-            
-InitializeClass( DependencyManager )        
-        
-            
-        

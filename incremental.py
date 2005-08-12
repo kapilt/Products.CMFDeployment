@@ -135,7 +135,7 @@ class DeletionSource( SimpleItem ):
 
     def manage_beforeDelete( self, item, container):
         # check on removal of incremental index
-
+        pass
 
 class PolicyIncrementalIndex( SimpleItem ):
     """
@@ -184,7 +184,7 @@ class PolicyIncrementalIndex( SimpleItem ):
             return
         
         dtool = getToolByName( self, 'portal_deployment')
-        policy = dtool._getOb( policy_id )
+        policy = dtool._getOb( self.policy_id )
 
         sources = policy.getContentSources()
         deletion_source = sources._getOb('deletion_source', None)
@@ -219,6 +219,14 @@ class PolicyIncrementalIndex( SimpleItem ):
         return
 
     #################################
+    def isObjectDeployed( self, object ):
+        path = '/'.join( object.getPhysicalPath() )
+        rid = self.getrid( path )
+        return not not rid
+    
+    def getObjectFor( self, documentId ):
+        return self.getobject( documentId )
+    
     def recordObject(self, object):
         catalog = self.aq_parent
         path = '/'.join( object.getPhysicalPath() )
@@ -233,8 +241,3 @@ class PolicyIncrementalIndex( SimpleItem ):
             assert key is not None
             
         self._index[ key ] = path
-
-
-
-
-        

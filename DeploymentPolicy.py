@@ -108,6 +108,12 @@ class DeploymentPolicy(Folder):
     def getContentFilters(self):
         return self._getOb(DefaultConfiguration.ContentFilters)
 
+    def getContentSources( self ):
+        return self.getContentIdentification().sources
+
+    def getContentRules( self ):
+        return self.getContentMastering().mime
+    
     def getDeploymentHistory(self):
         return self._getOb(DefaultConfiguration.DeploymentHistory)
 
