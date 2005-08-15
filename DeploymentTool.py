@@ -31,7 +31,7 @@ $Id$
 
 from Namespace import *
 from DeploymentPolicy import DeploymentPolicy
-from PolicyReader import read_policy, make_policy
+from reader import read_policy, make_policy
 
 class DeploymentTool(UniqueObject, Folder):
 
