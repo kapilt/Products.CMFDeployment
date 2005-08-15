@@ -21,7 +21,7 @@
 ##################################################################
 
 """
-Purpose: Filters and Transforms Rendered Content Before Storage
+Purpose: Transforms for Rendered Content Before Storage
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 8/10/2002
@@ -36,9 +36,9 @@ from Filters.registry import getFilter, listFilters
 
 log = LogFactory('Storage Filter')
 
-class ContentFilter(Folder):
+class ContentTransforms(Folder):
 
-    meta_type = 'Content Filter'
+    meta_type = 'Content Transforms'
 
     security = ClassSecurityInfo()
 
@@ -47,7 +47,7 @@ class ContentFilter(Folder):
         {'label':'Overview',
          'action':'overview'},
         
-        {'label':'Rules',
+        {'label':'Transforms',
          'action':'rules/manage_main'},
 
         {'label':'Policy',
