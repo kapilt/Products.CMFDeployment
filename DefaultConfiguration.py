@@ -37,6 +37,8 @@ DeploymentHistory     = 'DeploymentHistory'
 DeploymentStrategy    = 'DeploymentStrategy'
 ContentFilters        = 'ContentFilters'
 
+DEFAULT_CONTENT_SOURCE_ID = "portal_catalog_source"
+
 from ContentOrganization import ContentOrganization as KlassContentOrganization
 from ContentIdentification import ContentIdentification as KlassContentIdentification
 from ContentMastering import ContentMastering as KlassContentMastering

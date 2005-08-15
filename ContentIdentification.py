@@ -33,12 +33,14 @@ from Products.CMFTopic import Topic
 from Products.PageTemplates.Expressions import SecureModuleImporter, getEngine
 from Log import LogFactory
 
+import DefaultConfiguration
 from DeploymentInterfaces import *
 from ExpressionContainer import ExpressionContainer
 
+from sources import basic_catalog
+
 log = LogFactory('ContentIdentification')
 
-DEFAULT_CONTENT_SOURCE_ID = "portal_catalog_source"
 
 class ContentIdentification(Folder):
 
@@ -119,7 +121,7 @@ InitializeClass(ContentIdentification)
 
 
 #################################
-# Sources
+# Source Container 
 
 class ContentSourceContainer( OrderedFolder ):
 
@@ -144,51 +146,16 @@ class ContentSourceContainer( OrderedFolder ):
 
     def manage_afterAdd(self, item, container):
 
-        if not DEFAULT_CONTENT_SOURCE_ID in self.objectIds():
+        if not DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID in self.objectIds():
             self._setObject(
-                DEFAULT_CONTENT_SOURCE_ID,
-                PortalCatalogSource(DEFAULT_CONTENT_SOURCE_ID)
+                DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID,
+                basic_catalog.PortalCatalogSource(
+                  DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID )
                 )
                                                  
 
 InitializeClass( ContentSourceContainer )
 
-def addPortalCatalogSource( self,
-                            id=DEFAULT_CONTENT_SOURCE_ID,
-                            title='',
-                            RESPONSE=''):
-    """ riddle me this, why is a doc string here..
-        answer: bobo
-    """
-
-    self._setObject( id, PortalCatalogSource(id, title ) )
-
-    if RESPONSE:
-        RESPONSE.redirect('manage_workspace')
-
-addPortalCatalogSourceForm = DTMLFile('ui/IdentificationPortalCatalogSourceForm', globals() )
-
-class PortalCatalogSource(SimpleItem):
-
-    meta_type = 'Catalog Content Source'
-
-    __implements__ = IContentSource
-
-    manage_options = (
-        {'label':'Source',
-         'action':'source'},        
-        )
-    
-    source = DTMLFile('ui/ContentSourceView', globals())
-
-    def __init__(self, id, title='retrieves content from portal_catalog'):
-        self.id = id
-        self.title = title
-        
-    def getContent(self):
-        catalog = getToolByName(self, 'portal_catalog')
-        objects = catalog()
-        return objects
 
 #################################
 # Filters

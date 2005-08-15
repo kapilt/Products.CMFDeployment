@@ -62,12 +62,9 @@ class ContentDeployment( OrderedFolder ):
     def __init__(self, id):
         self.id = id
 
-    def getProtocolTypes(self):
-        return getProtocolNames()
-
     security.declarePrivate('deploy')
     def deploy(self, structure):
-        for target in self.objectValues('Deployment Target'):
+        for target in self.objectValues():
             target.transport( structure )
 
 InitializeClass( ContentDeployment )
