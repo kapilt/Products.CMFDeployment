@@ -29,7 +29,7 @@ $Id$
 from __future__ import nested_scopes
 from os import sep
 from Namespace import *
-from FileStructure import RootDirectory, descendant_filtered_folder_collector as\
+from structure import RootDirectory, descendant_filtered_folder_collector as\
      folder_collector
 from DeploymentExceptions import InvalidCMFMountPoint, InvalidPortalType
 
