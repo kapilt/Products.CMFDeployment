@@ -43,6 +43,8 @@ from BTrees.OOBTree import OOBTree
 from BTrees.IOBTree import IOBTree
 from DeploymentInterfaces import IContentSource
 
+from incremental import getIncrementalIndexId
+
 class DependencySource( SimpleItem ):
     """
     """
@@ -78,7 +80,6 @@ class DependencyManager( SimpleItem ):
         self.policy_id = policy_id
         
     def processDeploy( self, descriptor ):
-
         dependencies = descriptor.getDependencies()
         if not dependencies:
             return
@@ -92,12 +93,26 @@ class DependencyManager( SimpleItem ):
             source.addObject( rdep )
 
         # deploy objects that are needed by descriptor
+        #  - check first that they aren't already deployed
+        iidx = self.getIncrementalIndex()
+
         for dep in descriptor.getDependencies():
+            if iidx.isObjectDeployed( dep ):
+                continue
             source.addObject( dep )
 
     def processRemoval( self, record ):
         # XXX deletion record record deps on creation
-        pass
+        source = self.getDependencySource()
+        if not source:
+            return None
+        
+        for rdep in record.getReverseDependencies():
+            source.addObject( rdep )
+            
+    def getIncrementalIndex(self):
+        policy = self.getDeploymentPolicy()
+        return getIncrementalIndex( policy )
     
     def getDependencySource(self):
         sources = self.getContentSources()
@@ -105,19 +120,3 @@ class DependencyManager( SimpleItem ):
         return source
         
 InitializeClass( DependencyManager )        
-        
-            
-class BasePolicy( object ):
-
-    def dependencyDeleted( self, descriptor, source, dependency ):
-        pass
-
-    def dependencyModified( self, descriptor, source, dependency ):
-        pass
-
-    def process( self, descriptor, dependency ):
-        pass
-
-class PolicyManager( object ):
-    pass
-

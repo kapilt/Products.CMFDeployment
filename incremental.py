@@ -90,6 +90,7 @@ from BTrees.Length import Length
 from BTrees.IOBTree import IOBTree
 from Products.PluginIndexes.common.PluggableIndex import PluggableIndexInterface
 
+
 #################################
 # pipeline processing of deletion records
 #
@@ -136,6 +137,15 @@ class DeletionSource( SimpleItem ):
     def manage_beforeDelete( self, item, container):
         # check on removal of incremental index
         pass
+
+
+def getIncrementalIndexId( policy ):
+    pid = policy.getId()
+    iid = "%s_incremental_idx"%pid
+    catalog = getToolByName( policy, 'portal_catalog')._catalog
+    if not iid in catalog.names():
+        return None
+    return catalog.getIndex( iid )
 
 class PolicyIncrementalIndex( SimpleItem ):
     """

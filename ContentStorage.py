@@ -55,7 +55,7 @@ class ContentStorage:
     def __init__(self, ctx):
         self.stats = IOStatistics()
         self.structure = ctx.getContentOrganization().getActiveStructure()
-        self.filters = ctx.getContentFilters()
+        self.transforms = ctx.getContentTransforms()
         
     def getStatistics(self):
         return self.stats
@@ -98,7 +98,7 @@ class ContentStorage:
             
         self.stats( location, len(rendered) )
 
-        rendered = self.filters.filter(descriptor, rendered, location)
+        rendered = self.transforms.transform(descriptor, rendered, location)
         if not rendered:
             return
 

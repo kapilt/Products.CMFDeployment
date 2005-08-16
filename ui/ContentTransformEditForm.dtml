@@ -1,6 +1,6 @@
 <dtml-var manage_page_header>
 
-<h2> Content Filter Rule (<dtml-var getId>)</h2>
+<h2> Content Transform Rule (<dtml-var getId>)</h2>
 
 
 <form action="editRule" method="POST">
@@ -9,15 +9,15 @@
 <tr><td>Condition Expression</td>
     <td><input type="text" name="condition" value="<dtml-var condition_text>" size="100"></td></tr>
 
-<tr><td>Filter </td>
+<tr><td>Transform </td>
     <td> <select name="script_id">
-         <dtml-in listFilterScripts>
+         <dtml-in listTransformScripts>
          <option value="<dtml-var sequence-item>"><dtml-var sequence-item></option>
          </dtml-in>
     </td>
 
 <tr><td colspan="2">
-    <input type="submit" value="Edit Filter"> </td></tr>
+    <input type="submit" value="Edit Transform"> </td></tr>
 
 </table>
 

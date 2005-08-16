@@ -29,26 +29,26 @@ $Id$
 """
 import inspect
 
-_filter_scripts = {}
+_transform_scripts = {}
 
-class InvalidFilter(Exception): pass
+class InvalidTransform(Exception): pass
 
-def listFilters():
-    return _filter_scripts.keys()
+def listTransforms():
+    return _transform_scripts.keys()
 
-def registerFilter(name, filter):
+def registerTransform(name, transform):
 
-    argspec = inspect.getargspec(filter)
+    argspec = inspect.getargspec(transform)
 
     if not len(argspec[0]) == 3:
-        raise InvalidFilter("invalid filter, wrong signature")
-    if _filter_scripts.has_key(name):
-        raise InvalidFilter("filter with %s already exists"%name)
+        raise InvalidTransform("invalid transform, wrong signature")
+    if _transform_scripts.has_key(name):
+        raise InvalidTransform("transform with %s already exists"%name)
     
-    _filter_scripts[name] = filter
+    _transform_scripts[name] = transform
 
-def getFilter(name):
+def getTransform(name):
     # raises GetItemError if not found
-    return _filter_scripts[name]
+    return _transform_scripts[name]
 
     

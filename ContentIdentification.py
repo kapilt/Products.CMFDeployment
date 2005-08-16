@@ -33,11 +33,8 @@ from Products.CMFTopic import Topic
 from Products.PageTemplates.Expressions import SecureModuleImporter, getEngine
 from Log import LogFactory
 
-import DefaultConfiguration
 from DeploymentInterfaces import *
 from ExpressionContainer import ExpressionContainer
-
-from sources import basic_catalog
 
 log = LogFactory('ContentIdentification')
 
@@ -145,7 +142,8 @@ class ContentSourceContainer( OrderedFolder ):
                 yield c
 
     def manage_afterAdd(self, item, container):
-
+        import DefaultConfiguration
+        from sources import basic_catalog
         if not DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID in self.objectIds():
             self._setObject(
                 DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID,
@@ -162,7 +160,7 @@ InitializeClass( ContentSourceContainer )
 
 class ContentFilter(SimpleItem):
 
-    meta_type = 'Content Filter'
+    meta_type = 'Content Filters'
     __implements__ = IContentFilter
     
     filter_manage_options = (

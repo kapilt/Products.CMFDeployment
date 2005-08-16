@@ -45,7 +45,7 @@ import MimeMapping
 
 import rules
 import transports
-
+import sources
 
 DeploymentProductHome = package_home( globals() )
 
@@ -66,6 +66,7 @@ def initialize(context):
     utils.registerIcon('identify.png')
     utils.registerIcon('protocol.png')     
 
+    # register default plugin components
     rsync = transports.rsync
     context.registerClass(
         rsync.RsyncSSHTransport,
@@ -84,14 +85,21 @@ def initialize(context):
         visibility = None        
         )
 
-
     crule = rules.default
-
     context.registerClass(
         crule.MimeExtensionMapping,
         permission = 'CMFDeploy: Add Content Rule',
         constructors = ( crule.addContentRuleForm,
                          crule.addContentRule ),
+        visibility = None
+        )
+
+    basic_catalog = sources.basic_catalog
+    context.registerClass(
+        basic_catalog.PortalCatalogSource,
+        permission = 'CMFDeploy: Add Content Source',
+        constructors = ( basic_catalog.addPortalCatalogSourceForm,
+                         basic_catalog.addPortalCatalogSource, ),
         visibility = None
         )
         

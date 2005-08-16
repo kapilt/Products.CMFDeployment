@@ -27,6 +27,9 @@ Created: 8/10/2002
 $Id$
 """
 
+ContentSources        = 'sources'
+ContentFilters        = 'filters'
+
 ContentIdentification = 'ContentIdentification'
 ContentOrganization   = 'ContentOrganization'
 ContentMastering      = 'ContentMastering'
@@ -35,7 +38,8 @@ ContentDirectoryViews = 'ContentDirectoryViews'
 ContentURIs           = 'ContentURIs'
 DeploymentHistory     = 'DeploymentHistory'
 DeploymentStrategy    = 'DeploymentStrategy'
-ContentFilters        = 'ContentFilters'
+
+ContentTransforms     = 'transforms'
 
 DEFAULT_CONTENT_SOURCE_ID = "portal_catalog_source"
 
@@ -47,7 +51,7 @@ from DeploymentHistory import DeploymentHistoryContainer as KlassDeploymentHisto
 from DeploymentStrategy import DeploymentStrategy as KlassDeploymentStrategy
 from ContentDirectoryViews import ContentDirectoryView as KlassContentDirectoryView
 from ContentURI import ContentURI as KlassContentURI
-from ContentFilters import ContentFilter as KlassContentFilters
+from ContentTransforms import ContentTransforms as KlassContentTransforms
 
 def add_structure(policy):
 
@@ -91,8 +95,8 @@ def add_uris(policy):
 
 def add_filter(policy):
 
-    ob = KlassContentFilters(ContentFilters)
-    policy._setObject(ContentFilters, ob)
+    ob = KlassContentTransforms(ContentTransforms)
+    policy._setObject(ContentTransforms, ob)
         
 _add_funcs = [
     ( ContentOrganization, add_structure ),
@@ -103,7 +107,7 @@ _add_funcs = [
     ( DeploymentHistory, add_history ),
     ( DeploymentStrategy, add_strategy ),
     ( ContentURIs, add_uris ),
-    ( ContentFilters, add_filter ),
+    ( ContentTransforms, add_filter ),
     ]
 
 def install(deployment_policy):

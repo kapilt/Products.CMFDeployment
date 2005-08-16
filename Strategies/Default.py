@@ -87,8 +87,9 @@ def DefaultStrategy(self):
         log.debug('processing content loop')
         
         for ci in content:
-
             co = ci.getObject()
+            if co is  None:
+                continue
             d = descriptor_factory(co) #DescriptorFactory(co)
             if not mastering.prepare(d):
                 try: co._p_deactivate()

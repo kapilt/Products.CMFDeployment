@@ -3,8 +3,8 @@ $Id$
 """
 
 
-from Products.CMFDeployment.Namespaces import *
-from Products.CMFDeployment.Interfaces import IContentSource
+from Products.CMFDeployment.Namespace import *
+from Products.CMFDeployment.DeploymentInterfaces import IContentSource
 
 def addPortalCatalogSource( self,
                             id,

@@ -68,8 +68,8 @@ class DeploymentPolicy(Folder):
         {'label':'Deployment', 
          'action':'%s/manage_workspace'%DefaultConfiguration.ContentDeployment},
 
-        {'label':'Filters',
-         'action':'%s/manage_workspace'%DefaultConfiguration.ContentFilters},
+        {'label':'Transforms',
+         'action':'%s/manage_workspace'%DefaultConfiguration.ContentTransforms},
         
         {'label':'Strategies',
          'action':'%s/manage_workspace'%DefaultConfiguration.DeploymentStrategy},
@@ -105,8 +105,8 @@ class DeploymentPolicy(Folder):
     def getContentDirectoryViews(self):
         return self._getOb(DefaultConfiguration.ContentDirectoryViews)
 
-    def getContentFilters(self):
-        return self._getOb(DefaultConfiguration.ContentFilters)
+    def getContentTransforms(self):
+        return self._getOb(DefaultConfiguration.ContentTransforms)
 
     def getContentSources( self ):
         return self.getContentIdentification().sources
@@ -143,6 +143,7 @@ class DeploymentPolicy(Folder):
         history = histories.makeHistory()
     
         Log.attachLogMonitor(history)
+        
         try:
             try:
                 strategy = self.getDeploymentStrategy().getStrategy()
@@ -154,7 +155,7 @@ class DeploymentPolicy(Folder):
                 pdb.post_mortem( tb )
         finally:
             Log.detachLogMonitor(history)
-            
+
         history.recordStatistics(display)
         histories.attachHistory(history)
 
