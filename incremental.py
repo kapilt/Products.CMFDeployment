@@ -249,5 +249,8 @@ class PolicyIncrementalIndex( SimpleItem ):
 
             key = catalog.uids.get( path )
             assert key is not None
+  
+        if not key in self._index:
+            self._length.change(1)
             
         self._index[ key ] = path
