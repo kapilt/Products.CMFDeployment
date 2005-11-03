@@ -1,1 +1,1 @@
-CMFDeployment 1.1.0 - SVN / Unreleased
+CMFDeployment 1.1.0 - pww09
