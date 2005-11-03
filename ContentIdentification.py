@@ -200,6 +200,10 @@ def addZopeFindsource(self, RESPONSE=None):
 
 class BrainMock:
     """mocks catalog brain"""
+    
+    __allow_access_to_unprotected_subobjects__ = 1
+
+    brain_attrs = ['portal_type', 'getId']
 
     def __init__(self, ob):
         self.ob = ob
@@ -209,7 +213,18 @@ class BrainMock:
 
     def getObject(self):
         return self.ob
-    
+
+    def __getattr__(self, key):
+        if key in self.brain_attrs:
+            value = getattr(self.ob, key)
+            if callable(value):
+                value = value()
+        else:
+            raise AttributeError
+        
+        return value
+        
+   
 class ZopeFindSource(PortalCatalogSource):
     """find objects through zope find
 
