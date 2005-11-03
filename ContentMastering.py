@@ -248,6 +248,7 @@ class SiteChainSkin(SimpleItem):
         skin_name = self._v_saved_skin_name or skins.getDefaultSkin()
         portal.changeSkin( skin_name )
         self._v_saved_skin_name = None
+        self._v_active = None
 
         
     def manage_afterAdd(self, item, container):
