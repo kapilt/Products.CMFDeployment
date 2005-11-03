@@ -33,7 +33,7 @@ Enabled <select name="enable:int">
   <option value="0">No</option>
 </select>
 
- <input type="submit" value="change skin">
+ <input type="submit" value="change user">
 
 </form>
 
