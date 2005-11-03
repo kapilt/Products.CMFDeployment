@@ -11,7 +11,8 @@ def install(self):
     skinstool = getToolByName(self, 'portal_skins')
 
     ob = DeploymentTool.DeploymentTool()
-    self._setObject(ob.getId(), ob)
+    if ob.getId() not in self.objectIds():
+        self._setObject(ob.getId(), ob)
 
     if 'deployment_templates' not in skinstool.objectIds():
         addDirectoryViews(skinstool, 'skins', DeploymentProductHome)
