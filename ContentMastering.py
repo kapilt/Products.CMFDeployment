@@ -180,8 +180,8 @@ class ContentMastering(Folder):
                 descriptor.setRendered(render())
         except:
             log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
-            descriptor.setGhost(1) # ghostify it        
-            raise
+            descriptor.setGhost(1) # ghostify it
+
     #################################
     def setup(self):
         #self.site_root.lock()
