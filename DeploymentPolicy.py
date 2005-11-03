@@ -153,6 +153,11 @@ class DeploymentPolicy(Folder):
         histories.attachHistory(history)
 
         if RESPONSE:
+            RESPONSE.setStatus(200)
+            try:
+                del RESPONSE.headers['location']
+            except KeyError:
+                pass
             return "<html><pre>%s</pre></body</html>"%display
         return True
 
