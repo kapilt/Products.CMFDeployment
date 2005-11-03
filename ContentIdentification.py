@@ -190,6 +190,45 @@ class PortalCatalogSource(SimpleItem):
         objects = catalog()
         return objects
 
+
+def addZopeFindsource(self, RESPONSE=None):
+    """add zope find source"""
+    id = 'zope_find_source'
+    self._setObject(id, ZopeFindSource(id))
+    if RESPONSE:
+        RESPONSE.redirect('manage_workspace')
+
+class BrainMock:
+    """mocks catalog brain"""
+
+    def __init__(self, ob):
+        self.ob = ob
+        
+    def getPath(self):
+        return '/'.join(self.ob.getPhysicalPath())
+
+    def getObject(self):
+        return self.ob
+    
+class ZopeFindSource(PortalCatalogSource):
+    """find objects through zope find
+
+    currently only returns images
+    """
+
+    meta_type = 'ZopeFind Source'
+    
+    def __init__(self, id, title='retrieves content via ZopeFind'):
+        self.id = id
+        self.title = title
+
+    def getContent(self):
+        portal = getToolByName(self, 'portal_url').getPortalObject()
+        for path, obj in portal.ZopeFind(
+            portal, obj_metatypes=('Image',), search_sub=1):
+            yield BrainMock(obj)
+            
+
 #################################
 # Filters
 
