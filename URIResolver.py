@@ -230,7 +230,14 @@ class URIResolver:
         object = getattr( content, oid, None )
         if not object:
             return _marker
-        return  self.uris.get("/"+object.absolute_url(1), _marker)
+        try:
+            object_url = object.absolute_url(1)
+        except AttributeError:
+            res = _marker
+        else:
+            res = self.uris.get(object_url, _marker)
+        
+        return res
     
     def resolve(self, descriptor):
 
