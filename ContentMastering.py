@@ -37,6 +37,8 @@ from utils import file2string
 
 from Log import LogFactory
 
+from Products.Archetypes.BaseUnit import BaseUnit
+
 log = LogFactory('Mastering')
 
 class ContentMastering(Folder):
@@ -173,7 +175,9 @@ class ContentMastering(Folder):
         try: 
             if getattr(aq_base(render), 'isDocTemp', 0):
                 descriptor.setRendered(apply(render, (self, self.REQUEST)))
-            elif hasattr(aq_base(c), 'precondition'): # test if its a file object
+            elif (hasattr(aq_base(c), 'precondition') and 
+                  not isinstance(aq_base(c), BaseUnit)):
+                # test if its a file object but not an AT BaseUnit
                 descriptor.setRendered(file2string(c))
                 descriptor.setBinary(1)
             else:
