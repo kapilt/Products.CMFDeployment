@@ -5,6 +5,7 @@ $Id$
 from Products.CMFCore.Expression import Expression
 from Products.CMFDeployment.Namespace import *
 from Products.CMFDeployment.DeploymentInterfaces import IContentRule
+from Products.CMFDeployment.Descriptor import DescriptorFactory
 
 addContentRuleForm = DTMLFile('../ui/MimeExtensionMappingAddForm', globals())
 
@@ -63,9 +64,10 @@ class ChildView( BaseRule ):
         self.view_method = ''
         self.binary = False
 
-    def edit(self,  extension_text, view_method, binary):
-        self.extension_text = extension_text
-        self.extension = Expression( extension_text )
+    def edit(self,  extension_expression, view_method, binary):
+        """edit"""
+        self.extension_text = extension_expression
+        self.extension = Expression( extension_expression)
         self.view_method = view_method
         self.binary = not not binary
 
