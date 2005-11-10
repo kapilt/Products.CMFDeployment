@@ -150,7 +150,6 @@ class URIResolver:
         """
 
         rnu = None
-        
         if not u:
             return
 
@@ -229,12 +228,16 @@ class URIResolver:
             oid = parts[-1]
         object = getattr( content, oid, None )
         if not object:
+            object = content.unrestrictedTraverse(oid, None)
+        if not object:
             return _marker
         try:
             object_url = object.absolute_url(1)
         except AttributeError:
             res = _marker
         else:
+            if not object_url.startswith('/'):
+                object_url = '/' + object_url
             res = self.uris.get(object_url, _marker)
         
         return res
