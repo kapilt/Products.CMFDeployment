@@ -47,6 +47,8 @@ import rules
 import transports
 import sources
 
+from Products.CMFDeployment.incremental import PolicyIncrementalIndex
+        
 DeploymentProductHome = package_home( globals() )
 
 registerDirectory('skins', globals())
@@ -101,5 +103,16 @@ def initialize(context):
         constructors = ( basic_catalog.addPortalCatalogSourceForm,
                          basic_catalog.addPortalCatalogSource, ),
         visibility = None
+        )   
+
+    context.registerClass(
+        PolicyIncrementalIndex,
+        permission = 'Add Pluggable Index',
+        constructors = (incremental.manage_addPolicyIncrementalIndexForm,
+                        incremental.manage_addPolicyIncrementalIndex,
+                        incremental.getIndexTypes,
+                        ),
+        icon='www/index.gif',
+        visibility=None
         )
         
