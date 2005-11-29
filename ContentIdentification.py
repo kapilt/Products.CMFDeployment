@@ -86,7 +86,7 @@ class ContentIdentification(Folder):
                 path = c.getPath()[mount_length:]
                 for rst in restricted:
                     if path.count(rst) > 0:
-                        log.debug('Restricted Id Filter (%s) (%s)->(%s)'%(rst, c.portal_type, c.getPath()))                        
+                        #log.debug('Restricted Id Filter (%s) (%s)->(%s)'%(rst, c.portal_type, c.getPath()))                        
                         skip = 1
                         break
 
@@ -99,11 +99,11 @@ class ContentIdentification(Folder):
             for f in self.filters.objectValues():
                 if f.meta_type == ContentFilter.meta_type:
                     if not f.filter(fc):
-                        log.debug('Filtered Out (%s) (%s)->(%s)'%(f.getId(), c.portal_type, c.getPath()))
+                        #log.debug('Filtered Out (%s) (%s)->(%s)'%(f.getId(), c.portal_type, c.getPath()))
                         skip = 1
                         break
                 elif not f(c):
-                    log.debug('Scripted Out (%s) (%s)->(%s)'%(s.getId(), c.portal_type, c.getPath()))
+                    #log.debug('Scripted Out (%s) (%s)->(%s)'%(s.getId(), c.portal_type, c.getPath()))
                     skip = 1
                     break
                         
@@ -111,7 +111,7 @@ class ContentIdentification(Folder):
 
     security.declarePrivate('manage_afterAdd')
     def manage_afterAdd(self, item, container):
-        self._setObject('sources',  ContentSourceContainer('source'))
+        self._setObject('sources',  ContentSourceContainer('sources'))
         self._setObject('filters',  ContentFilterContainer('filters'))
 
 InitializeClass(ContentIdentification)
