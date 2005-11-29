@@ -29,6 +29,8 @@ from xml.sax import make_parser, ContentHandler
 from UserDict import UserDict
 
 from ZPublisher.mapply import mapply
+from Products.CMFDeployment import pipeline, dependencies
+
 
 marker = []
 class PolicyNode(UserDict):
@@ -201,6 +203,7 @@ def make_policy(portal, policy_node, id=None, title=None):
     from App.Common import package_home
 
     deployment_tool = portal.portal_deployment
+    catalog_tool    = portal.portal_catalog
     
     if id:
         title = title or ''
@@ -296,8 +299,30 @@ def make_policy(portal, policy_node, id=None, title=None):
     # strategy setup
     strategies = getattr(policy, DefaultConfiguration.DeploymentStrategy)
     if policy_node.has_key('strategy') and policy_node.strategy.has_key('id'):
+        print "reader: policy_node: ", policy_node.strategy.id
         strategies.setStrategy(policy_node.strategy.id)
 
+    #################################################################
+    #ContentMap is added automatically to the policy, in DefaultConfig.py
+    #idem for DependencySource, DeletionSource
+    #Creates the DependencyManager
+    policy_id= policy.getId()
+    a_dependency_manager= dependencies.DependencyManager("DependencyManager", policy_id, catalog_tool)
+
+    # setting up the incremental index and Create the Policy Pipeline
+    steps= (pipeline.PipeEnvironmentInitializer(),
+                pipeline.ContentSource(),
+                pipeline.ContentPreparation(),
+                pipeline.DirectoryViewDeploy(),
+                pipeline.ContentProcessPipe(),
+                pipeline.ContentTransport(),
+                a_dependency_manager
+                )
+    #Create a pipeline and Add steps in it
+    new_pipeline = pipeline.PolicyPipeline()
+    new_pipeline.steps= steps  
+    new_pipeline.process(policy)
+    
     return policy
     
 if __name__=='__main__':
