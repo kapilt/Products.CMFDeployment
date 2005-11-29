@@ -40,6 +40,10 @@ DeploymentHistory     = 'DeploymentHistory'
 DeploymentStrategy    = 'DeploymentStrategy'
 
 ContentTransforms     = 'transforms'
+ContentMap            = 'ContentMap'
+DependencySource      = 'DependencySource'
+DeletionSource        = 'DeletionSource'
+
 
 DEFAULT_CONTENT_SOURCE_ID = "portal_catalog_source"
 
@@ -52,6 +56,9 @@ from DeploymentStrategy import DeploymentStrategy as KlassDeploymentStrategy
 from ContentDirectoryViews import ContentDirectoryView as KlassContentDirectoryView
 from ContentURI import ContentURI as KlassContentURI
 from ContentTransforms import ContentTransforms as KlassContentTransforms
+from ContentMap import ContentMap as KlassContentMap
+from dependencies import DependencySource as KlassDependencySource
+from incremental import DeletionSource as KlassDeletionSource
 
 def add_structure(policy):
 
@@ -97,7 +104,21 @@ def add_filter(policy):
 
     ob = KlassContentTransforms(ContentTransforms)
     policy._setObject(ContentTransforms, ob)
+
+def add_content_map (policy):
+    resolver= policy.getDeploymentURIs()
+    ob = KlassContentMap(ContentMap, resolver)
+    policy._setObject(ContentMap, ob)
         
+def add_dependency_source (policy):
+    ob= KlassDependencySource(DependencySource)
+    policy._setObject(DependencySource, ob)
+        
+def add_deletion_source (policy):
+    ob= KlassDeletionSource(DeletionSource)
+    policy._setObject(DeletionSource, ob)
+
+
 _add_funcs = [
     ( ContentOrganization, add_structure ),
     ( ContentIdentification, add_identification ),
@@ -108,6 +129,9 @@ _add_funcs = [
     ( DeploymentStrategy, add_strategy ),
     ( ContentURIs, add_uris ),
     ( ContentTransforms, add_filter ),
+    ( ContentMap, add_content_map ),
+    ( DependencySource, add_dependency_source ),
+    ( DeletionSource, add_deletion_source ),
     ]
 
 def install(deployment_policy):
