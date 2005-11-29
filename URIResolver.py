@@ -48,7 +48,6 @@ _marker = []
 
 LINKING_ERROR_REPLACEMENT = 'deployment_linking_error'
 
-
 class URIResolver:
     """
 
@@ -88,7 +87,8 @@ class URIResolver:
                  source_host='http://localhost',
                  mount_path = '/',
                  target_path='/',
-                 link_error_url='deploy_link_error'):
+                 link_error_url='deploy_link_error',
+                 content_map= None):
         
         self.id = id
         self.source_host = source_host
@@ -97,6 +97,7 @@ class URIResolver:
         self.link_error_url = link_error_url
         self.mlen = len(mount_path)
         self.uris = OOBTree()
+        self.content_map = content_map
 
     def addResource(self, descriptor):
 
@@ -115,7 +116,7 @@ class URIResolver:
             # find the path segment            
             url_context  = relative_url[:relative_url.rfind('/')]
             content_path = url_context[mlen:]
-
+         
         content_path = normalize('/'.join( (self.target_path,
                                             content_path,
                                             descriptor.getFileName() ) ),
@@ -125,7 +126,7 @@ class URIResolver:
         if relative_url[0] != '/':
             relative_url = '/'+relative_url
 
-        log.debug("add %s -> %s"%(relative_url, content_path))
+        #log.debug("add %s -> %s"%(relative_url, content_path))
         self.uris[relative_url]=content_path
 
         if descriptor.isContentFolderish():
@@ -252,15 +253,14 @@ class URIResolver:
         # if we have a link reference to
         # non deployable content
         # we need some sort of policy decision
-        """
-
+        """ 
+              
         for descriptor in descriptor.getDescriptors():
             if descriptor.isBinary() or descriptor.isGhost():
                 continue
             self._resolveDescriptor( descriptor )
 
     def _resolveDescriptor(self, descriptor ):
-
 
         r = descriptor.getRendered()
         uris = unique( filter( lambda u: u[1], (url_regex.findall(r) +\
@@ -270,17 +270,17 @@ class URIResolver:
                               descriptor.composite_content_p
         
         content_url = descriptor.getSourcePath() or descriptor.getContentURL()
+        physical_path = '/'.join(descriptor.getContent().getPhysicalPath())
         
         count = 0
         total_count = 0
         
         for l, u in uris:
-            
             total_count += 1            
             nu = self.resolveURI(u, content_url, content_folderish_p, content=descriptor.getContent())
             
             if nu is _marker:            
-                log.warning('unknown url (%s) from %s'%(u, content_url))
+                #log.warning('unknown url (%s) from %s'%(u, content_url))
                 nu = self.link_error_url
                 
             elif nu is None:
@@ -290,6 +290,9 @@ class URIResolver:
                 count += 1
 
             r = r.replace(l, l.replace(u, nu))
+            
+            if (self.content_map!= None):
+                self.content_map.addContentMap(nu, physical_path)
             
         #log.debug('resolved %d intern references of %d total refs'%(
         #                                                  count, total_count))
