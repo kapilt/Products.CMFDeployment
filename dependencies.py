@@ -45,6 +45,7 @@ from DeploymentInterfaces import IContentSource
 
 from incremental import getIncrementalIndexId
 
+
 class DependencySource( SimpleItem ):
     """
     """
@@ -66,56 +67,111 @@ class DependencySource( SimpleItem ):
             yield rec
         self._queue = []
         
-    def addObject( self, object ):
-        self._queue.append( object )
-        self._p_changed = 1
+    def addObject( self, descriptor ):
+        #print "Dependencies: ADD OBject: ", descriptor
+        if not descriptor in self._queue:
+            self._queue.append( descriptor )
+            self._p_changed = 1
         
 InitializeClass( DependencySource )
 
+from segments import *
 
-class DependencyManager( SimpleItem ):
+class DependencyManager( PipeSegment ):
 
-    def __init__(self, id, policy_id=None):
+    implements( IProducer )
+
+    def __init__(self, id, policy_id=None, catalog=None):
         self.id = id
         self.policy_id = policy_id
+        self.catalog= catalog
         
-    def processDeploy( self, descriptor ):
-        dependencies = descriptor.getDependencies()
-        if not dependencies:
-            return
-
+    def process(self, pipe, content):
+        self.source= pipe.services['ContentIdentification']
+        self.policy= pipe.services['DeploymentPolicy']
+        self.content_map= pipe.services['ContentMap']
+        self.factory = pipe.services["DescriptorFactory"]
+        self.mastering = pipe.services["ContentMastering"]
+        #print "dependencies: process: content: ", content
+        for c in content:
+            self.processDeploy(c)
+        
+    def processDeploy( self, descriptor ):  
         source = self.getDependencySource()
         if not source:
             return
 
-        # deploy objects that depend on descriptor
-        for rdep in descriptor.getReverseDependencies():
-            source.addObject( rdep )
+        # deploy objects that depend on descriptor    
+        
+        #print "dependencies: descriptor: ", descriptor    
+        for apath in self.content_map.getReverseDependencies(descriptor): 
+            rid = self.catalog.getrid(apath)
+            
+            if rid== None:
+                #the object doesn't exist anymore
+                continue
+                
+            the_object = self.catalog.getobject(rid)
+            
+            #we've got URL, we have to take the descriptor corresponding
+            #and add the descriptor
+            content = the_object
+            desc = self.factory( content )
+            #print "*** dependencies: addObj1: ", desc.getContent()   
+            source.addObject( desc )
 
         # deploy objects that are needed by descriptor
         #  - check first that they aren't already deployed
         iidx = self.getIncrementalIndex()
-
-        for dep in descriptor.getDependencies():
+        
+        for dep in descriptor.getDescriptors():
             if iidx.isObjectDeployed( dep ):
                 continue
+            #print "*** dependencies: addObj2: ", dep.getContent()
             source.addObject( dep )
 
-    def processRemoval( self, record ):
+    def processRemoval( self, record):
         # XXX deletion record record deps on creation
         source = self.getDependencySource()
         if not source:
             return None
-        
-        for rdep in record.getReverseDependencies():
-            source.addObject( rdep )
+        descriptors= source.getContent()
+        try:
+            while(True):
+                descr= descriptors.next()
+                #print "dependencies: on cuisine : ", descr.content_url
+                self.mastering.cook(descr)
+        except:
+            pass
             
+        descriptor= record.descriptor
+        the_dependencies= self.content_map.getReverseDependencies(descriptor)
+            
+        for apath in the_dependencies:        
+            rid = self.catalog.getrid(apath)
+            
+            if rid== None:
+                #the object doesn't exist anymore
+                continue
+                
+            the_object = self.catalog.getobject(rid)
+            
+            #we've got URL, we have to take the descriptor corresponding
+            #and rerender the content
+            content = the_object
+            desc = self.factory( content )
+            #print "dependencies: on cuisine les pred : ", desc.content_url
+            self.mastering.cook(desc)
+        
+        #we clean the content map, deleting all the links on the descriptor
+        self.content_map.clean(descriptor)
+        
     def getIncrementalIndex(self):
-        policy = self.getDeploymentPolicy()
-        return getIncrementalIndex( policy )
+        return getIncrementalIndexId( self.policy )
     
     def getDependencySource(self):
-        sources = self.getContentSources()
+        sources = self.source.sources
+        
         source = sources._getOb( 'dependency_source', None)
         return source
         
