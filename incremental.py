@@ -89,6 +89,7 @@ from Namespace import *
 from BTrees.Length import Length
 from BTrees.IOBTree import IOBTree
 from Products.PluginIndexes.common.PluggableIndex import PluggableIndexInterface
+from Descriptor import DescriptorFactory
 
 
 #################################
@@ -118,7 +119,7 @@ class DeletionSource( SimpleItem ):
     stores records for content deleted through the portal lifecycle.
     """
 
-    def __init__(self, id, title=""):
+    def __init__(self, id):
         self.id = id
         self._records = []
 
@@ -130,7 +131,7 @@ class DeletionSource( SimpleItem ):
             yield rec
         self._records = []
 
-    def addRecord( self, record ):
+    def addRecord( self, record):
         self._records.append( record )
         self._p_changed = 1
 
@@ -138,12 +139,63 @@ class DeletionSource( SimpleItem ):
         # check on removal of incremental index
         pass
 
+from Globals import DTMLFile
+from UserDict import UserDict
+from Interface.Implements import objectImplements
+from Products.ZCatalog.IZCatalog import IZCatalog
+from Acquisition import aq_parent
+import os, sys, time
+
+try:
+    from Products.CMFCore.CatalogTool import IndexableObjectWrapper, ICatalogTool
+    CMF_FOUND = 1
+except ImportError:
+    class ICatalogTool(Interface): pass
+    IndexableObjectWrapper = None
+
+manage_addPolicyIncrementalIndexForm = DTMLFile('ui/PolicyIncrementalIndexAddForm', globals())
+
+def manage_addPolicyIncrementalIndex(self, id, extra=None, REQUEST=None, RESPONSE=None, URL3=None, **kw):
+    """Add a policy incremental index"""
+    
+    return self.manage_addIndex(id,
+                                'PolicyIncrementalIndex',
+                                extra=extra,
+                                REQUEST=REQUEST,
+                                RESPONSE=RESPONSE,
+                                URL1=URL3)
+                                
+def getIndexTypes(self, names_only=1):
+    " returns a list of plugin indexes for use in a zcatalog "
+
+    obj = self
+    found = 0
+
+    while obj is not None:
+        ifaces = objectImplements(obj)
+        if IZCatalog in ifaces or ICatalogTool in ifaces:
+            found = 1
+            break
+        newobj = aq_parent(obj)
+        if newobj is obj:
+            obj = None
+        else:
+            obj = newobj
+
+    if not found:
+        return []
+
+    res = obj.all_meta_types(interfaces=(PluggableIndexInterface,))
+    if names_only:
+        return [r['name'] for r in res]
+
+    return res
 
 def getIncrementalIndexId( policy ):
     pid = policy.getId()
     iid = "%s_incremental_idx"%pid
     catalog = getToolByName( policy, 'portal_catalog')._catalog
-    if not iid in catalog.names():
+    if not iid in catalog.names:
         return None
     return catalog.getIndex( iid )
 
@@ -154,7 +206,7 @@ class PolicyIncrementalIndex( SimpleItem ):
     corresponding policy.
     """
     
-    meta_type = "Policy Incremental Index"
+    meta_type = "PolicyIncrementalIndex"
     
     __implements__ = PluggableIndexInterface
 
@@ -172,13 +224,16 @@ class PolicyIncrementalIndex( SimpleItem ):
 
     index_overview = DTMLFile('zmi/IncrementalIndexView', globals())    
 
-    def __init__(self, id, extra, caller=None):
+    def __init__(self, id, extra, caller=None): 
         self.id = id
-        self.policy_id = ""
+        if extra!=None:
+            self.policy_id = extra
+        else:
+            self.policy_id = ""
         self._length = Length()
         self._index = IOBTree()
 
-    def getId(self):
+    def getId(self): #used in getIncrementalIndexId()
         return self.id
 
     def getEntryForObject( self, documentId, default=None):
@@ -187,12 +242,16 @@ class PolicyIncrementalIndex( SimpleItem ):
     def index_object( self, documentId, obj, threshold=None):
         # policy execution directly populates through the
         # recordObject api.
-        return
+        
+        self._index[documentId]=obj
+        self._length.change(1)
+        
+        #if we have a new object, we return 0, else 1
+        return 0
 
     def unindex_object( self, documentId):
         if not self._index.has_key(documentId):
             return
-        
         dtool = getToolByName( self, 'portal_deployment')
         policy = dtool._getOb( self.policy_id )
 
@@ -225,12 +284,13 @@ class PolicyIncrementalIndex( SimpleItem ):
         return self._length()
 
     def clear(self):
+        print "Incremental: CLEAR"
         # i can't do that jim ;-)
         return
 
     #################################
     def isObjectDeployed( self, object ):
-        path = '/'.join( object.getPhysicalPath() )
+        path = '/'.join( object.getContent().getPhysicalPath() )
         rid = self.getrid( path )
         return not not rid
     
@@ -238,7 +298,7 @@ class PolicyIncrementalIndex( SimpleItem ):
         return self.getobject( documentId )
     
     def recordObject(self, object):
-        catalog = self.aq_parent
+        catalog = aq_parent(self)
         path = '/'.join( object.getPhysicalPath() )
         key = catalog.uids.get( path, None )
         
