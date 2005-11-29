@@ -17,7 +17,7 @@ class IPipeSegment( object ):
 class IProducer( IPipeSegment ): pass
 class IConsumer( IPipeSegment ): pass
 class IProducerConsumer( IPipeSegment ): pass
-class IFilter( ProducerConsumer ): pass
+class IFilter( IProducerConsumer ): pass
 class ITee( IPipeSegment ): pass
 class IWatcher( IPipeSegment ): pass
 class IConditionalBranch( IPipeSegment ): pass
@@ -36,12 +36,12 @@ class Pipeline( object ):
         for s in self.steps:
             yield s
 
-    def process( self, context ):
+    def process( self, context ): #calls process on each step
         for s in self:
+            #print "Pipeline process of", s
             context = s.process( self, context )
-
+  
 class PipeSegment( object ):
-
     def process( self, pipeline, ctxobj ):
         raise NotImplemented
 
