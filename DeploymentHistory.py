@@ -69,6 +69,13 @@ class DeploymentHistoryContainer(Folder):
         history.id = hid
         self._records.insert(history)
         self._record_length.change(1)
+        print "DeploymentHistory: attachHistory: ", self._records
+        if self._record_length() > 0:
+            print "time du 2: ", self._records[0].bobobase_modification_time()
+        if self._record_length() > 1:
+            print "time du 1: ", self._records[1].bobobase_modification_time()
+        if self._record_length() > 2:
+            print "time du 0: ", self._records[2].bobobase_modification_time()
         
     security.declareProtected(Permissions.view_management_screens, 'getHistories')
     def getHistories(self):
@@ -78,6 +85,12 @@ class DeploymentHistoryContainer(Folder):
     def getLastTime(self):
         if self._record_length() == 0:
             return None
+        print "### DeploymentHistory: getLastTime: ", self._records
+        print "time du 2: ", self._records[0].bobobase_modification_time()
+        if self._record_length() > 1:
+            print "time du 1: ", self._records[1].bobobase_modification_time()
+        if self._record_length() > 2:
+            print "time du 0: ", self._records[2].bobobase_modification_time()
         return self._records[self._record_length()-1].bobobase_modification_time()
 
     security.declarePrivate('makeHistory')
@@ -110,6 +123,10 @@ class DeploymentHistory(SimpleItem):
         self.timeTime = str(int(self.creation_time.timeTime()))
         self.logs = []
         self.statistics = None
+        self.last_modification_time = DateTime()
+        
+    def update_last_modification_time (self):
+        self.last_modification_time = DateTime()
         
     def recordStatistics(self, stats_display):
         self.statistics = stats_display

@@ -113,6 +113,15 @@ class DeploymentPolicy(Folder):
 
     def getContentRules( self ):
         return self.getContentMastering().mime
+        
+    def getContentMap( self ):
+        return self._getOb(DefaultConfiguration.ContentMap)
+    
+    def getDependencySource( self ):
+        return self._getOb(DefaultConfiguration.DependencySource)
+        
+    def getDeletionSource( self ):
+        return self._getOb(DefaultConfiguration.DeletionSource)
     
     def getDeploymentHistory(self):
         return self._getOb(DefaultConfiguration.DeploymentHistory)
@@ -157,8 +166,9 @@ class DeploymentPolicy(Folder):
             Log.detachLogMonitor(history)
 
         history.recordStatistics(display)
+        history.update_last_modification_time()
         histories.attachHistory(history)
-
+        
         if RESPONSE:
             return "<html><pre>%s</pre></body</html>"%display
         return True
@@ -168,5 +178,3 @@ class DeploymentPolicy(Folder):
         DefaultConfiguration.install(self)
     
 InitializeClass(DeploymentPolicy)
-    
-
