@@ -1,9 +1,13 @@
 from segments import *
+from ContentStorage import ContentStorage
+from Descriptor import DescriptorFactory
+from Products.CMFDeployment import incremental
 
 class PolicyPipeline( Pipeline ):
+    
+    def __call__( self, policy):
+        self.process( policy)
 
-    def __call__( self, policy ):
-        self.process( policy )
 
 class PipeEnvironmentInitializer( Pipeline ):
 
@@ -16,10 +20,8 @@ class PipeEnvironmentInitializer( Pipeline ):
         return ctxobj
     
     def setupVariables( self, pipe, ctxobj ):
-
         dfactory = DescriptorFactory( ctxobj )
-        pipe.services["DescriptorFactory"] = DescriptorFactory
-        
+        pipe.services["DescriptorFactory"] = dfactory
 
     def setupURIResolver( self, pipe, ctxobj ):
         resolver = pipe.services['ContentResolver']
@@ -35,6 +37,8 @@ class PipeEnvironmentInitializer( Pipeline ):
         uri_resolver.mount_path = mount_url_root
         uri_resolver.source_host = ctxobj.REQUEST['SERVER_URL']
         uri_resolver.mlen = len(mount_url_root)
+        #maybe we should change this:
+        uri_resolver.content_map= pipe.services['ContentMap']
 
         pipe.services['URIResolver'] = uri_resolver
         
@@ -49,8 +53,11 @@ class PipeEnvironmentInitializer( Pipeline ):
         addService("ContentOrganization", structure)
         
         mastering = ctxobj.getContentMastering()
-        addService("ContentRules", mastering)
+        addService("ContentMastering", mastering)
         
+        rules = ctxobj.getContentRules()
+        addService("ContentRules", rules)
+
         deployer  = ctxobj.getContentDeployment()
         addService("ContentTransports", deployer)
         
@@ -62,30 +69,35 @@ class PipeEnvironmentInitializer( Pipeline ):
         
         history   = ctxobj.getDeploymentHistory()
         addService("ContentHistory", history )
-
-        addService("ContentStorage", ContentStorage(self) )
+        
+        policy= ctxobj.getDeploymentPolicy()
+        addService("DeploymentPolicy", policy)
+        
+        addService("ContentStorage", ContentStorage(ctxobj) )
+        
+        content_map= ctxobj.getContentMap()
+        addService("ContentMap", content_map)
 
 class ContentSource( PipeSegment ):
 
     implements( IProducer )
 
     def process( self, pipe, ctxobj ):
-        mlen = pipe.variables.get('mount_length', 0)
-        source = self.getService("ContentIdentification")
+        getService = pipe.services.__getitem__
+        mlen = pipe.vars.get('mount_length', 0)
+        source = getService("ContentIdentification")
+        
+        #print "pipeline: ContentSource: ", source.getContent(mount_length = mlen)
         return source.getContent(mount_length = mlen)
-
-
 
 class DirectoryViewDeploy( PipeSegment ):
     """
     """
 
     def process( self, pipe, content ):
-
         views = pipe.services["ContentDirectoryViews"]
         resolver = pipe.services['URIResolver']
         store = pipe.services["ContentStorage"]
-        stats = pipe.services['ExecutionStats']
         
         contents = views.getContent()
 
@@ -97,12 +109,15 @@ class DirectoryViewDeploy( PipeSegment ):
             resolver.resolve( dvc )
             store( dvc )
 
+        return content
+
 class ContentTransport( PipeSegment ):
 
     def process( self, pipe, ctxobj ):
         transports = pipe.services['ContentTransports']
         organization = pipe.services['ContentOrganization']
         transports.deploy( organization.getActiveStructure() )
+        return ctxobj
 
 
 class ContentPreparation( PipeSegment ):
@@ -116,43 +131,54 @@ class ContentPreparation( PipeSegment ):
     def __init__(self):
         self.prepared = []
 
-    def process( self, pipe, context ):
-        return self.processContent( c )
+    def process( self, pipe, content):
+            return self.processContent(pipe, content)
 
     def processContent( self, pipe, content ):
         factory = pipe.services["DescriptorFactory"]
-        rules = pipe.services["ContentRules"]
+        mastering = pipe.services["ContentMastering"]
         resolver = pipe.services['URIResolver']
         
-        content = self.getContent( content )
-        descriptor = factory( content )
+        descriptors= [] #list of the descriptors returned
+        while (True):
+            #content = self.getContent( content )
+            try:
+                descriptor = factory( content.next().getObject() )
+            except:
+                return descriptors    
+            if not mastering.prepare( descriptor ):
+                try: content._p_deactivate()
+                except: pass
+                return []
 
-        if not rules.match( descriptor ):
-            try: content._p_deactivate()
-            except: pass
-            return
-
-        resolver.addResource( descriptor )
-        return descriptor
+            resolver.addResource( descriptor )
+            descriptors.append(descriptor)
+            
+        #print "pipeline: ContentPreparation: ", descriptors
+        return descriptors
 
     def getContent( self, ctxobj ):
-        return ctxobj.getObject()
+        return ctxobj.next().getObject()
 
     
 class ContentProcessPipe( PipeSegment ):
 
     def process( self, pipe, descriptor):
-        rules = pipe.services["ContentRules"]
+        mastering = pipe.services["ContentMastering"]
         resolver = pipe.services['URIResolver']
         store = pipe.services["ContentStorage"]
         
-        rules.render( descriptor )
-        content = descriptor.getContent()
-
-        if not descriptor.isGhost():
-            resolver.resolve( descriptor )
+        #print "pipeline: ContentProcessPipe desc: ", descriptor
+        for desc in descriptor:
+            mastering.cook(desc)
+            content = desc.getContent()
             
-        store( descriptor )
+            if not desc.isGhost():
+                resolver.resolve( desc )
+                
+            store( desc )
+        return descriptor
+        
 
 
 #################################
@@ -162,18 +188,15 @@ class ContentProcessPipe( PipeSegment ):
 class DeletionPipeline( object ):
 
     def condition(self):
+        pass
 
     def process( self, record ):
         pass
 
 """
-
   initializer [ policy ] -> policy
   directoryviewdeploy [ policy ] -> policy
-  content source [ policy ] -> content stream
-    iterator
-  
-  
+  content source [ policy ] -> content stream iterator  
   
 """
 
@@ -181,18 +204,18 @@ class DefaultPolicyPipeline( object ):
     
     step_factories = [ PipeEnvironmentInitializer,
                        ContentSource,
-                       ContentPrepPipe,
                        DirectoryViewDeploy,
                        ContentProcessPipe ]
     
-IncrementalPipeline = Pipeline(
-    steps = ( PipeEnvironmentInitializer(),
-              ContentSource(),
-              ConditionalBranch(
-                      
-              Iterator( ( ContentPrepPipeline, ) ),
-              DirectoryViewDeploy(),
-              
+#IncrementalPipeline = Pipeline(
+#    steps = ( PipeEnvironmentInitializer(),
+#              ContentSource(),
+#              ConditionalBranch(
+#                      
+#              Iterator( ( ContentPrepPipeline, ) ),
+#              DirectoryViewDeploy(),
+
+       
          
 
         
