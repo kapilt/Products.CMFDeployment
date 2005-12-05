@@ -5,7 +5,8 @@ License: GPL
 Created: 11/16/2005
 $Id: $
 """
-import os, sys, time
+import os, sys, time, shutil
+from stat import ST_MTIME
 
 if __name__ == '__main__':
     execfile(os.path.join(sys.path[0], 'framework.py'))
@@ -26,19 +27,27 @@ from Products.CMFDeployment import pipeline
 from Products.CMFDeployment import dependencies
 from Products.CMFDeployment import ContentMap
 
+
+TESTDEPLOYDIR = os.path.join( DeploymentProductHome, 'tests', 'deploy')
+
+# these two settings operate together
+LEAVE_DEPLOY_DIR=True
+CLEAN_DEPLOY_DIR=True
+
 class TestEverything (PloneTestCase):
     
     def afterSetUp(self):
         self.loginPortalOwner()
+        
+        if os.path.exists( TESTDEPLOYDIR ) and CLEAN_DEPLOY_DIR:
+            shutil.rmtree( TESTDEPLOYDIR )
+        
+        if not os.path.exists( TESTDEPLOYDIR ):
+            os.mkdir( TESTDEPLOYDIR )
+        
         installer = getToolByName(self.portal, 'portal_quickinstaller')
         installer.installProduct('ATContentRule')
         installer.installProduct('CMFDeployment')
-        
-        self.portal.invokeFactory('Folder', 'folderwithindex')
-        self.folderwithindex = self.portal.folderwithindex
-        
-        self.folderwithindex.invokeFactory('Document', 'docwithindex')
-        self.docwithindex = self.folderwithindex.docwithindex
         
         policy_file = os.path.join(DeploymentProductHome,'examples','policies', 'plone.xml')
         fh = open( policy_file )
@@ -46,55 +55,211 @@ class TestEverything (PloneTestCase):
         deployment_tool.addPolicy( policy_xml=fh )
         fh.close()
         self.policy = deployment_tool.getPolicy('plone_example')
-        #setupContentTree(self.portal)
-        self.catalog_tool = getToolByName(self.portal, "portal_catalog")    
+        self.catalog_tool = getToolByName(self.portal, "portal_catalog")  
         
-    def testEverything(self): 
-        #################################
-        #Add the ContentMap to the policy
-        one_map= ContentMap.ContentMap() 
-        self.policy._setOb('ContentMap', one_map)      
-     
-        #################################
-        #Creates the dependencySource and add it to the policy
-        id_dep= "pouetDepSource"
-        title_dep= "The Dependency Source"
-        dependency_source= dependencies.DependencySource(id_dep, title_dep)
-        sources= self.policy.getContentSources()
-        sources._setOb('dependency_source', dependency_source)
+        structure = self.policy.getContentOrganization().getActiveStructure()
+        structure.mount_point = TESTDEPLOYDIR
+        
+        get_transaction().commit(1)
+          
+        
+    def testDeployFolder(self):  
+        self.portal.invokeFactory('Folder', 'folderwithindex')
+        folderwithindex = self.portal.folderwithindex
+        folderwithindex.edit(title="my folder")
+        
+        self.policy.execute()
+        
+        location = os.sep.join( ( TESTDEPLOYDIR, "folderwithindex") )
+        self.assertEqual(os.path.exists(location), True, "Location should be folderwithindex")
     
-        #################################
-        #Add an index and its name
-        extra= self.policy.getId()
-        self.catalog_tool.manage_addIndex('plone_example_incremental_idx', 'PolicyIncrementalIndex', extra)
-        self.catalog_tool.manage_addColumn('plone_example_incremental_idx')
-        #Index an object with the new index plone_example_incremental_idx
-        self.catalog_tool.indexObject(self.folderwithindex, ['plone_example_incremental_idx']) 
+    def testDeployDocument(self):
+        self.testDeployFolder()
+        folderwithindex = self.portal.folderwithindex
+        folderwithindex.invokeFactory('Document', 'docwithindex')
+        docwithindex = folderwithindex.docwithindex
+        
+        self.policy.execute()
+        
+        location = os.sep.join( ( TESTDEPLOYDIR, "folderwithindex", "docwithindex.html") )
+        self.assertEqual(os.path.exists(location), True, "Location should be docwithindex.html")
     
-        ################################
-        #Create the Policy Pipeline
-        policy_id= self.policy.getId()
-        new_steps= (pipeline.PipeEnvironmentInitializer(),
-                    pipeline.ContentSource(),
-                    pipeline.ContentPreparation(),
-                    pipeline.DirectoryViewDeploy(),
-                    pipeline.ContentProcessPipe(),
-                    pipeline.ContentTransport(),
-                    dependencies.DependencyManager("PouetDepManager", policy_id)
-                    )
-        #Create a pipeline and Add steps in it
-        new_pipeline = pipeline.PolicyPipeline()
-        new_pipeline.steps= new_steps  
-        new_pipeline.process(self.policy)  
+    def testDeployImage(self):
+        logo = self.portal['logo.jpg']
+        content = str(logo)
+        self.portal.invokeFactory('Image', 'vera.jpg')
+        self.portal['vera.jpg'].edit(file=content)
         
-        #################################
-        #Adding the deletion source to the contentIdentification
-        #create a new deletion source
-        sources= new_pipeline.services['ContentIdentification'].sources
-        deletion_source= incremental.DeletionSource("pouetDeletion")
-        sources._setOb('deletion_source', deletion_source)
+        self.policy.execute()
         
-        #result      
+        location = os.sep.join( ( TESTDEPLOYDIR, "vera.jpg") )
+        self.assertEqual(os.path.exists(location), True, "Location should be vera.jpg")
+    
+    def testDeleteDocument(self):
+        self.testDeployDocument()
+        self.portal.folderwithindex.manage_delObjects(["docwithindex"])
+        
+        self.policy.execute()
+        
+        location = os.sep.join( ( TESTDEPLOYDIR, "folderwithindex", "docwithindex.html") )
+        self.assertEqual(os.path.exists(location), False, "Location shouldn't exist")
+    
+    def testDeleteFolder(self):
+        self.testDeployFolder()
+        self.portal.manage_delObjects(["folderwithindex"])
+        
+        self.policy.execute()
+        
+        location = os.sep.join( ( TESTDEPLOYDIR, "folderwithindex") )
+        self.assertEqual(os.path.exists(location), False, "Location shouldn't exist")
+    
+    def testDeleteImage(self):
+        self.testDeployImage()
+        self.portal.manage_delObjects(["vera.jpg"])
+        
+        self.policy.execute()
+        
+        location = os.sep.join( ( TESTDEPLOYDIR, "vera.jpg") )
+        self.assertEqual(os.path.exists(location), False, "Location shouldn't exist")
+        
+    def testDependentContent(self):
+        self.portal.portal_catalog.indexObject( self.portal )
+
+        self.portal.invokeFactory('Document','index_html')
+        self.portal.invokeFactory('Document','pouet')
+        
+        news_index_content = '''\
+        <html>
+        <body>
+        # relative url
+        <a href="../about">About Us</a>
+        # absolute url
+        <a href="/portal/about/contact">Jobs - You Wish!</a>    
+        # javascript url
+        <a href="javascript:this.print()">Print Me</a>    
+        # mailto url
+        <a href="mailto:deployment@example.com">Print Me</a>    
+        # test self referencing content
+        <a href="./index_html"> My Self </a>
+        <a href="/portal/pouet">My Self aliased</a>
+        <a href=".">My Self</a>
+        # test anchor link inside of page
+        <a href="#furtherdown">Down the page</a>
+        this is some more text
+        <a name="furtherdown"></a>
+        here is stuff that is further down the page.
+        </body>
+        </html>
+                '''
+        self.portal.index_html.edit(text_format='html', text=news_index_content)
+    
+        self.policy.execute()
+        
+        pathname = os.sep.join( ( TESTDEPLOYDIR, "index.html") )
+        pathname2 = os.sep.join( ( TESTDEPLOYDIR, "pouet.html") )
+
+        mtime1 = os.stat(pathname)[ST_MTIME]
+
+        self.portal.pouet.edit(text_format='html', text=news_index_content)
+        time.sleep(10.0)
+
+        self.policy.execute()
+        
+        mtime2 = os.stat(pathname)[ST_MTIME]
+       
+        self.assertNotEqual(mtime1,mtime2,'Modification time did not change')
+        
+    def XtestDependentContent(self):
+        self.portal.portal_catalog.indexObject( self.portal )
+
+        self.portal.invokeFactory('Document','index_html')
+        self.portal.invokeFactory('Document','pouet')
+        
+        news_index_content = '''\
+        <html>
+        <body>
+        # relative url
+        <a href="../about">About Us</a>
+        # absolute url
+        <a href="/portal/about/contact">Jobs - You Wish!</a>    
+        # javascript url
+        <a href="javascript:this.print()">Print Me</a>    
+        # mailto url
+        <a href="mailto:deployment@example.com">Print Me</a>    
+        # test self referencing content
+        <a href="./index_html"> My Self </a>
+        <a href="/portal/pouet">My Self aliased</a>
+        <a href=".">My Self</a>
+        # test anchor link inside of page
+        <a href="#furtherdown">Down the page</a>
+        this is some more text
+        <a name="furtherdown"></a>
+        here is stuff that is further down the page.
+        </body>
+        </html>
+                '''
+        self.portal.index_html.edit(text_format='html', text=news_index_content)
+    
+        self.policy.execute()
+        
+        pathname = os.sep.join( ( TESTDEPLOYDIR, "index.html") )
+        pathname2 = os.sep.join( ( TESTDEPLOYDIR, "pouet.html") )
+
+        mtime1 = os.stat(pathname)[ST_MTIME]
+
+        self.portal.pouet.edit(text_format='html', text=news_index_content)
+        time.sleep(10.0)
+
+        self.policy.execute()
+        
+        mtime2 = os.stat(pathname)[ST_MTIME]
+       
+        self.assertNotEqual(mtime1,mtime2,'Modification time did not change')
+        
+    def testDependentContent2(self):
+        self.portal.portal_catalog.indexObject( self.portal )
+        self.portal.invokeFactory('Document','index_html')
+        self.portal.invokeFactory('Document','pouet')
+        self.portal.invokeFactory('Document', 'foo')
+        
+        news_index_content = '''\
+        <html>
+        <body>
+        # relative url
+        <a href="../about">About Us</a>
+        # absolute url
+        <a href="/portal/about/contact">Jobs - You Wish!</a>    
+        # javascript url
+        <a href="javascript:this.print()">Print Me</a>    
+        # mailto url
+        <a href="mailto:deployment@example.com">Print Me</a>    
+        # test self referencing content
+        <a href="./index_html"> My Self </a>
+        <a href="/portal/pouet">My Self aliased</a>
+        <a href=".">My Self</a>
+        # test anchor link inside of page
+        <a href="#furtherdown">Down the page</a>
+        this is some more text
+        <a name="furtherdown"></a>
+        here is stuff that is further down the page.
+        </body>
+        </html>
+        '''
+        self.portal.index_html.edit(text_format='html', text=news_index_content)
+        self.portal.foo.edit(text_format='html', text='du texte')
+        self.policy.execute()
+        
+        pathname = os.sep.join( ( TESTDEPLOYDIR, "foo.html") )
+        #pathname2 = os.sep.join( ( TESTDEPLOYDIR, "pouet.html") )
+        mtime1 = os.stat(pathname)[ST_MTIME]
+
+        self.portal.pouet.edit(text_format='html', text=news_index_content)
+        time.sleep(10.0)
+        self.policy.execute()
+        mtime2 = os.stat(pathname)[ST_MTIME]
+       
+        self.assertEqual(mtime1,mtime2,'Modification time did change')
+    
         
 def test_suite():
     suite = unittest.TestSuite()
