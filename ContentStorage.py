@@ -76,7 +76,7 @@ class ContentStorage:
         for descriptor in descriptors:
             content_path = self.structure.getContentPathFromDescriptor( descriptor )
             if content_path.endswith(sep):
-                #log.warning('invalid content path detected %s ... fixing'%content_path)
+                log.warning('invalid content path detected %s ... fixing'%content_path)
                 content_path = content_path[:-1]
             self.storeDescriptor( content_path, descriptor )
 
@@ -102,7 +102,7 @@ class ContentStorage:
         if not rendered:
             return
 
-        #log.debug("storing content %s at %s"%(descriptor.content_url, location))
+        log.debug("storing content %s at %s"%(descriptor.content_url, location))
         
         fh = open(location, 'w')
         try:
@@ -119,9 +119,9 @@ class ContentStorage:
         if path.exists( directory ):
             return True
         if not location.startswith( self.structure.mount_point ):
-            #log.warning( 'invalid store location %s'%(location))
+            log.warning( 'invalid store location %s'%(location))
             return False
-        #log.debug("creating parent directories for location %s"%location)
+        log.debug("creating parent directories for location %s"%location)
         components = directory.split(sep)
         for i in range( 2, len(components)+1 ):
             ppath = sep.join( components[:i] )

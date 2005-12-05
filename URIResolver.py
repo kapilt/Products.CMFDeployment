@@ -126,7 +126,7 @@ class URIResolver:
         if relative_url[0] != '/':
             relative_url = '/'+relative_url
 
-        #log.debug("add %s -> %s"%(relative_url, content_path))
+        log.debug("add %s -> %s"%(relative_url, content_path))
         self.uris[relative_url]=content_path
 
         if descriptor.isContentFolderish():
@@ -280,7 +280,7 @@ class URIResolver:
             nu = self.resolveURI(u, content_url, content_folderish_p, content=descriptor.getContent())
             
             if nu is _marker:            
-                #log.warning('unknown url (%s) from %s'%(u, content_url))
+                log.warning('unknown url (%s) from %s'%(u, content_url))
                 nu = self.link_error_url
                 
             elif nu is None:

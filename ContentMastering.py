@@ -127,7 +127,7 @@ class ContentMastering(Folder):
             if m.isValid(descriptor, ctx):
                 m.process( descriptor, ctx )
                 return True
-        #log.debug('no mime mapping (%s)->(%s)'%(str(c.portal_type), descriptor.content_url))
+        log.debug('no mime mapping (%s)->(%s)'%(str(c.portal_type), descriptor.content_url))
         return None
 
     def cook(self, descriptor):
@@ -178,7 +178,7 @@ class ContentMastering(Folder):
             else:
                 descriptor.setRendered(render())
         except:
-            #log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
+            log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
             descriptor.setGhost(1) # ghostify it        
             raise
     #################################
