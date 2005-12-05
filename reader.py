@@ -107,6 +107,11 @@ class PolicyReader(MetaReader):
         filters = self.policy.ident.setdefault('filters', [])
         filter = PolicyNode(attrs)
         filters.append(filter)
+        
+    def startIdentsource(self, attrs):
+        sources = self.policy.ident.setdefault('sources', [])
+        source = PolicyNode(attrs)
+        sources.append(source)
 
     def startOrganization(self, attrs):
         organization = PolicyNode(attrs)
@@ -218,6 +223,18 @@ def make_policy(portal, policy_node, id=None, title=None):
     if hasattr(policy_node.ident, 'filters'):
         for f in policy_node.ident.filters:
             identification.filters.addFilter(f.id, f.expr)
+            
+    ##Source setup      
+    for s in policy_node.ident.sources:
+        # transparently map old policies to the expected format
+        product = s.product
+        factory = s.factory
+            
+        factory = getattr(identification.sources.manage_addProduct[product], factory)
+        sd = dict(s)
+        if 'product' in sd: del sd['product']
+        if 'factory' in sd: del sd['factory']
+        factory( **sd )
 
 
     ## mastering setup
@@ -228,15 +245,15 @@ def make_policy(portal, policy_node, id=None, title=None):
         product = m.get('product', DEFAULT_RULE_PRODUCT)
         factory = m.get('factory', DEFAULT_RULE_FACTORY)
         import pprint
-        print 'ee', product, factory
-        pprint.pprint(dict(m.items()))
+        #print 'ee', product, factory
+        #pprint.pprint(dict(m.items()))
         
         if (product, factory) in REMAP_TYPES:
-            print 'remapped'
+            #print 'remapped'
             m.setdefault('ghost',0)
             m = remap_default_rule_factory( m )
 
-        pprint.pprint( dict( m.items() ) )
+        #pprint.pprint( dict( m.items() ) )
             
         factory = getattr(mastering.mime.manage_addProduct[product], factory)
         md = dict(m)
@@ -299,29 +316,7 @@ def make_policy(portal, policy_node, id=None, title=None):
     # strategy setup
     strategies = getattr(policy, DefaultConfiguration.DeploymentStrategy)
     if policy_node.has_key('strategy') and policy_node.strategy.has_key('id'):
-        print "reader: policy_node: ", policy_node.strategy.id
         strategies.setStrategy(policy_node.strategy.id)
-
-    #################################################################
-    #ContentMap is added automatically to the policy, in DefaultConfig.py
-    #idem for DependencySource, DeletionSource
-    #Creates the DependencyManager
-    policy_id= policy.getId()
-    a_dependency_manager= dependencies.DependencyManager("DependencyManager", policy_id, catalog_tool)
-
-    # setting up the incremental index and Create the Policy Pipeline
-    steps= (pipeline.PipeEnvironmentInitializer(),
-                pipeline.ContentSource(),
-                pipeline.ContentPreparation(),
-                pipeline.DirectoryViewDeploy(),
-                pipeline.ContentProcessPipe(),
-                pipeline.ContentTransport(),
-                a_dependency_manager
-                )
-    #Create a pipeline and Add steps in it
-    new_pipeline = pipeline.PolicyPipeline()
-    new_pipeline.steps= steps  
-    new_pipeline.process(policy)
     
     return policy
     
