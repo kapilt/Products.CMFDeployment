@@ -68,7 +68,7 @@ class ContentIdentification(Folder):
         self.id = id
 
     security.declarePrivate('getContent')
-    def getContent(self, mount_length=0):
+    def getContent(self, last_time=None, mount_length=0):
         """
         retrieve deployable content brains
         """
@@ -80,7 +80,7 @@ class ContentIdentification(Folder):
         
         skip = 0
 
-        for c in self.sources.getContent():
+        for c in self.sources.getContent(last_time):
             ## remove objects which reference restricted ids
             if mount_length:
                 path = c.getPath()[mount_length:]
@@ -136,20 +136,11 @@ class ContentSourceContainer( OrderedFolder ):
         self.id = id
         self.title = title
         
-    def getContent( self ):
+    def getContent( self, last_time=None ):
+        #print "ContentIdentification: getContent"
         for source in self.objectValues():
-            for c in source.getContent():
-                yield c
-
-    def manage_afterAdd(self, item, container):
-        import DefaultConfiguration
-        from sources import basic_catalog
-        if not DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID in self.objectIds():
-            self._setObject(
-                DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID,
-                basic_catalog.PortalCatalogSource(
-                  DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID )
-                )
+            for c in source.getContent(last_time):
+                yield c     
                                                  
 
 InitializeClass( ContentSourceContainer )
