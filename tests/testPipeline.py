@@ -24,14 +24,13 @@ from Products.CMFDeployment import DeploymentProductHome
 from Products.CMFDeployment.DeploymentPolicy import DeploymentPolicy
 from Products.CMFDeployment.ExpressionContainer import getDeployExprContext
 from Products.CMFDeployment.Descriptor import ContentDescriptor
-from Products.CMFDeployment import pipeline
-from Products.CMFDeployment import ContentMap
+from Products.CMFDeployment import pipeline, ContentMap, dependencies
 from Products.CMFDeployment.tests.testDeployment import setupContentTree
 
 class MyPipeline(PloneTestCase):
     
     def afterSetUp(self):
-        self.loginPortalOwner() #Use if you need to manipulate the portal object itself.
+        self.loginPortalOwner()
         installer = getToolByName(self.portal, 'portal_quickinstaller')
         installer.installProduct('ATContentRule')
         installer.installProduct('CMFDeployment')
@@ -42,40 +41,42 @@ class MyPipeline(PloneTestCase):
         deployment_tool.addPolicy( policy_xml=fh )
         fh.close()
         self.policy = deployment_tool.getPolicy('plone_example')
-        setupContentTree(self.portal)    
         
-        #################################
-        #Add the ContentMap to the policy
-        resolver= self.policy.getDeploymentURIs()
-        one_map= ContentMap.ContentMap(resolver) 
-        self.policy._setOb('ContentMap', one_map) 
+        setupContentTree(self.portal)  
+        
+        catalog_tool = getToolByName(self.portal, "portal_catalog")  
+        index= self.policy.getId() + '_incremental_idx'
         
     def testCreatePipeline(self):
-        new_steps= (pipeline.PipeEnvironmentInitializer(), #OK pipeline
-                    pipeline.ContentSource(), #OK
-                    pipeline.ContentPreparation(), #OK pipesegment l.146 match
-                    pipeline.DirectoryViewDeploy(), #OK pipesegment
-                    pipeline.ContentProcessPipe(), #OK pipesegment
-                    pipeline.ContentTransport() #OK pipesegment 
-                    )
+        steps= (pipeline.PipeEnvironmentInitializer(),
+                pipeline.ContentSource(),
+                pipeline.ContentPreparation(),
+                pipeline.DirectoryViewDeploy(),
+                dependencies.DependencyManager(),
+                pipeline.ContentProcessPipe(),
+                pipeline.ContentDeletionPipeline(),
+                pipeline.ContentTransport(),
+                pipeline.ContentWatchEnd()
+                )
         #Create a pipeline and Add steps in it
         new_pipeline = pipeline.Pipeline()
-        new_pipeline.steps= new_steps
-        #Try to process each step     
+        new_pipeline.steps= steps 
         new_pipeline.process(self.policy)
         
     def testCreatePolicyPipeline(self):
-        new_steps= (pipeline.PipeEnvironmentInitializer(), #OK pipeline
-                    pipeline.ContentSource(), #OK
-                    pipeline.ContentPreparation(), #OK pipesegment l.146 match
-                    pipeline.DirectoryViewDeploy(), #OK pipesegment
-                    pipeline.ContentProcessPipe(), #OK pipesegment
-                    pipeline.ContentTransport() #OK pipesegment 
-                    )
+        steps= (pipeline.PipeEnvironmentInitializer(),
+                pipeline.ContentSource(),
+                pipeline.ContentPreparation(),
+                pipeline.DirectoryViewDeploy(),
+                dependencies.DependencyManager(),
+                pipeline.ContentProcessPipe(),
+                pipeline.ContentDeletionPipeline(),
+                pipeline.ContentTransport(),
+                pipeline.ContentWatchEnd()
+                )
         #Create a pipeline and Add steps in it
         new_pipeline = pipeline.PolicyPipeline()
-        new_pipeline.steps= new_steps
-        #Try to process each step     
+        new_pipeline.steps= steps 
         new_pipeline.process(self.policy)
 
 if __name__ == '__main__':

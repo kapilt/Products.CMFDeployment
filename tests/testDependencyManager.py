@@ -18,8 +18,6 @@ ZopeTestCase.installProduct('MimetypesRegistry')
 ZopeTestCase.installProduct('PortalTransforms')
 ZopeTestCase.installProduct('Archetypes')
 ZopeTestCase.installProduct('ATContentRule')
-ZopeTestCase.installProduct('ZCatalog')
-ZopeTestCase.installProduct('ZCTextIndex')
 
 from Products.CMFCore.utils import getToolByName
 from Products.CMFDeployment import DeploymentProductHome
@@ -27,12 +25,6 @@ from Products.CMFDeployment.DeploymentPolicy import DeploymentPolicy
 from Products.CMFDeployment.ExpressionContainer import getDeployExprContext
 from Products.CMFDeployment.Descriptor import ContentDescriptor
 from Products.CMFDeployment import incremental
-from Products.ZCatalog import ZCatalog, Vocabulary
-from Products.CMFCore.tests.base.testcase import SecurityRequestTest
-from Products.ZCTextIndex.ZCTextIndex import ZCTextIndex, PLexicon
-from Products.ZCTextIndex.Lexicon import Splitter
-from Products.ZCTextIndex.Lexicon import CaseNormalizer, StopWordRemover
-from Products.PluginIndexes.TextIndex.TextIndex import TextIndex
 from Products.CMFPlone.CatalogTool import CatalogTool
 from Products.CMFCore.CatalogTool import CatalogTool
 from Products.ZCatalog import ZCatalog
@@ -147,62 +139,11 @@ class TestDependencyManager(PloneTestCase):
             id = "at_image_content",
             condition="python: object.portal_type == 'Sample Image Content'"
             ) 
-        
-    def testProcessDeploy(self): 
-        #################################
-        #Add the ContentMap to the policy
-        resolver= self.policy.getDeploymentURIs()
-        one_map= ContentMap.ContentMap(resolver) 
-        self.policy._setOb('ContentMap', one_map)      
-     
-        #################################
-        #Creates the dependencySource and add it to the policy
-        id_dep= "pouetDepSource"
-        title_dep= "The Dependency Source"
-        dependency_source= dependencies.DependencySource(id_dep, title_dep)
-        sources= self.policy.getContentSources()
-        sources._setOb('dependency_source', dependency_source)
-    
-        #################################
-        #Add an index and its name
-        extra= self.policy.getId()
-        self.catalog_tool.manage_addIndex('plone_example_incremental_idx', 'PolicyIncrementalIndex', extra)
-        self.catalog_tool.manage_addColumn('plone_example_incremental_idx')
-        #Index an object with the new index plone_example_incremental_idx
-        self.catalog_tool.indexObject(self.portal.about.index_html, ['plone_example_incremental_idx']) 
-    
-        ################################
-        #Create the Policy Pipeline
-        policy_id= self.policy.getId()
-        new_steps= (pipeline.PipeEnvironmentInitializer(),
-                    pipeline.ContentSource(),
-                    pipeline.ContentPreparation(),
-                    pipeline.DirectoryViewDeploy(),
-                    pipeline.ContentProcessPipe(),
-                    pipeline.ContentTransport(),
-                    dependencies.DependencyManager("PouetDepManager", policy_id)
-                    )
-        #Create a pipeline and Add steps in it
-        new_pipeline = pipeline.PolicyPipeline()
-        new_pipeline.steps= new_steps  
-        new_pipeline.process(self.policy)
-        
-        #################################
-        #Verify the DependencySource
-        dependency_source2= sources._getOb('dependency_source', dependency_source) 
-        result= dependency_source2.getContent()
-        result1 = result.next()
-        result2 = result.next()
-        self.assertNotEqual(result1, '/portal/Members/test_user_1_', "Result1 should be folderwithindex")
-        self.assertNotEqual(result2, '/portal/folderwithindex', "Result2 should be folderwithindex")
-        
-        
+            
     def testAddObject(self):
         #################################
         #Tests the addObject() method
-        id_dep= "pouetDepSource2"
-        title_dep= "The Dependency Source2"
-        dependency_source= dependencies.DependencySource(id_dep, title_dep)
+        dependency_source= self.policy.getDependencySource()
         dependency_source.addObject(self.folderwithindex)
         result= dependency_source._queue
         self.assertEqual(result,[self.folderwithindex], 'Result should be PloneFolderInstance')
@@ -210,9 +151,7 @@ class TestDependencyManager(PloneTestCase):
     def testGetContent(self):
         #################################
         #Tests the getContent() method
-        id_dep= "pouetDepSource3"
-        title_dep= "The Dependency Source3"
-        dependency_source= dependencies.DependencySource(id_dep, title_dep)
+        dependency_source= self.policy.getDependencySource()
         dependency_source.addObject(self.folderwithindex)
         dependency_source.addObject(self.docwithindex)
         
@@ -224,48 +163,10 @@ class TestDependencyManager(PloneTestCase):
         except:
             self.assertEqual(dependency_source._queue, [],'Dependency queue should be empty')
 
-    def testContentMap(self):
-        #################################
-        #Add the ContentMap to the policy
-        resolver= self.policy.getDeploymentURIs()
-        one_map= ContentMap.ContentMap(resolver) 
-        self.policy._setOb('ContentMap', one_map)  
-        result = dict(one_map.content_map.items() )
-        self.assertEqual(result,{}, 'ContentMpa should be empty')    
-     
-        #################################
-        #Creates the dependencySource and add it to the policy
-        id_dep= "pouetDepSource"
-        title_dep= "The Dependency Source"
-        dependency_source= dependencies.DependencySource(id_dep, title_dep)
-        sources= self.policy.getContentSources()
-        sources._setOb('dependency_source', dependency_source)
-    
-        #################################
-        #Add an index and its name
-        extra= self.policy.getId()
-        self.catalog_tool.manage_addIndex('plone_example_incremental_idx', 'PolicyIncrementalIndex', extra)
-        self.catalog_tool.manage_addColumn('plone_example_incremental_idx')
-        #Index an object with the new index plone_example_incremental_idx
-        self.catalog_tool.indexObject(self.folderwithindex, ['plone_example_incremental_idx']) 
-    
-        ################################
-        #Create the Policy Pipeline
-        policy_id= self.policy.getId()
-        new_steps= (pipeline.PipeEnvironmentInitializer(),
-                    pipeline.ContentSource(),
-                    pipeline.ContentPreparation(),
-                    pipeline.DirectoryViewDeploy(),
-                    pipeline.ContentProcessPipe(),
-                    pipeline.ContentTransport(),
-                    dependencies.DependencyManager("PouetDepManager", policy_id)
-                    )
-        #Create a pipeline and Add steps in it
-        new_pipeline = pipeline.PolicyPipeline()
-        new_pipeline.steps= new_steps  
-        new_pipeline.process(self.policy)
+    def testContentMap(self):    
+        self.policy.execute()
         
-        result = dict(one_map.content_map.items() )
+        result = dict(self.policy.getContentMap().content_map.items() )
         self.assertNotEqual(result,{}, 'ContentMap shouldn\'t be empty')
         
         
