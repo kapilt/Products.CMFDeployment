@@ -35,6 +35,7 @@ from Namespace import *
 from Descriptor import ContentDescriptor
 from ComputedAttribute import ComputedAttribute
 from DeploymentInterfaces import IDeploymentPolicy
+from Products.CMFCore.utils import getToolByName
 
 class DeploymentPolicy(Folder):
 
@@ -118,7 +119,7 @@ class DeploymentPolicy(Folder):
         return self._getOb(DefaultConfiguration.ContentMap)
     
     def getDependencySource( self ):
-        return self._getOb(DefaultConfiguration.DependencySource)
+        return self.getContentSources().dependency_source
         
     def getDeletionSource( self ):
         return self._getOb(DefaultConfiguration.DeletionSource)
@@ -174,6 +175,10 @@ class DeploymentPolicy(Folder):
         return True
 
     def manage_afterAdd(self, item, container):
+        catalog_tool = getToolByName(self, "portal_catalog")
+        catalog_tool.manage_addIndex('plone_example_incremental_idx', 'PolicyIncrementalIndex', self.id)
+        catalog_tool.manage_addColumn('plone_example_incremental_idx')
+        
         import DefaultConfiguration
         DefaultConfiguration.install(self)
     
