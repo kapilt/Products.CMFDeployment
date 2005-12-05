@@ -4,6 +4,14 @@
 
     <filter id="no_members" 
             expr="python: not memento.getPath().find('Members')+1" />
+            
+    <source id="incremental_catalog_source" 
+            product="CMFDeployment"
+            factory="addIncrementalPortalCatalogSource" />
+
+    <source id="dependency_source" 
+            product="CMFDeployment"
+            factory="addDependencySource" />
 
     <!--
     <filter id="review_state"
@@ -12,7 +20,7 @@
 
   </identification>
 
-  <strategy id="default" />
+  <strategy id="defaultpolicypipeline" />
 
   <skins>
 
