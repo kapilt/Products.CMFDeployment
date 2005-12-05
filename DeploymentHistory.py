@@ -112,8 +112,11 @@ class DeploymentHistory(SimpleItem):
         self.statistics = None
         self.last_modification_time = DateTime()
         
-    def update_last_modification_time (self):
+    def update_last_modification_time(self):
         self.last_modification_time = DateTime()
+        
+    def reset_last_modification_time(self):
+        self.last_modification_time = None
         
     def recordStatistics(self, stats_display):
         self.statistics = stats_display
