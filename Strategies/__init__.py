@@ -23,9 +23,9 @@
 ##################################
 # simple global protocol registry    
 
-import Default
+#import Default
 import Incremental
-
+import Pipeline
 
 class StrategyDatabase:
 
@@ -48,6 +48,7 @@ registerStrategy = _strategies.registerStrategy
 getStrategyNames = _strategies.getStrategyNames
 getStrategy = _strategies.getStrategy
 
-registerStrategy('default', Default.DefaultStrategy)
+#registerStrategy('default', Default.DefaultStrategy)
 registerStrategy('incremental', Incremental.IncrementalStrategy)
+registerStrategy('defaultpolicypipeline', Pipeline.DefaultPolicyPipelineStrategy)
 

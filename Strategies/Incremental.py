@@ -21,19 +21,19 @@
 ##################################################################
 
 """
-Purpose: Default Strategy for Policy Execution
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003
+Purpose: Incremental Strategy for Policy Execution
+Author: lucie
 License: GPL
-Created: 10/10/2002
-$Id$
+Created: 11/23/2005
 """
 
 from common import *
 from DateTime import DateTime
 
+#someplace you will need to get the time of the last run so you can modify the source query of the catalog for content
+
 def IncrementalStrategy(self):
-    #################################
-    #
+
     source    = self.getContentIdentification()
     structure = self.getContentOrganization()
     mastering = self.getContentMastering()
@@ -41,6 +41,7 @@ def IncrementalStrategy(self):
     views     = self.getContentDirectoryViews()
     resolver  = self.getDeploymentURIs()
     history   = self.getDeploymentHistory()
+    sources   = self.getContentSources()
     
     store = ContentStorage(self)
     stats = TimeStatistics()
@@ -49,7 +50,7 @@ def IncrementalStrategy(self):
     descriptors = []
     w = descriptors.append
 
-    log.debug('setting up structure')
+    #log.debug('setting up structure')
     views.mountDirectories(structure.getActiveStructure())
     structure.mount()
 
@@ -62,19 +63,23 @@ def IncrementalStrategy(self):
     mlen = len('/'.join(mount_path))
     mount_url_root = mount_point.absolute_url(1)
 
-    uri_resolver = resolver.clone(persistent=1)
+    uri_resolver = resolver.clone(persistent=0)
     
     # should setup an edit method for this
     uri_resolver.mount_path = mount_url_root
     uri_resolver.source_host = self.REQUEST['SERVER_URL']
     uri_resolver.mlen = len(mount_url_root)
     
-    log.debug('setting up mastering')    
+    #log.debug('setting up mastering')    
     mastering.setup()
-    #stats('mastering setup')
 
     # incremental time
     last_time = history.getLastTime()
+    #if history._record_length()!= 0:
+    #    last_time = history._records[0].last_modification_time
+    #else:
+    #    last_time = None
+    print "\n****** Incremental: last_time: ", last_time
 
     descriptor_factory = DescriptorFactory(self)
 
@@ -83,23 +88,62 @@ def IncrementalStrategy(self):
 
     try:
         
-        log.debug('retrieving content')
+        #log.debug('retrieving content')
         content = source.getContent(mount_length=mlen)
         stats('retrieving content')
         mstats('content retrieval')
-        
-        log.debug('processing content loop %d'%len(content))
-        
-        for ci in content:
 
-            # this datetime parse is expensive... using a specialized dt index
-            # would be better.
-            if not last_time is None and DateTime(ci.ModificationDate) < last_time:
+        #log.debug('processing content loop')
+        
+        #################################        
+        #we take care of the contents modified by the deleted contents
+        
+        #taking the content that has been deleted in deletion source
+        deletion_source = sources._getOb('deletion_source', None)
+        deleted_records= deletion_source.getContent()
+        
+        #taking the DependencyManager
+        a_dependency_manager = sources._getOb('DependencyManager', None)
+        
+        #take the reverse dependencies of the deleted_records
+        #one_map.pprint()
+        try:
+            while (True):
+                record = deleted_records.next()
+                print "Incremental: record: ", record.descriptor.content_url
+                a_dependency_manager.processRemoval(record)
+        except:         
+            #check if dependency source and deletion source are empty
+            #deleted_records= deletion_source._records
+            #print "Incremental: deleted_records:", deleted_records
+            #
+            #dependency_source = sources._getOb('dependency_source', None)
+            #dependencies_source= dependency_source._queue
+            #print "Incremental: dependencies_source:", dependencies_source
+            pass
+            
+                        
+        #################################
+        #now, we take care of the potentially modified content
+        i= 1
+        for ci in content:      
+            print "%d)" % i,
+            i+=1
+            print " ------ Incremental: FOR: content: ", ci.getPath(), "---------"
+            print "-> Incremental: DateTime: ", DateTime(ci.ModificationDate)
+            
+            #if not last_time is None and DateTime(ci.ModificationDate)<last_time:
+            if (last_time!= None) and (DateTime(ci.ModificationDate)<last_time) :
+                print "-> Incremental: CONTINUE"
                 continue
             
             co = ci.getObject()
-            d = descriptor_factory(co) 
+            if co is  None:
+                print "-> Incremental: CO IS NONE CONTINUE"
+                continue
+            d = descriptor_factory(co)
             if not mastering.prepare(d):
+                print "-> Incremental: NOT MASTERING PREPARE"
                 try: co._p_deactivate()
                 except: pass
                 continue                        
@@ -111,13 +155,12 @@ def IncrementalStrategy(self):
                 
             gc_counter += 1
             if gc_threshold%gc_counter == 0:
-                log.debug('garbage collecting')
+                log.debug('garbage collecting1')
                 self._p_jar._incrgc()
 
         gc_counter = 0
-        
         # add in content from directory views
-
+        
         # handle directory view merging...        
         directory_contents = views.getContent()
         map(uri_resolver.addResource, directory_contents)        
@@ -129,12 +172,10 @@ def IncrementalStrategy(self):
         # we now return you to your regularly scheduled deployment        
         stats('1st pass, content prep', relative='retrieving content')
         mstats('content filtering/prep')
-        log.debug('mastering content %d'%len(descriptors))
-
+        #log.debug('mastering content %d'%len(descriptors))
         for d in descriptors:
-
             ci = d.getContent()
-            #log.debug('%s mastering content (%s) '%(str(ci.absolute_url(1)), str(ci.portal_type)))
+            log.debug('%s mastering content (%s) '%(str(ci.absolute_url(1)), str(ci.portal_type)))
                 
             mastering.cook(d)
             stats( 'cook time' )
@@ -143,7 +184,7 @@ def IncrementalStrategy(self):
                 uri_resolver.resolve(d)
                 stats( 'resolve time' )
             
-            store(d)
+            store(d) 
             stats( 'storage time' )
 
             # ghostify the object
@@ -153,9 +194,8 @@ def IncrementalStrategy(self):
             # check mem pressure
             gc_counter += 1
             if gc_counter % gc_threshold == 0:
-                log.debug('garbage collecting')
+                log.debug('garbage collecting2')
                 self._p_jar._incrgc()
-
             stats('cache fiddle time')
             
             del d
@@ -169,7 +209,6 @@ def IncrementalStrategy(self):
     finally:
         mastering.tearDown()
         structure.unmount()
-        #uri_resolver._p_changed=1
         
     log.debug('deploying content')
     deployer.deploy(structure.getActiveStructure())

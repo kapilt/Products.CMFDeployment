@@ -103,7 +103,23 @@ def initialize(context):
         constructors = ( basic_catalog.addPortalCatalogSourceForm,
                          basic_catalog.addPortalCatalogSource, ),
         visibility = None
+        )
+        
+    incremental_catalog = sources.incremental_catalog
+    context.registerClass(
+        incremental_catalog.IncrementalPortalCatalogSource,
+        permission = 'CMFDeploy: Add Content Source',
+        constructors= (incremental_catalog.addIncrementalPortalCatalogSourceForm, incremental_catalog.addIncrementalPortalCatalogSource, ),
+        visibility = None
         )   
+        
+    dependency_source = sources.dependency_source
+    context.registerClass(
+        dependency_source.DependencySource,
+        permission = 'CMFDeploy: Add Content Source',
+        constructors= (dependency_source.addDependencySourceForm, dependency_source.addDependencySource, ),
+        visibility = None
+        )
 
     context.registerClass(
         PolicyIncrementalIndex,

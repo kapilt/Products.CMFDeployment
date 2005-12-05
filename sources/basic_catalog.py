@@ -39,6 +39,7 @@ class PortalCatalogSource(SimpleItem):
         self.title = title
         
     def getContent(self):
+        #print "basic_catalog: getContent"
         catalog = getToolByName(self, 'portal_catalog')
         objects = catalog()
         return objects
