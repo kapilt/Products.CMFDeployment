@@ -69,7 +69,7 @@ class DependencyManager( PipeSegment ):
         return content
         
     def processDeploy( self, descriptor ): 
-        self.stats ('Deploying dependencies')
+        self.stats ('Deploying dependencies', relative='View deployed')
         self.mstats('Deploying dependencies')
         source = self.policy.getDependencySource()
         if not source:

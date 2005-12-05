@@ -80,9 +80,11 @@ class PipeEnvironmentInitializer( Pipeline ):
         addService("ContentMap", content_map)
         
         stats = TimeStatistics()
+        stats ('Initializing the environnement')
         addService("TimeStatistics", stats)
         
         mstats = MemoryStatistics()
+        mstats('Initializing the environnement')
         addService("MemoryStatistics", mstats)
         
         deletion_source= ctxobj.getDeletionSource()
@@ -98,8 +100,7 @@ class ContentSource( PipeSegment ):
     def process( self, pipe, ctxobj ):
         stats = pipe.services["TimeStatistics"]      
         mstats = pipe.services["MemoryStatistics"]
-        
-        stats ('Getting the content sources')
+        stats ('Getting the content sources', relative='Initializing the environnement')
         mstats('Getting the content sources')
     
         mlen = pipe.vars.get('mount_length', 0)
@@ -127,6 +128,12 @@ class DirectoryViewDeploy( PipeSegment ):
             views.cookViewObject( dvc )
             resolver.resolve( dvc )
             store( dvc )
+
+        stats = pipe.services["TimeStatistics"]      
+        mstats = pipe.services["MemoryStatistics"]
+        
+        stats ('View deployed', relative='Content prepared')
+        mstats('View deployed')  
 
         return content
 
@@ -166,7 +173,7 @@ class ContentPreparation( PipeSegment ):
         stats = pipe.services["TimeStatistics"]      
         mstats = pipe.services["MemoryStatistics"]
         
-        stats ('Content prepared')
+        stats ('Content prepared', relative='Getting the content sources')
         mstats('Content prepared')  
         return descriptors
 
@@ -194,10 +201,22 @@ class ContentProcessPipe( PipeSegment ):
                 resolver.resolve( desc )
                 
             store( desc )
+        
+        stats = pipe.services["TimeStatistics"]      
+        mstats = pipe.services["MemoryStatistics"]
+        
+        stats ('Processing the content', relative='Deploying dependencies')
+        mstats('Processing the content')
        
 class ContentDeletionPipeline( PipeSegment ):
 
     def process( self, pipe, ctxobj):
+        stats = pipe.services["TimeStatistics"]      
+        mstats = pipe.services["MemoryStatistics"]
+        
+        stats ('Taking care of the deleted content', relative='Processing the content')
+        mstats('Taking care of the deleted content')
+       
         #delete deleted_records from the filesystem      
         deletion_source = pipe.services['DeletionSource']
         deleted_records= deletion_source.getContent()
