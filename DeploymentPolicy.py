@@ -176,8 +176,9 @@ class DeploymentPolicy(Folder):
 
     def manage_afterAdd(self, item, container):
         catalog_tool = getToolByName(self, "portal_catalog")
-        catalog_tool.manage_addIndex('plone_example_incremental_idx', 'PolicyIncrementalIndex', self.id)
-        catalog_tool.manage_addColumn('plone_example_incremental_idx')
+        policy_id = self.getId()
+        catalog_tool.manage_addIndex(policy_id+'_incremental_idx', 'PolicyIncrementalIndex', self.id)
+        catalog_tool.manage_addColumn(policy_id+'_incremental_idx')
         
         import DefaultConfiguration
         DefaultConfiguration.install(self)
