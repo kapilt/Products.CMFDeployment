@@ -61,16 +61,17 @@ class DependencyManager( PipeSegment ):
         self.mastering = self.policy.getContentMastering()
         self.policy_id = self.policy.getId()
         self.catalog= getToolByName(self.policy, "portal_catalog")
-        self.stats = pipe.services["TimeStatistics"]      
-        self.mstats = pipe.services["MemoryStatistics"]
+        stats = pipe.services["TimeStatistics"]      
+        mstats = pipe.services["MemoryStatistics"]
+        stats ('Deploying dependencies', relative='View deployed')
+        mstats('Deploying dependencies')
+
         for c in content:
             self.processDeploy(c)
         
         return content
         
     def processDeploy( self, descriptor ): 
-        self.stats ('Deploying dependencies', relative='View deployed')
-        self.mstats('Deploying dependencies')
         source = self.policy.getDependencySource()
         if not source:
             return
@@ -97,7 +98,7 @@ class DependencyManager( PipeSegment ):
         for dep in descriptor.getDescriptors():
             if iidx.isObjectDeployed( dep ):
                 continue
-            self.mastering.prepare(desc)
+            self.mastering.prepare(dep)
             source.addObject( dep )
             
         
