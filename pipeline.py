@@ -154,28 +154,36 @@ class ContentPreparation( PipeSegment ):
     implements( IProducerConsumer )
 
     def process( self, pipe, content):
+        descriptors= [] #list of the descriptors returned
+        while True:
+            try:
+                co = content.next().getObject()
+                if not co: continue
+                descriptor = self.processContent(pipe, co)
+                if descriptor:
+                    descriptors.append(descriptor)
+                try: co._p_deactivate()
+                except: pass
+            except StopIteration:
+                stats = pipe.services["TimeStatistics"]      
+                mstats = pipe.services["MemoryStatistics"]
+                
+                stats ('Content prepared', relative='Getting the content sources')
+                mstats('Content prepared')  
+                return descriptors
+
+    def processContent(self, pipe, co):
         factory = pipe.services["DescriptorFactory"]
         mastering = pipe.services["ContentMastering"]
         resolver = pipe.services['URIResolver']
         
-        descriptors= [] #list of the descriptors returned
-        while (True):
-            try:
-                cont= content.next().getObject()
-                descriptor = factory( cont )
-                if not mastering.prepare( descriptor ):
-                    pass
-                resolver.addResource( descriptor )
-                descriptors.append(descriptor)
-            except:
-                break   
-          
-        stats = pipe.services["TimeStatistics"]      
-        mstats = pipe.services["MemoryStatistics"]
-        
-        stats ('Content prepared', relative='Getting the content sources')
-        mstats('Content prepared')  
-        return descriptors
+        descriptor = factory( co )
+        if not mastering.prepare( descriptor ):
+            try: co._p_deactivate()
+            except: pass
+            return None
+        resolver.addResource( descriptor )
+        return descriptor
 
     
 class ContentProcessPipe( PipeSegment ):
