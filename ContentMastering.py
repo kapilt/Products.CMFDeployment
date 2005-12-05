@@ -127,7 +127,7 @@ class ContentMastering(Folder):
             if m.isValid(descriptor, ctx):
                 m.process( descriptor, ctx )
                 return True
-        log.debug('no mime mapping (%s)->(%s)'%(str(c.portal_type), descriptor.content_url))
+        #log.debug('no mime mapping (%s)->(%s)'%(str(c.portal_type), descriptor.content_url))
         return None
 
     def cook(self, descriptor):
@@ -151,14 +151,13 @@ class ContentMastering(Folder):
             self.renderContent( descriptor )
 
     def renderContent( self, descriptor ):
-            
         c = descriptor.getContent()
         vm = descriptor.getRenderMethod()
 
         if vm is None: # XXX redundant
             descriptor.setGhost(1)
             return
-        
+            
         render = getattr(c, vm, None) or getattr(c, '__call__', None)
                                                  
         if render is None:
@@ -166,7 +165,7 @@ class ContentMastering(Folder):
                 log.error(" couldn't find render method for %s %s"%( str(descriptor.content_url), str(c.getPortalTypeName()) ))
             except Exception, e:
                 print e
-                      
+                   
         # this is just a tad verbose..
         #log.debug('rendering %s %s %s'%(c.getId(), vm, str(render)))
 
@@ -179,7 +178,7 @@ class ContentMastering(Folder):
             else:
                 descriptor.setRendered(render())
         except:
-            log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
+            #log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
             descriptor.setGhost(1) # ghostify it        
             raise
     #################################
@@ -219,7 +218,7 @@ class SiteChainSkin(SimpleItem):
 
     def lock(self):
         if not self.enable or self._v_active or not self.skin_name:
-            log.debug('deployment skin not enabled')
+            #log.debug('deployment skin not enabled')
             return
 
         portal = getToolByName(self, 'portal_url').getPortalObject()
@@ -288,7 +287,7 @@ class SiteChainUser(SimpleItem):
     def lock(self):
 
         if not self.enable or not self.userid or not self.udb_path:
-            log.debug('not chaining user')
+            #log.debug('not chaining user')
             return
         
         from AccessControl import User

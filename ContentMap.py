@@ -28,32 +28,21 @@ class ContentMap(SimpleItem):
         
     def getKeyURL(self, descriptor):
         relative_url = descriptor.getSourcePath() or descriptor.content_url
-        #print "\n***** relative_url: ", relative_url
         content_path = descriptor.getContentPath()
         
         if content_path is None:
             content_path=''
-            mlen = len(self.resolver.mount_path)
-            #print "mlen: ", mlen
-                
-            #print "coupage 1: ", relative_url.rfind('/')             
+            mlen = len(self.resolver.mount_path)                
             url_context  = relative_url[:relative_url.rfind('/')]
-            #print "url_context: ", url_context
             cut2= url_context.rfind('/')
-            #print "coupage 2: ", cut2 
             if (cut2 != -1):
                 content_path = url_context[url_context.rfind('/'):]
-            #print "-> content_path: ", content_path       
-            
-            #print "filename: ", descriptor.getFileName()
-            #print "target: ", self.resolver.target_path
 
         nu = normalize('/'.join( (self.resolver.target_path,
                                             content_path,
                                             descriptor.getFileName() ) ),
                                  '/'
                                  )
-        #print "nu: ", nu
         return nu
         
         
@@ -63,7 +52,6 @@ class ContentMap(SimpleItem):
         result= self.content_map.get(nu)
         if (not result):
             result= []
-        #print "####### ContentMap: getReverseDependencies: result: ", result
         return result
         
         
@@ -74,7 +62,6 @@ class ContentMap(SimpleItem):
     def clean(self, descriptor):
         #clean the content map when an object has been deleted
         #remove all the urls in the contentmap 
-        #print "####### ContentMap: clean"
         key_url = self.getKeyURL(descriptor)
         if key_url in self.content_map.items():
             del self.content_map[key_url]
