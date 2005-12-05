@@ -41,7 +41,7 @@ DeploymentStrategy    = 'DeploymentStrategy'
 
 ContentTransforms     = 'transforms'
 ContentMap            = 'ContentMap'
-DependencySource      = 'DependencySource'
+#DependencySource      = 'DependencySource'
 DeletionSource        = 'DeletionSource'
 
 
@@ -57,8 +57,9 @@ from ContentDirectoryViews import ContentDirectoryView as KlassContentDirectoryV
 from ContentURI import ContentURI as KlassContentURI
 from ContentTransforms import ContentTransforms as KlassContentTransforms
 from ContentMap import ContentMap as KlassContentMap
-from dependencies import DependencySource as KlassDependencySource
+#from dependencies import DependencySource as KlassDependencySource
 from incremental import DeletionSource as KlassDeletionSource
+from Products.CMFCore.utils import getToolByName
 
 def add_structure(policy):
 
@@ -66,7 +67,6 @@ def add_structure(policy):
     policy._setObject(ContentOrganization, ob)
 
 def add_identification(policy):
-
     ob = KlassContentIdentification(ContentIdentification)
     policy._setObject(ContentIdentification, ob)
 
@@ -110,12 +110,13 @@ def add_content_map (policy):
     ob = KlassContentMap(ContentMap, resolver)
     policy._setObject(ContentMap, ob)
         
-def add_dependency_source (policy):
-    ob= KlassDependencySource(DependencySource)
-    policy._setObject(DependencySource, ob)
+#def add_dependency_source (policy):
+#    ob= KlassDependencySource(DependencySource)
+#    policy._setObject(DependencySource, ob)
         
 def add_deletion_source (policy):
-    ob= KlassDeletionSource(DeletionSource)
+    portal  = getToolByName(policy, 'portal_url').getPortalObject()
+    ob= KlassDeletionSource(DeletionSource, portal)
     policy._setObject(DeletionSource, ob)
 
 
@@ -130,7 +131,7 @@ _add_funcs = [
     ( ContentURIs, add_uris ),
     ( ContentTransforms, add_filter ),
     ( ContentMap, add_content_map ),
-    ( DependencySource, add_dependency_source ),
+    #( DependencySource, add_dependency_source ),
     ( DeletionSource, add_deletion_source ),
     ]
 
