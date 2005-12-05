@@ -90,6 +90,7 @@ from BTrees.Length import Length
 from BTrees.IOBTree import IOBTree
 from Products.PluginIndexes.common.PluggableIndex import PluggableIndexInterface
 from Descriptor import DescriptorFactory
+from ContentIdentification import getFilterExprContext
 
 
 #################################
@@ -119,15 +120,16 @@ class DeletionSource( SimpleItem ):
     stores records for content deleted through the portal lifecycle.
     """
 
-    def __init__(self, id):
+    def __init__(self, id, portal=None):
         self.id = id
         self._records = []
+        self.portal = portal
 
     def getContent( self ):
         return self.destructiveIter()
         
     def destructiveIter(self):
-        for rec in self._records:
+        for rec in self._records:               
             yield rec
         self._records = []
 
@@ -255,8 +257,7 @@ class PolicyIncrementalIndex( SimpleItem ):
         dtool = getToolByName( self, 'portal_deployment')
         policy = dtool._getOb( self.policy_id )
 
-        sources = policy.getContentSources()
-        deletion_source = sources._getOb('deletion_source', None)
+        deletion_source = policy.getDeletionSource()
         
         if deletion_source is None:
             return
@@ -284,7 +285,6 @@ class PolicyIncrementalIndex( SimpleItem ):
         return self._length()
 
     def clear(self):
-        print "Incremental: CLEAR"
         # i can't do that jim ;-)
         return
 

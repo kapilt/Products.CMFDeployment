@@ -2,12 +2,13 @@ from segments import *
 from ContentStorage import ContentStorage
 from Descriptor import DescriptorFactory
 from Products.CMFDeployment import incremental
+from Products.CMFDeployment.Statistics import TimeStatistics, MemoryStatistics
+import os, shutil
 
 class PolicyPipeline( Pipeline ):
     
     def __call__( self, policy):
         self.process( policy)
-
 
 class PipeEnvironmentInitializer( Pipeline ):
 
@@ -77,18 +78,36 @@ class PipeEnvironmentInitializer( Pipeline ):
         
         content_map= ctxobj.getContentMap()
         addService("ContentMap", content_map)
+        
+        stats = TimeStatistics()
+        addService("TimeStatistics", stats)
+        
+        mstats = MemoryStatistics()
+        addService("MemoryStatistics", mstats)
+        
+        deletion_source= ctxobj.getDeletionSource()
+        addService("DeletionSource", deletion_source)
+        
+        dependency_source= ctxobj.getDependencySource()
+        addService("DependencySource", dependency_source)
 
 class ContentSource( PipeSegment ):
 
     implements( IProducer )
 
     def process( self, pipe, ctxobj ):
-        getService = pipe.services.__getitem__
-        mlen = pipe.vars.get('mount_length', 0)
-        source = getService("ContentIdentification")
+        stats = pipe.services["TimeStatistics"]      
+        mstats = pipe.services["MemoryStatistics"]
         
-        #print "pipeline: ContentSource: ", source.getContent(mount_length = mlen)
-        return source.getContent(mount_length = mlen)
+        stats ('Getting the content sources')
+        mstats('Getting the content sources')
+    
+        mlen = pipe.vars.get('mount_length', 0)
+        source = pipe.services["ContentIdentification"]
+        
+        history = pipe.services["ContentHistory"]
+        last_time = history.getLastTime()
+        return source.getContent(last_time, mount_length = mlen)
 
 class DirectoryViewDeploy( PipeSegment ):
     """
@@ -117,7 +136,6 @@ class ContentTransport( PipeSegment ):
         transports = pipe.services['ContentTransports']
         organization = pipe.services['ContentOrganization']
         transports.deploy( organization.getActiveStructure() )
-        return ctxobj
 
 
 class ContentPreparation( PipeSegment ):
@@ -128,37 +146,29 @@ class ContentPreparation( PipeSegment ):
     
     implements( IProducerConsumer )
 
-    def __init__(self):
-        self.prepared = []
-
     def process( self, pipe, content):
-            return self.processContent(pipe, content)
-
-    def processContent( self, pipe, content ):
         factory = pipe.services["DescriptorFactory"]
         mastering = pipe.services["ContentMastering"]
         resolver = pipe.services['URIResolver']
         
         descriptors= [] #list of the descriptors returned
         while (True):
-            #content = self.getContent( content )
             try:
-                descriptor = factory( content.next().getObject() )
+                cont= content.next().getObject()
+                descriptor = factory( cont )
+                if not mastering.prepare( descriptor ):
+                    pass
+                resolver.addResource( descriptor )
+                descriptors.append(descriptor)
             except:
-                return descriptors    
-            if not mastering.prepare( descriptor ):
-                try: content._p_deactivate()
-                except: pass
-                return []
-
-            resolver.addResource( descriptor )
-            descriptors.append(descriptor)
-            
-        #print "pipeline: ContentPreparation: ", descriptors
+                break   
+          
+        stats = pipe.services["TimeStatistics"]      
+        mstats = pipe.services["MemoryStatistics"]
+        
+        stats ('Content prepared')
+        mstats('Content prepared')  
         return descriptors
-
-    def getContent( self, ctxobj ):
-        return ctxobj.next().getObject()
 
     
 class ContentProcessPipe( PipeSegment ):
@@ -167,8 +177,15 @@ class ContentProcessPipe( PipeSegment ):
         mastering = pipe.services["ContentMastering"]
         resolver = pipe.services['URIResolver']
         store = pipe.services["ContentStorage"]
+        dependency_source = pipe.services["DependencySource"]
+        ds = dependency_source.getContent()
+        while True:
+            try:
+                d = ds.next()
+                descriptor.append(d)
+            except StopIteration:
+                break
         
-        #print "pipeline: ContentProcessPipe desc: ", descriptor
         for desc in descriptor:
             mastering.cook(desc)
             content = desc.getContent()
@@ -177,9 +194,59 @@ class ContentProcessPipe( PipeSegment ):
                 resolver.resolve( desc )
                 
             store( desc )
-        return descriptor
-        
+       
+class ContentDeletionPipeline( PipeSegment ):
 
+    def process( self, pipe, ctxobj):
+        #delete deleted_records from the filesystem      
+        deletion_source = pipe.services['DeletionSource']
+        deleted_records= deletion_source.getContent()
+        
+        organization = pipe.services['ContentOrganization']
+        structure = organization.getActiveStructure()
+        content_map= pipe.services['ContentMap']
+        
+        #take the reverse dependencies of the deleted_records
+        #no need to clean the deletion source and the dep. source
+        try:
+            while True:
+                record = deleted_records.next()
+                descriptor= record.descriptor
+                filename = descriptor.getFileName()
+                content_path = structure.getContentPathFromDescriptor(descriptor)
+                #if the content_path is None, the object has been unindexed
+                if descriptor.getId() == ".personal":
+                    continue
+                location = os.sep.join( ( content_path, filename) )
+                if descriptor.isContentFolderish():
+                    shutil.rmtree(content_path)
+                else:
+                    os.remove(location)
+                    
+                #we clean the content map, deleting all the links on the descriptor
+                content_map.clean(descriptor)
+        
+        except StopIteration:         
+            return
+           
+
+class ContentWatchEnd( PipeSegment ):
+
+    implements( IWatcher )
+
+    def process( self, pipe, descriptor):
+    
+        stats = pipe.services["TimeStatistics"]      
+        mstats = pipe.services["MemoryStatistics"]
+        
+        stats ('pipeline processed')
+        mstats('pipeline processed')
+    
+        stats.stop()
+        mstats.stop()
+    
+        block = stats.pprint() + '\n\n' +mstats.pprint()
+        return block
 
 #################################
 # pipeline - todo conditional matching on record or descriptor        
