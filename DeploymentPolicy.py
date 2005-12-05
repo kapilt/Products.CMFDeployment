@@ -36,6 +36,7 @@ from Descriptor import ContentDescriptor
 from ComputedAttribute import ComputedAttribute
 from DeploymentInterfaces import IDeploymentPolicy
 from Products.CMFCore.utils import getToolByName
+from OFS.ObjectManager import ObjectManager
 
 class DeploymentPolicy(Folder):
 
@@ -179,8 +180,15 @@ class DeploymentPolicy(Folder):
         policy_id = self.getId()
         catalog_tool.manage_addIndex(policy_id+'_incremental_idx', 'PolicyIncrementalIndex', self.id)
         catalog_tool.manage_addColumn(policy_id+'_incremental_idx')
-        
         import DefaultConfiguration
         DefaultConfiguration.install(self)
     
+
+    def manage_beforeDelete(self, item, container):
+        catalog_tool = getToolByName(self, "portal_catalog")
+        policy_id = self.getId()
+        catalog_tool.manage_delIndex(policy_id+'_incremental_idx')
+        catalog_tool.manage_delColumn(policy_id+'_incremental_idx')
+        ObjectManager.manage_beforeDelete(self, item, container)
+
 InitializeClass(DeploymentPolicy)
