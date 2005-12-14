@@ -94,4 +94,9 @@ def initialize(context):
                          crule.addContentRule ),
         visibility = None
         )
+
+    context.registerClass(
+        ContentIdentification.ZopeFindSource,
+        permission = 'CMFDeploy: Add Deployment Source',
+        constructors=(ContentIdentification.addZopeFindsource,))
         

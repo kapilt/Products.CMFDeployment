@@ -95,6 +95,7 @@ class DirectoryViewRule( SimpleItem ):
 
     security.declareProtected(CMFCorePermissions.ManagePortal, 'edit')
     def edit(self, view_path, source_path, deployment_path, RESPONSE=None):
+        """edit"""
         cdv = self.getParentNode()
         if not cdv.isValidDirectoryView( view_path.strip() ):
             raise InvalidDirectoryView("%s is not valid"%str(view_path)) 

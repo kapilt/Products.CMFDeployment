@@ -152,7 +152,14 @@ class DeploymentPolicy(Folder):
         history.recordStatistics(display)
         histories.attachHistory(history)
 
+        # explicitly set response status, to avoid any potential redirects
+        # as a side affect from rendered content.
         if RESPONSE:
+            RESPONSE.setStatus(200)
+            try:
+                del RESPONSE.headers['location']
+            except KeyError:
+                pass
             return "<html><pre>%s</pre></body</html>"%display
         return True
 
