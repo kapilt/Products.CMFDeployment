@@ -165,3 +165,13 @@ class ContentDescriptor(object):
             
     def getChildDescriptors(self):
         return self.child_descriptors
+
+
+    #################################
+    # dependency management
+
+    def getDependencies( self ):
+        return ()
+
+    def getReverseDependencies( self ):
+        return ()

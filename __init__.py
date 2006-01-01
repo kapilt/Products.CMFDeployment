@@ -94,12 +94,48 @@ def initialize(context):
         visibility = None
         )
 
-    basic_catalog = sources.basic_catalog
+    catalog = sources.catalog
     context.registerClass(
-        basic_catalog.PortalCatalogSource,
+        catalog.PortalCatalogSource,
         permission = 'CMFDeploy: Add Content Source',
-        constructors = ( basic_catalog.addPortalCatalogSourceForm,
-                         basic_catalog.addPortalCatalogSource, ),
+        constructors = ( catalog.addPortalCatalogSourceForm,
+                         catalog.addPortalCatalogSource, ),
+        visibility = None
+        )
+
+    context.registerClass(
+        catalog.IncrementalCatalogSource,
+        permission = 'CMFDeploy: Add Content Source',        
+        constructors = ( catalog.addIncrementalCatalogSourceForm,
+                         catalog.addIncrementalCatalogSource, ),
         visibility = None
         )
         
+    dependency = sources.dependency
+    context.registerClass(
+        dependency.DependencySource,
+        permission = 'CMFDeploy: Add Content Source',
+        constructors= (dependency.addDependencySourceForm,
+                       dependency.addDependencySource, ),
+        visibility = None
+        )
+
+    deletion = sources.deletion
+    context.registerClass(
+        deletion.DeletionSource,
+        permission = 'CMFDeploy: Add Content Source',
+        constructors= (deletion.addDeletionSourceForm,
+                       deletion.addDeletionSource, ),
+        visibility = None
+        )
+
+##     context.registerClass(
+##         PolicyIncrementalIndex,
+##         permission = 'Add Pluggable Index',
+##         constructors = (incremental.manage_addPolicyIncrementalIndexForm,
+##                         incremental.manage_addPolicyIncrementalIndex,
+##                         incremental.getIndexTypes,
+##                         ),
+##         icon='www/index.gif',
+##         visibility=None
+##         )    

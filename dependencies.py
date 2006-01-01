@@ -45,34 +45,6 @@ from DeploymentInterfaces import IContentSource
 
 from incremental import getIncrementalIndexId
 
-class DependencySource( SimpleItem ):
-    """
-    """
-    
-    meta_type = "Dependency Source"
-    
-    __implements__ = IContentSource
-    
-    def __init__(self, id, title=""):
-        self.id = id
-        self.title = title
-        self._queue = []
-
-    def getContent(self):
-        return self.destructiveIter()
-
-    def destructiveIter(self):
-        for rec in self._queue:
-            yield rec
-        self._queue = []
-        
-    def addObject( self, object ):
-        self._queue.append( object )
-        self._p_changed = 1
-        
-InitializeClass( DependencySource )
-
-
 class DependencyManager( SimpleItem ):
 
     def __init__(self, id, policy_id=None):
@@ -92,17 +64,18 @@ class DependencyManager( SimpleItem ):
         for rdep in descriptor.getReverseDependencies():
             source.addObject( rdep )
 
+        # XXX disable for now.
         # deploy objects that are needed by descriptor
         #  - check first that they aren't already deployed
-        iidx = self.getIncrementalIndex()
+        #iidx = self.getIncrementalIndex()
 
         for dep in descriptor.getDependencies():
-            if iidx.isObjectDeployed( dep ):
-                continue
+            #if iidx.isObjectDeployed( dep ):
+            #    continue
             source.addObject( dep )
 
     def processRemoval( self, record ):
-        # XXX deletion record record deps on creation
+        # XXX deletion record needs to record deps on creation
         source = self.getDependencySource()
         if not source:
             return None

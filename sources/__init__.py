@@ -2,4 +2,6 @@
 $Id$
 """
 
-import basic_catalog
+import catalog
+import deletion
+import dependency

@@ -42,7 +42,7 @@ in the diagram of an execution pipeline below.
 
    Dependency Source
 
-    a source for deletions, as injected by the dependency manager.
+    a source for dependencies, as injected by the dependency manager.
 
    the dependency plugin content source is injected to during
    the pipeline execution. a duplicate eliminating filter needs
@@ -111,32 +111,6 @@ class DeletionRecord( object ):
 
     def __init__(self, descriptor ):
         self.descriptor = descriptor
-
-
-class DeletionSource( SimpleItem ):
-    """
-    stores records for content deleted through the portal lifecycle.
-    """
-
-    def __init__(self, id, title=""):
-        self.id = id
-        self._records = []
-
-    def getContent( self ):
-        return self.destructiveIter()
-        
-    def destructiveIter(self):
-        for rec in self._records:
-            yield rec
-        self._records = []
-
-    def addRecord( self, record ):
-        self._records.append( record )
-        self._p_changed = 1
-
-    def manage_beforeDelete( self, item, container):
-        # check on removal of incremental index
-        pass
 
 
 def getIncrementalIndexId( policy ):
