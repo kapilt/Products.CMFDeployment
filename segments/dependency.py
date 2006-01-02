@@ -38,12 +38,9 @@ Author: Kapil Thangavelu <hazmat@objectrealms.net>
 $Id$
 """
 
-from Namespace import *
-from BTrees.OOBTree import OOBTree
-from BTrees.IOBTree import IOBTree
-from DeploymentInterfaces import IContentSource
 
-from incremental import getIncrementalIndexId
+from Products.CMFDeployment.Namespace import *
+from Products.CMFDeployment.incremental import getIncrementalIndexId
 
 class DependencyManager( SimpleItem ):
 
