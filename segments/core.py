@@ -2,6 +2,9 @@
 $Id$
 """
 
+
+OUTPUT_FILTERED = object()
+
 def implements( iface ): pass
 
 class IPipeline( object ):

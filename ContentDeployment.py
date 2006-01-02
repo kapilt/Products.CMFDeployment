@@ -69,6 +69,3 @@ class ContentDeployment( OrderedFolder ):
 
 InitializeClass( ContentDeployment )
 
-
-#################################
-# all transports/protocols/thingies moved to transport package

@@ -29,8 +29,8 @@ $Id$
 """
 
 from Interface import Base as Interface
-from Log import LogFactory
-from Statistics import IOStatistics
+from Products.CMFDeployment.Log import LogFactory
+from Products.CMFDeployment.Statistics import IOStatistics
 
 from os import sep, path, mkdir
 log = LogFactory('Content Storage')
@@ -47,8 +47,19 @@ class IContentStorage(Interface):
 
     def store(self, descriptor):
         """
-        
         """
+
+class StorageManifest( object ):
+
+    def __init__(self):
+        self._items = []
+
+    def add(self, path ):
+        pass
+
+    def remove( self, path ):
+        pass
+
 
 class ContentStorage:
 

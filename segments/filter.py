@@ -2,39 +2,38 @@
 $Id$
 """
 
-class ContentFilterSegment( object ):
+from core import PipelineSegment, OUTPUT_FILTERED
 
-    def process( self, pipe, brain ):
+class ContentFilterSegment( PipelineSegment ):
 
+    def process( self, pipe, content ):
         restricted = self.getRestrictedId( pipe )
-        mount_length = self.getMountPointPathLength( pipe )
+        mount_length = pipe.variables['mount_length']
+        
         portal = self.getPortal( pipe )
         
-        path = brain.getPath()
+        path = "/".join( content.getPhysicalPath() )[mount_length:]
         for rst in restricted:
             if rst in path:
                 return None
 
-        ec = getFilterExprContext( c, portal )
+        ec = getFilterExprContext( content, portal )
 
         for f in self.getFilters( pipe ):
             if isinstance( f, ContentFilter) and not f.filter(fc):
                 log.debug('Filtered Out (%s) (%s)->(%s)'%(f.getId(), c.portal_type, c.getPath()))
-                return None
-            elif not f(c):
+                return OUTPUT_FILTERED
+            elif not f(content):
                 log.debug('Scripted Out (%s) (%s)->(%s)'%(s.getId(), c.portal_type, c.getPath()))
-                return None
-        return f
-        
+                return OUTPUT_FILTERED
+        return content
         
     def getRestrictedIds(self, pipe):
-        pass
-
-    def getMountPointPathLength( self, pipe ):
-        pass
+        structure = pipe.services['ContentOrganization'].getActiveStructure()
+        return tuple( structure.restricted )
 
     def getPortal(self, pipe):
-        pass
+        return pipe.services['ContentOrganization'].portal_url.getPortalObject()
         
         
 
