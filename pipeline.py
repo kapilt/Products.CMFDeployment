@@ -1,57 +1,85 @@
-from segments import *
+import segments
 
-class PolicyPipeline( Pipeline ):
-
-    def __call__( self, policy ):
-        self.process( policy )
+from segments.core import Pipeline, PolicyPipeline, PipeExecutor
 
 
 
-class ContentPreparation( PipeSegment ):
-    pass
-    
+class PipelineFactory( object ):
 
+    id = None
 
-#################################
-# pipeline - todo conditional matching on record or descriptor        
-# segment - uindex / dependency manager /
-
-class DeletionPipeline( object ):
-
-    def condition(self):
-
-    def process( self, record ):
+    def __call__( self ):
         pass
 
-"""
+    def finishPolicyConstruction( self, policy ):
+        pass
 
-  initializer [ policy ] -> policy
-  directoryviewdeploy [ policy ] -> policy
-  content source [ policy ] -> content stream
-    iterator
-  
-  
-  
-"""
+    def cleanupPolicyRemoval( self, policy ):
+        pass
+    
 
-class DefaultPolicyPipeline( object ):
+class IncrementalPipelineFactory( PipelineFactory ):
     
-    step_factories = [ PipeEnvironmentInitializer,
-                       ContentSource,
-                       ContentPrepPipe,
-                       DirectoryViewDeploy,
-                       ContentProcessPipe ]
-    
-IncrementalPipeline = Pipeline(
-    steps = ( PipeEnvironmentInitializer(),
-              ContentSource(),
-              ConditionalBranch(
-                      
-              Iterator( ( ContentPrepPipeline, ) ),
-              DirectoryViewDeploy(),
+    id = 'incremental'
+
+    def __call__( self ):
+
+        deletion_pipeline = self.constructDeletionPipeline()
+        content_pipeline = self.constructContentPipeline()
+        dv_pipeline = self.constructDirectoryViewPipeline()
+
+        policy_pipeline = PolicyPipeline( 
+            steps = (
+               segments.environment.PipeEnvironmentInitializer(),
+               dv_pipeline,
+               deletion_pipeline,
+               content_pipeline,
+               segments.transport.ContentTransport()
+               )
+            )
+
+        return policy_pipeline
+
+        
+
+    def finishPolicyConstruction( self, policy ):
+
+        import incremental
+
+        catalog = getToolByName( policy, 'portal_catalog' )
+        pidx_id = "%s-%s"%(policy.getId(), "policy_index")
+        catalog.manage_addIndex( pidx_id,
+                                 incremental.PolicyIncrementalIndex.meta_type )
+
+    def cleanupPolicyRemoval( self, policy ):
+        pass
               
-         
 
-        
-        
-        
+    #################################
+    # private methods for easy subclass construction
+    def constructContentPipeline( self ):
+        return PipeExecutor(
+            
+            steps = (
+                segments.source.ContentSource(),
+                segments.filter.ContentFilter(),
+                segments.rule.ContentRuleMatch(),
+                segments.dependency.DeployDependencyInjector(),
+                segments.render.ContentRender(),
+                segments.resolver.ResolverDatabase(),
+                segments.storage.ContentStorage(),
+                )
+            )
+
+    def constructDeletionPipeline( self ):
+        return PipeExecutor(
+            steps = (
+                segments.source.ContentDeletion(),
+                segments.dependency.RemovalDependencyInjector(),
+                segments.resolver.ResolverRemoval(),
+                segments.storage.ContentRemoval()
+                )
+            )
+
+    def constructDirectoryViewPipeline( self ):
+        return segments.directoryview.DirectoryViewDeploy()

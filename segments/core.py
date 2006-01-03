@@ -2,7 +2,7 @@
 $Id$
 """
 
-from interfaces import implements, IPipeline, IPipeSegment, IFilter, IProducer
+from interfaces import *
 
 #################################
 
@@ -29,6 +29,9 @@ class Pipeline( object ):
     def process( self, context ):
         for s in self:
             context = s.process( self, context )
+
+class PolicyPipeline( Pipeline ): pass
+
 
 class PipeExecutor( object ):
     """

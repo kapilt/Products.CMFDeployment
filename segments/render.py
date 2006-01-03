@@ -9,7 +9,3 @@ class ContentRender( PipeSegment ):
         rules.cook( descriptor )
         return descriptor
     
-        if not descriptor.isGhost():
-            resolver.resolve( descriptor )
-            
-        store( descriptor )

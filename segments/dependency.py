@@ -38,22 +38,16 @@ Author: Kapil Thangavelu <hazmat@objectrealms.net>
 $Id$
 """
 
+from core import PipeSegment
 
-from Products.CMFDeployment.Namespace import *
-from Products.CMFDeployment.incremental import getIncrementalIndexId
-
-class DependencyManager( SimpleItem ):
-
-    def __init__(self, id, policy_id=None):
-        self.id = id
-        self.policy_id = policy_id
+class DependencyManager( object ):
         
-    def processDeploy( self, descriptor ):
+    def processDeploy( self, pipe, descriptor ):
         dependencies = descriptor.getDependencies()
         if not dependencies:
             return
 
-        source = self.getDependencySource()
+        source = self.getDependencySource( pipe )
         if not source:
             return
 
@@ -71,22 +65,30 @@ class DependencyManager( SimpleItem ):
             #    continue
             source.addObject( dep )
 
-    def processRemoval( self, record ):
+    def processRemoval( self, pipe, record ):
         # XXX deletion record needs to record deps on creation
-        source = self.getDependencySource()
+        source = self.getDependencySource( pipe )
         if not source:
             return None
         
         for rdep in record.getReverseDependencies():
             source.addObject( rdep )
             
-    def getIncrementalIndex(self):
-        policy = self.getDeploymentPolicy()
-        return getIncrementalIndex( policy )
+##     def getIncrementalIndex(self):
+##         policy = self.getDeploymentPolicy()
+##         return getIncrementalIndex( policy )
     
     def getDependencySource(self):
-        sources = self.getContentSources()
-        source = sources._getOb( 'dependency_source', None)
+        source = pipe.services['ContentDependencySource']
         return source
         
-InitializeClass( DependencyManager )        
+
+
+class DeployDependencyInjector( PipeSegment, DependencyManager ):
+
+    process = DependencyManager.processDeploy
+
+
+class RemovalDependencyInjector( PipeSegment, DependencyManager ):
+
+    process = DependencyManager.processRemoval

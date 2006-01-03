@@ -2,9 +2,9 @@
 $Id$
 """
 
-from core import PipelineSegment, OUTPUT_FILTERED
+from core import Filter, OUTPUT_FILTERED
 
-class ContentFilterSegment( PipelineSegment ):
+class ContentFilter( Filter ):
 
     def process( self, pipe, content ):
         restricted = self.getRestrictedId( pipe )

@@ -2,6 +2,8 @@
 $Id$
 """
 
+__all__ = ['IPipeline', 'IPipeSegment', 'IProducer', 'IConsumer', 'IFilter', 'implements']
+
 try:
     from zope.interface import Interface, Attribute, implements
 except ImportError:
@@ -40,7 +42,7 @@ class IConsumer( IPipeSegment ):
     value.
     """
 
-class IFilter( ProducerConsumer ):
+class IFilter( IPipeSegment ):
     """
     a pipeline segment that conditionally filters input, if the output
     is filtered, returns OUTPUT_FILTERED marker value, and subsequent

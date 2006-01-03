@@ -28,26 +28,13 @@ Created: 8/10/2002
 $Id$
 """
 
-from Interface import Base as Interface
-from Products.CMFDeployment.Log import LogFactory
-from Products.CMFDeployment.Statistics import IOStatistics
+from core import Consumer
+
+#from Products.CMFDeployment.Log import LogFactory
+#from Products.CMFDeployment.Statistics import IOStatistics
 
 from os import sep, path, mkdir
-log = LogFactory('Content Storage')
-
-class IContentStorage(Interface):
-    """
-    convienent point of collecting stats, and
-    centralizing storage of rendered content.
-
-    actual storage location is determined by
-    content organization. should get refactored
-    over here.
-    """
-
-    def store(self, descriptor):
-        """
-        """
+#log = LogFactory('Content Storage')
 
 class StorageManifest( object ):
 
@@ -61,7 +48,7 @@ class StorageManifest( object ):
         pass
 
 
-class ContentStorage:
+class ContentStorage(Consumer):
 
     def __init__(self, ctx):
         self.stats = IOStatistics()

@@ -2,16 +2,13 @@
 $Id$
 """
 
-from interfaces import implements
-from core import PipeSegment
+from core import Filter
 
-class ContentRuleMatch( PipeSegment ):
+class ContentRuleMatch( Filter ):
     """
     prepares a piece of content to be deployed, determines matching
     rulel, creates descriptor, and adds to uri resolver.
     """
-    
-    implements( IProducerConsumer )
 
     def __init__(self):
         self.prepared = []
