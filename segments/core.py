@@ -2,36 +2,21 @@
 $Id$
 """
 
+from interfaces import implements, IPipeline, IPipeSegment, IFilter, IProducer
+
+#################################
 
 OUTPUT_FILTERED = object()
 
-def implements( iface ): pass
-
-class IPipeline( object ):
-    services = " "
-    vars = " "
-    steps = " "
-
-    def process( context ): pass
-
-class IPipeSegment( object ):
-    def process( pipeline, ctxobj ): pass
-
-class IProducer( IPipeSegment ): pass
-class IConsumer( IPipeSegment ): pass
-class IProducerConsumer( IPipeSegment ): pass
-class IFilter( ProducerConsumer ): pass
-class ITee( IPipeSegment ): pass
-class IWatcher( IPipeSegment ): pass
-class IConditionalBranch( IPipeSegment ): pass
-
-
-
+# internal marker value to pipe execution
+_OUTPUT_FINISHED = object()
 
 #################################
 
 class Pipeline( object ):
 
+    __implements__ = IPipeline 
+    
     def __init__(self, **kw):
         self.steps = []
         self.vars = kw
@@ -45,27 +30,76 @@ class Pipeline( object ):
         for s in self:
             context = s.process( self, context )
 
-class PipeSegment( object ):
-
-    def process( self, pipeline, ctxobj ):
-        raise NotImplemented
-
-class Producer( PipeSegment ):
-
-    def process( self, pipeline, ctxobj ):
-        for res in self.generate():
-            yield res
-
-class Iterator( PipeSegment ):
+class PipeExecutor( object ):
+    """
+    support for pipes include producer/filters/conditional branches segments
+    """
 
     def __init__(self, steps ):
         self.steps = steps
+        self.context_iterator = None
+        self.producer_idx = 0
         
+    def process( self, pipeline, context ):
+        idx = 0
+        while context is not _OUTPUT_FINISHED:
+
+            step = self.steps[idx]
+
+            if isinstance( step, Producer ):
+                if self.context_iterator is not None:
+                    raise RuntimeError("only one producer per pipeline atm")
+                self.context_iterator = step.process( self, pipeline, context )
+                context = self.getNextContextObject()
+
+            elif isinstance( step, Consumer ):
+                step.process( self, pipeline, context )
+                context = self.getNextContentObject()
+                idx = self.producer_idx
+                
+            elif isinstance( step, Filter ):
+                value = step.process( self, pipeline, context )
+                if value is OUTPUT_FILTERED:
+                    context = self.getNextContentObject()
+                    idx = self.producer_idx
+                else:
+                    context = value
+                    
+            elif isinstance( step, PipeSegment ):
+                context = step.process( self, pipeline, context )
+                
+            idx += 1
+
+    def getNextContextObject( self ):
+        if self.context_iterator is None:
+            return _OUTPUT_FINISHED
+        try:
+            return self.context_iterator.next()
+        except StopIteration:
+            return _OUTPUT_FINISHED
+            
+                
+class BaseSegment( object ):
+    
     def process( self, pipeline, ctxobj ):
-        for obj in ctxobj:
-            for s in self.steps:
-                s.process( pipeline, obj )
-        return ctxobj
+        raise NotImplemented
+
+class PipeSegment( BaseSegment ):
+
+    __implements__ =  IPipeSegment 
+
+class Producer( PipeSegment ):
+
+    __implements__ = IProducer 
+
+class Consumer( PipeSegment ):
+
+    __implements__ = IConsumer
+
+class Filter( PipeSegment ):
+    
+    __implements__ = IFilter
+
 
 class VariableAggregator( PipeSegment ):
 
@@ -78,29 +112,30 @@ class VariableAggregator( PipeSegment ):
         self.values.append( ctxobj )
         return ctxobj
 
-class VariableIterator( PipeSegment ):
 
-    def __init__(self, variable_name, steps ):
-        self.variable_name = variable_name
-        self.steps = steps
+## class VariableIterator( Producer ):
 
-    def process( self, pipeline, ctxobj ):
-        for value in pipeline.vars.get( self.variable_name, () ):
-            for s in self.steps:
-                s.process( pipeline, value )
+##     def __init__(self, variable_name, steps ):
+##         self.variable_name = variable_name
+##         self.steps = steps
+
+##     def process( self, pipeline, ctxobj ):
+##         for value in pipeline.vars.get( self.variable_name, () ):
+##             for s in self.steps:
+##                 s.process( pipeline, value )
 
 
-class ConditionalBranch( PipeSegment ):
+## class ConditionalBranch( PipeSegment ):
 
-    def __init__(self, branches ):
-        assert isinstance( branches, list)
-        self.branches = branches
+##     def __init__(self, branches ):
+##         assert isinstance( branches, list)
+##         self.branches = branches
 
-    def addBranch( self, condition, step ):
-        self.branches.append( ( condition, step ) )
+##     def addBranch( self, condition, step ):
+##         self.branches.append( ( condition, step ) )
 
-    def process( self, pipeline, ctxobj ):
-        for condition, step in self.branches:
-            if condition( ctxobj ):
-                return step( pipeline, ctxobj )
+##     def process( self, pipeline, ctxobj ):
+##         for condition, step in self.branches:
+##             if condition( ctxobj ):
+##                 return step( pipeline, ctxobj )
 

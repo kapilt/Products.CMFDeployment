@@ -1,8 +1,10 @@
-from core import IProducer, PipeSegment
+"""
+$Id$
+"""
 
-class ContentSource( PipeSegment ):
+from core import Producer
 
-    implements( IProducer )
+class ContentSource( Producer ):
 
     def process( self, pipe, ctxobj ):
         for source in pipe.services["ContentIdentification"].sources.objectValues():

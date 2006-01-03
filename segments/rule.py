@@ -2,6 +2,7 @@
 $Id$
 """
 
+from interfaces import implements
 from core import PipeSegment
 
 class ContentRuleMatch( PipeSegment ):
