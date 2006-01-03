@@ -8,6 +8,7 @@ class ResolveContent( PipeSegment ):
     """
     resolve the rendered content
     """
+    
     def process( self, pipe, descriptor ):
 
         if descriptor.isGhost():
@@ -28,4 +29,16 @@ class ResolverDatabase( PipeSegment ):
         resolver = pipe.services['ContentResolver']
         resolver.addResource( descriptor )
         return descriptor
+
+class ResolverRemoval( PipeSegment ):
+    """
+    remove the content from the uri resolver db
+    """
+
+    def process( self, pipe, descriptor ):
+        resolver = pipe.services['ContentResolver']
+        resolver.removeResource( descriptor )
+        return descriptor        
+        
+    
 

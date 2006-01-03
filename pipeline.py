@@ -1,15 +1,20 @@
+"""
+$Id$
+"""
+
 import segments
 
 from segments.core import PolicyPipeline, PipeExecutor
 
-
+from Namespace import getToolByName
+import DefaultConfiguration
 
 class PipelineFactory( object ):
 
     id = None
 
     def __call__( self ):
-        pass
+        raise NotImplemented
 
     def getId( klass ):
         return klass.id
@@ -17,10 +22,10 @@ class PipelineFactory( object ):
     getId = classmethod( getId )
 
     def finishPolicyConstruction( self, policy ):
-        pass
+        raise NotImplemented
 
-    def cleanupPolicyRemoval( self, policy ):
-        pass
+    def beginPolicyRemoval( self, policy ):
+        raise NotImplemented
     
 
 class IncrementalPipelineFactory( PipelineFactory ):
@@ -45,21 +50,33 @@ class IncrementalPipelineFactory( PipelineFactory ):
 
         return policy_pipeline
 
-        
 
     def finishPolicyConstruction( self, policy ):
+        """
+        add incremental policy index, deletion source, and dependency source
+        """
 
         import incremental
-
         catalog = getToolByName( policy, 'portal_catalog' )
-        pidx_id = "%s-%s"%(policy.getId(), "policy_index")
+        pidx_id = getPolicyIndexId( policy )
         catalog.manage_addIndex( pidx_id,
                                  incremental.PolicyIncrementalIndex.meta_type )
 
-        # XXX - add deletion source / dependency source
+        import sources
+        sources.deletion.addDeletionSource( policy,
+                                            DefaultConfiguration.DeletionSource)
         
-    def cleanupPolicyRemoval( self, policy ):
-        pass
+
+        
+    def beginPolicyRemoval( self, policy ):
+        """
+        remove any non contained instance objects associated with policy.
+        ie. policy incremental index
+        """
+
+        catalog = getToolByName( policy, 'portal_catalog' )
+        pidx_id = getPolicyIndexId( policy )
+        catalog.manage_delIndex( ids=[ pidx_id ] )
               
 
     #################################
@@ -92,6 +109,11 @@ class IncrementalPipelineFactory( PipelineFactory ):
         return segments.directoryview.DirectoryViewDeploy()
 
 
+def getPolicyIndexId( policy ):
+    pidx_id = "%s-%s"%(policy.getId(), "policy_index")
+    return pidx_id
+
+
 class PipelineDatabase( object ):
 
     def __init__(self):
@@ -114,6 +136,6 @@ getPipelineNames = _pipelines.getPipelineNames
 getPipeline = _pipelines.getPipeline
 
 registerPipeline( IncrementalPipelineFactory.getId(),
-                  IncrementalPipelineFactory)
+                  IncrementalPipelineFactory())
                   
 

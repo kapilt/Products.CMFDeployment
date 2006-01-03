@@ -99,6 +99,17 @@ class URIResolver:
         for descriptor in descriptor.getDescriptors():
             self._addResource( descriptor )
 
+    def removeResource( self, descriptor ):
+        for descriptor in descriptor.getDescriptors():
+            self._removeResource( descriptor )
+            
+    def _removeResource(self, descriptor):
+        relative_url = descriptor.getSourcePath() or descriptor.content_url
+        if not relative_url.startswith('/'):
+            relative_url = '/'+relative_url
+        del self.uris[relative_url]
+        
+        
     def _addResource(self, descriptor):
 
         relative_url = descriptor.getSourcePath() or descriptor.content_url

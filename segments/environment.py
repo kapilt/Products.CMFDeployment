@@ -66,3 +66,5 @@ class PipeEnvironmentInitializer( PipeSegment ):
         addService("ContentHistory", history )
 
         addService("ContentStorage", ContentStorage(self) )
+
+        addService("DeploymentPolicy", ctxobj )

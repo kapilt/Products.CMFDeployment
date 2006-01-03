@@ -30,14 +30,15 @@ $Id$
 
 from core import Consumer
 
-#from Products.CMFDeployment.Log import LogFactory
+from Products.CMFDeployment.Log import LogFactory
 #from Products.CMFDeployment.Statistics import IOStatistics
 
 from os import sep, path, mkdir
-#log = LogFactory('Content Storage')
+log = LogFactory('Content Storage')
 
 class StorageManifest( object ):
 
+    # XXX todo
     def __init__(self):
         self._items = []
 
@@ -48,18 +49,20 @@ class StorageManifest( object ):
         pass
 
 
-class ContentStorage(Consumer):
+class ContentStorageManager(object):
 
-    def __init__(self, ctx):
-        #self.stats = IOStatistics()
-        self.stats = None
-        self.structure = ctx.getContentOrganization().getActiveStructure()
-        self.transforms = ctx.getContentTransforms()
-        
+    stats = None
+    structure = None
+    
     def getStatistics(self):
         return self.stats
-    
-    def __call__(self, descriptor):
+
+    def getStructure(self, pipe):
+        if self.structure is None:
+            self.structure = pipe.services['ContentOrganization'].getActiveStructure()
+        return self.structure
+        
+    def add(self, pipe, descriptor):
         """
         store a rendered content object on the filesystem.
         """
@@ -71,9 +74,10 @@ class ContentStorage(Consumer):
             return 
 
         descriptors = descriptor.getDescriptors()
-
+        structure = self.getStructure( pipe )
+        
         for descriptor in descriptors:
-            content_path = self.structure.getContentPathFromDescriptor( descriptor )
+            content_path = structure.getContentPathFromDescriptor( descriptor )
             if content_path.endswith(sep):
                 log.warning('invalid content path detected %s ... fixing'%content_path)
                 content_path = content_path[:-1]
@@ -81,8 +85,24 @@ class ContentStorage(Consumer):
 
         return True
     
-    store = __call__
-    
+    def remove(self, pipe, descriptor):
+        """
+        remove a rendered content object on the filesystem
+        """
+        
+        descriptors = descriptors.getDescriptors()
+        structure   = self.getStructure( pipe )
+
+        for descriptor in descriptor:
+            content_path = structure.getContentPathFromDescriptor( descriptor )
+            file_name = descriptor.getFileName()
+            location = os.path.join( content_path, file_name )
+            if not os.path.exists( location ) and os.path.isfile( location ):
+                # XXX log me
+                print "Invalid Content Path", location, descriptor
+            else:
+                os.path.remove( location )
+                
     def storeDescriptor(self, content_path, descriptor ):
         """
         """
@@ -97,9 +117,9 @@ class ContentStorage(Consumer):
             
 #        self.stats( location, len(rendered) )
 
-        rendered = self.transforms.transform(descriptor, rendered, location)
-        if not rendered:
-            return
+#        rendered = self.transforms.transform(descriptor, rendered, location)
+#        if not rendered:
+#            return
 
         log.debug("storing content %s at %s"%(descriptor.content_url, location))
         
@@ -129,6 +149,11 @@ class ContentStorage(Consumer):
         return True
                         
         
+class ContentStorage( Consumer, ContentStorageManager ):
 
-            
+    process = ContentStorageManager.add
+
+class ContentRemoval( Consumer, ContentStorageManager ):
+
+    process = ContentStorageManager.remove            
 

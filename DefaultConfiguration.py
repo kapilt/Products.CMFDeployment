@@ -38,6 +38,9 @@ ContentDirectoryViews = 'ContentDirectoryViews'
 ContentURIs           = 'ContentURIs'
 DeploymentHistory     = 'DeploymentHistory'
 
+DeletionSource        = 'deletion_source'
+
+
 ContentTransforms     = 'transforms'
 
 DEFAULT_CONTENT_SOURCE_ID = "portal_catalog_source"

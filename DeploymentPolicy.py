@@ -122,6 +122,12 @@ class DeploymentPolicy(Folder):
     def getDeploymentPolicy(self):
         return self
 
+    security.declarePrivate('getPipeline')
+    def getPipeline(self):
+        factory = pipeline.getPipeline( self.pipeline_id )
+        deployment_pipeline = factory()
+        return deployment_pipeline
+
     def setActive(self, flag, RESPONSE=None):
         self._active = not not flag
         if RESPONSE is not None:
@@ -142,26 +148,36 @@ class DeploymentPolicy(Folder):
         
         try:
             try:
-                strategy = self.getDeploymentStrategy().getStrategy()
-                display = strategy(self)
+                pipeline = self.getPipeline()
+                pipeline.process( self )
             except:
-                import sys, pdb
+                import sys, pdb, traceback
                 ec, e, tb = sys.exc_info()
                 print ec, e
+                print traceback.print_tb( tb )
                 pdb.post_mortem( tb )
         finally:
             Log.detachLogMonitor(history)
 
-        history.recordStatistics(display)
+        #history.recordStatistics(display)
         histories.attachHistory(history)
 
         if RESPONSE:
-            return "<html><pre>%s</pre></body</html>"%display
+            return "<html><pre>deployed</pre></body</html>"
         return True
 
     def manage_afterAdd(self, item, container):
         import DefaultConfiguration
         DefaultConfiguration.install(self)
+
+        factory = pipeline.getPipeline( self.pipeline_id )
+        factory.finishPolicyConstruction( self )
+
+    def manage_beforeDelete(self, *args):
+
+        factory = pipeline.getPipeline( self.pipeline_id )
+        factory.beginPolicyRemoval( self )
+        
     
 InitializeClass(DeploymentPolicy)
     
