@@ -46,6 +46,7 @@ import MimeMapping
 import rules
 import transports
 import sources
+import incremental
 
 DeploymentProductHome = package_home( globals() )
 
@@ -129,13 +130,10 @@ def initialize(context):
         visibility = None
         )
 
-##     context.registerClass(
-##         PolicyIncrementalIndex,
-##         permission = 'Add Pluggable Index',
-##         constructors = (incremental.manage_addPolicyIncrementalIndexForm,
-##                         incremental.manage_addPolicyIncrementalIndex,
-##                         incremental.getIndexTypes,
-##                         ),
-##         icon='www/index.gif',
-##         visibility=None
-##         )    
+     context.registerClass(
+        incremental.PolicyIncrementalIndex,
+        permission = 'Add Pluggable Index',
+        constructors = (incremental.addPolicyIncrementalIndexForm,)
+        icon='www/index.gif',
+        visibility=None
+        )    

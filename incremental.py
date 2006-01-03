@@ -121,6 +121,8 @@ def getIncrementalIndexId( policy ):
         return None
     return catalog.getIndex( iid )
 
+addPolicyIncrementalIndexForm = DTMLFile('ui/IncrementalIndexForm', globals())
+
 class PolicyIncrementalIndex( SimpleItem ):
     """
     abuses the catalog plugin index interface to get events for content
@@ -146,12 +148,16 @@ class PolicyIncrementalIndex( SimpleItem ):
 
     index_overview = DTMLFile('zmi/IncrementalIndexView', globals())    
 
-    def __init__(self, id, extra, caller=None):
+    def __init__(self, id, extra=None, caller=None):
         self.id = id
-        self.policy_id = ""
+        self.policy_id = self._getPolicyId( id )
         self._length = Length()
         self._index = IOBTree()
 
+    def _getPolicyId( self, id ):
+        idx = id.rfind('-')
+        return id[:idx]
+    
     def getId(self):
         return self.id
 
@@ -228,3 +234,5 @@ class PolicyIncrementalIndex( SimpleItem ):
             self._length.change(1)
             
         self._index[ key ] = path
+
+InitializeClass( PolicyIncrementalIndex )
