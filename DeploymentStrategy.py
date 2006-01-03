@@ -27,18 +27,8 @@ Created: 8/10/2002
 $Id$
 """
 
-import pprint
-
 from Namespace import *
-from Statistics import TimeStatistics, MemoryStatistics
-from ContentStorage import ContentStorage
-from URIResolver import URIResolver
-from Log import LogFactory
-from Descriptor import ContentDescriptor
-
 from Strategies import getStrategyNames, getStrategy
-
-log = LogFactory('Strategy')
 
 class DeploymentStrategy(SimpleItem):
 

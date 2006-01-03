@@ -51,7 +51,8 @@ class StorageManifest( object ):
 class ContentStorage(Consumer):
 
     def __init__(self, ctx):
-        self.stats = IOStatistics()
+        #self.stats = IOStatistics()
+        self.stats = None
         self.structure = ctx.getContentOrganization().getActiveStructure()
         self.transforms = ctx.getContentTransforms()
         
@@ -94,7 +95,7 @@ class ContentStorage(Consumer):
         if not self.createParentDirectories( location ):
             return
             
-        self.stats( location, len(rendered) )
+#        self.stats( location, len(rendered) )
 
         rendered = self.transforms.transform(descriptor, rendered, location)
         if not rendered:

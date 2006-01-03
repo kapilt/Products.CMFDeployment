@@ -170,6 +170,13 @@ class PolicyIncrementalIndex( SimpleItem ):
         return
 
     def unindex_object( self, documentId):
+        # we get unindex call backs on renames and moves as well
+        # which is fine since that also requires generating a deletion
+        # record for the old content location for static deployments..
+        # for data deployments this might be a little more tricky, since
+        # we might not want the deletion, and we might have relational
+        # referential integrity to deal with as well.
+        
         if not self._index.has_key(documentId):
             return
         
