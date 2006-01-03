@@ -40,9 +40,6 @@ class DeletionSource( SimpleItem ):
         self._records.append( record )
         self._p_changed = 1
 
-    def manage_beforeDelete( self, item, container):
-        # check on removal of incremental index
-        pass
 
 
     

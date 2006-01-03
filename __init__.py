@@ -39,7 +39,7 @@ import ContentOrganization
 import ContentMastering
 import ContentDeployment
 import ContentIdentification
-import DeploymentStrategy
+#import DeploymentStrategy
 import Descriptor
 import MimeMapping
 
@@ -47,13 +47,14 @@ import rules
 import transports
 import sources
 import incremental
+import pipeline
 
 DeploymentProductHome = package_home( globals() )
 
 registerDirectory('skins', globals())
 
 methods = {
-    'ContentDeploymentStrategyIds':DeploymentStrategy.getStrategyNames
+    'DeploymentPipelineIds':pipeline.getPipelineNames
     }
 
 def initialize(context):

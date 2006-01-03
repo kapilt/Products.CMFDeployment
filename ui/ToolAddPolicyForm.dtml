@@ -18,6 +18,14 @@
 <tr><td class="form-label">Title</td>
     <td><input type="text" name="policy_title"></td></tr>
 
+<tr><td class="form-label">Pipeline Type</td>
+    <td><select name="policy_pipeline_id">
+         <dtml-in DeploymentPipelineIds>
+	  <option value="<dtml-var sequence-item>"><dtml-var sequence-item></option>
+	 </dtml-in>
+	</select>
+    </td></tr>
+
 <tr><td class="form-label">Policy XML</td>
     <td><input type="file" name="policy_xml"></td></tr>
 

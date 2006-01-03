@@ -1,6 +1,8 @@
-class PipeEnvironmentInitializer( Pipeline ):
+from core import PipeSegment
 
-    implements( PipeSegment )
+class PipeEnvironmentInitializer( PipeSegment ):
+
+    __implements__ = ( PipeSegment )
 
     def process( self, pipe, ctxobj ):
         self.setupServices( pipe, ctxobj )

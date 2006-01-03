@@ -29,6 +29,7 @@ $Id$
 
 import DefaultConfiguration
 import Log
+import pipeline
 
 from Namespace import *
 from DeploymentInterfaces import IDeploymentPolicy
@@ -68,9 +69,6 @@ class DeploymentPolicy(Folder):
         {'label':'Transforms',
          'action':'%s/manage_workspace'%DefaultConfiguration.ContentTransforms},
         
-        {'label':'Strategies',
-         'action':'%s/manage_workspace'%DefaultConfiguration.DeploymentStrategy},
-
         {'label':'History',
          'action':'%s/manage_workspace'%DefaultConfiguration.DeploymentHistory},
         
@@ -84,8 +82,12 @@ class DeploymentPolicy(Folder):
 
     icon = 'misc_/CMFDeployment/policy.png'
     
-    def __init__(self, id):
-        self.id = id 
+    def __init__(self, id, title, pipeline_id):
+        self.id = id
+        self.title = title
+        self.pipeline_id = pipeline_id
+
+        assert pipeline_id in pipeline.getPipelineNames(), "invalid pipeline"
 
     def getContentIdentification(self):
         return self._getOb(DefaultConfiguration.ContentIdentification)
@@ -113,9 +115,6 @@ class DeploymentPolicy(Folder):
     
     def getDeploymentHistory(self):
         return self._getOb(DefaultConfiguration.DeploymentHistory)
-
-    def getDeploymentStrategy(self):
-        return self._getOb(DefaultConfiguration.DeploymentStrategy)
 
     def getDeploymentURIs(self):
         return self._getOb(DefaultConfiguration.ContentURIs)

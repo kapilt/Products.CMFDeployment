@@ -11,6 +11,11 @@ class PipelineFactory( object ):
     def __call__( self ):
         pass
 
+    def getId( klass ):
+        return klass.id
+
+    getId = classmethod( getId )
+
     def finishPolicyConstruction( self, policy ):
         pass
 
@@ -51,6 +56,8 @@ class IncrementalPipelineFactory( PipelineFactory ):
         catalog.manage_addIndex( pidx_id,
                                  incremental.PolicyIncrementalIndex.meta_type )
 
+        # XXX - add deletion source / dependency source
+        
     def cleanupPolicyRemoval( self, policy ):
         pass
               
@@ -83,3 +90,30 @@ class IncrementalPipelineFactory( PipelineFactory ):
 
     def constructDirectoryViewPipeline( self ):
         return segments.directoryview.DirectoryViewDeploy()
+
+
+class PipelineDatabase( object ):
+
+    def __init__(self):
+        self._pipelines = {}
+
+    def registerPipeline(self, name, protocol):
+        self._pipelines[name]=protocol
+
+    def getPipelineNames(self, context=None):
+        return self._pipelines.keys()
+
+    def getPipeline(self, name):
+        return self._pipelines[name]
+
+
+_pipelines = PipelineDatabase()
+
+registerPipeline = _pipelines.registerPipeline
+getPipelineNames = _pipelines.getPipelineNames
+getPipeline = _pipelines.getPipeline
+
+registerPipeline( IncrementalPipelineFactory.getId(),
+                  IncrementalPipelineFactory)
+                  
+

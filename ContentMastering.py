@@ -54,7 +54,7 @@ class ContentMastering(Folder):
         {'label':'User',
          'action':'user'},
 
-        {'label':'MimeMapping',
+        {'label':'Rules',
          'action':'mime/manage_main'},        
 
         {'label':'Policy',

@@ -152,8 +152,8 @@ class PolicyReader(MetaReader):
     def endSkinsskins(self,attrs):
 	self.prefix=''
 
-    def startStrategy(self, attrs):
-        self.policy.strategy = PolicyNode(attrs)
+#    def startStrategy(self, attrs):
+#        self.policy.strategy = PolicyNode(attrs)
 
     def startUris(self, attrs):
         self.policy.uris = PolicyNode(attrs)
@@ -293,10 +293,10 @@ def make_policy(portal, policy_node, id=None, title=None):
 				sd.deploy_path
 				)
   
-    # strategy setup
-    strategies = getattr(policy, DefaultConfiguration.DeploymentStrategy)
-    if policy_node.has_key('strategy') and policy_node.strategy.has_key('id'):
-        strategies.setStrategy(policy_node.strategy.id)
+    # strategy setup - XXX convert to pipeline id
+#    strategies = getattr(policy, DefaultConfiguration.DeploymentStrategy)
+#    if policy_node.has_key('strategy') and policy_node.strategy.has_key('id'):
+#        strategies.setStrategy(policy_node.strategy.id)
 
     return policy
     

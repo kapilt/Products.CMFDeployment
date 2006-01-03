@@ -1,6 +1,6 @@
-from core import PipelineSegment
+from core import PipeSegment
 
-class DeletionSegment( PipelineSegment ):
+class DeletionSegment( PipeSegment ):
 
     def process( self, pipeline, descriptor ):
         storage = pipeline.services['ContentStorage']
