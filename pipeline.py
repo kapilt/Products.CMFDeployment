@@ -1,6 +1,6 @@
 import segments
 
-from segments.core import Pipeline, PolicyPipeline, PipeExecutor
+from segments.core import PolicyPipeline, PipeExecutor
 
 
 

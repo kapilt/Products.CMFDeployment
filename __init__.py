@@ -130,10 +130,10 @@ def initialize(context):
         visibility = None
         )
 
-     context.registerClass(
+    context.registerClass(
         incremental.PolicyIncrementalIndex,
         permission = 'Add Pluggable Index',
-        constructors = (incremental.addPolicyIncrementalIndexForm,)
+        constructors = (incremental.addPolicyIncrementalIndexForm,),
         icon='www/index.gif',
         visibility=None
         )    

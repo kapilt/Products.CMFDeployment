@@ -32,7 +32,7 @@ License: GPL
 $Id$
 """
 
-from zLOG import register_subsystem, LOG
+from zLOG import LOG
 from threading import Lock
 from thread import get_ident
 

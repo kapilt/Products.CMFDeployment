@@ -28,12 +28,9 @@ $Id$
 """
 
 import DefaultConfiguration
-import DeploymentStrategy
 import Log
 
 from Namespace import *
-from Descriptor import ContentDescriptor
-from ComputedAttribute import ComputedAttribute
 from DeploymentInterfaces import IDeploymentPolicy
 
 class DeploymentPolicy(Folder):

@@ -31,10 +31,6 @@ import re
 import string
 import pprint
 
-
-
-
-from Acquisition import aq_base
 from urlparse import urlparse
 
 from Log import LogFactory

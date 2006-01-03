@@ -28,7 +28,6 @@ $Id$
 
 """
 from Namespace import *
-from time import time
 from BTrees.OIBTree import OISet
 from BTrees.Length import Length
 

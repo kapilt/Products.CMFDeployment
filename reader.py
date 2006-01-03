@@ -28,7 +28,7 @@ $Id$
 from xml.sax import make_parser, ContentHandler
 from UserDict import UserDict
 
-from ZPublisher.mapply import mapply
+#from ZPublisher.mapply import mapply
 
 marker = []
 class PolicyNode(UserDict):

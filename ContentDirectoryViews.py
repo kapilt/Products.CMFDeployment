@@ -47,7 +47,6 @@ License: GPL
 
 """
 
-import os
 import types
 
 from Globals import HTML
@@ -55,11 +54,10 @@ from AccessControl import getSecurityManager
 from OFS.OrderedFolder import OrderedFolder
 
 from Products.CMFCore.utils import getToolByName
-from Products.CMFCore.DirectoryView import DirectoryView
 
 from Namespace import *
 from Log import LogFactory
-from Descriptor import ContentDescriptor, DescriptorFactory
+from Descriptor import ContentDescriptor
 from URIResolver import clstrip, extend_relative_path
 
 from DeploymentExceptions import InvalidDirectoryView

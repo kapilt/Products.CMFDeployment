@@ -29,12 +29,10 @@ $Id$
 
 from Namespace import *
 from Products.CMFCore.Expression import Expression
-from Products.CMFTopic import Topic
 from Products.PageTemplates.Expressions import SecureModuleImporter, getEngine
 from Log import LogFactory
 
 from DeploymentInterfaces import *
-from ExpressionContainer import ExpressionContainer
 
 log = LogFactory('ContentIdentification')
 

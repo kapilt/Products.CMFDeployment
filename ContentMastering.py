@@ -291,7 +291,6 @@ class SiteChainUser(SimpleItem):
             log.debug('not chaining user')
             return
         
-        from AccessControl import User
         from AccessControl.SecurityManagement import newSecurityManager
         from AccessControl import SpecialUsers
 
