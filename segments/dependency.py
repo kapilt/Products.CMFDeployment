@@ -45,11 +45,11 @@ class DependencyManager( object ):
     def processDeploy( self, pipe, descriptor ):
         dependencies = descriptor.getDependencies()
         if not dependencies:
-            return
+            return descriptor
 
         source = self.getDependencySource( pipe )
         if not source:
-            return
+            return descriptor
 
         # deploy objects that depend on descriptor
         for rdep in descriptor.getReverseDependencies():
@@ -65,15 +65,19 @@ class DependencyManager( object ):
             #    continue
             source.addObject( dep )
 
+        return descriptor
+
     def processRemoval( self, pipe, record ):
         # XXX deletion record needs to record deps on creation
         source = self.getDependencySource( pipe )
         if not source:
-            return None
+            return record
         
         for rdep in record.getReverseDependencies():
             source.addObject( rdep )
-            
+
+        return record
+    
 ##     def getIncrementalIndex(self):
 ##         policy = self.getDeploymentPolicy()
 ##         return getIncrementalIndex( policy )

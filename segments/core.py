@@ -53,24 +53,26 @@ class PipeExecutor( object ):
                 if self.context_iterator is not None:
                     raise RuntimeError("only one producer per pipeline atm")
                 self.context_iterator = step.process( pipeline, context )
+
                 context = self.getNextContextObject()
 
             elif isinstance( step, Consumer ):
-                step.process( self, pipeline, context )
-                context = self.getNextContentObject()
+                step.process( pipeline, context )
+                context = self.getNextContextObject()
                 idx = self.producer_idx
                 
             elif isinstance( step, Filter ):
                 value = step.process( pipeline, context )
+
                 if value is OUTPUT_FILTERED:
-                    context = self.getNextContentObject()
+                    context = self.getNextContextObject()
                     idx = self.producer_idx
                 else:
                     context = value
                     
             elif isinstance( step, PipeSegment ):
                 context = step.process( pipeline, context )
-                
+            
             idx += 1
 
     def getNextContextObject( self ):
