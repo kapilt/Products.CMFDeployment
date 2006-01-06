@@ -2,12 +2,14 @@
 $Id$
 """
 
+from Products.CMFDeployment.ContentIdentification import getFilterExprContext
 from core import Filter, OUTPUT_FILTERED
+
 
 class ContentFilter( Filter ):
 
     def process( self, pipe, content ):
-        restricted = self.getRestrictedId( pipe )
+        restricted = self.getRestrictedIds( pipe )
         mount_length = pipe.variables['mount_length']
         
         portal = self.getPortal( pipe )
@@ -34,7 +36,9 @@ class ContentFilter( Filter ):
 
     def getPortal(self, pipe):
         return pipe.services['ContentOrganization'].portal_url.getPortalObject()
-        
+
+    def getFilters( self, pipe ):
+        return pipe.services['ContentIdentification'].filters.objectValues()
         
 
         

@@ -18,8 +18,8 @@ class Pipeline( object ):
     __implements__ = IPipeline 
     
     def __init__(self, **kw):
-        self.steps = []
-        self.vars = kw
+        self.steps = kw.get('steps') or []
+        self.variables = kw
         self.services = {}
         
     def __iter__(self):
@@ -52,7 +52,7 @@ class PipeExecutor( object ):
             if isinstance( step, Producer ):
                 if self.context_iterator is not None:
                     raise RuntimeError("only one producer per pipeline atm")
-                self.context_iterator = step.process( self, pipeline, context )
+                self.context_iterator = step.process( pipeline, context )
                 context = self.getNextContextObject()
 
             elif isinstance( step, Consumer ):
@@ -61,7 +61,7 @@ class PipeExecutor( object ):
                 idx = self.producer_idx
                 
             elif isinstance( step, Filter ):
-                value = step.process( self, pipeline, context )
+                value = step.process( pipeline, context )
                 if value is OUTPUT_FILTERED:
                     context = self.getNextContentObject()
                     idx = self.producer_idx
@@ -69,7 +69,7 @@ class PipeExecutor( object ):
                     context = value
                     
             elif isinstance( step, PipeSegment ):
-                context = step.process( self, pipeline, context )
+                context = step.process( pipeline, context )
                 
             idx += 1
 

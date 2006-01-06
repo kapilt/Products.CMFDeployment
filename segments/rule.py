@@ -13,15 +13,11 @@ class ContentRuleMatch( Filter ):
     def __init__(self):
         self.prepared = []
 
-    def process( self, pipe, context ):
-        return self.processContent( c )
-
-    def processContent( self, pipe, content ):
+    def process( self, pipe, content ):
         factory = pipe.services["DescriptorFactory"]
         rules = pipe.services["ContentRules"]
         resolver = pipe.services['URIResolver']
         
-        content = self.getContent( content )
         descriptor = factory( content )
 
         if not rules.match( descriptor ):
@@ -31,7 +27,3 @@ class ContentRuleMatch( Filter ):
 
         resolver.addResource( descriptor )
         return descriptor
-
-
-    def getContent( self, ctxobj ):
-        return ctxobj.getObject()

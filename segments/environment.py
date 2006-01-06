@@ -1,4 +1,6 @@
+from Products.CMFDeployment.Descriptor import DescriptorFactory
 from core import PipeSegment
+from storage import ContentStorage
 
 class PipeEnvironmentInitializer( PipeSegment ):
 
@@ -65,6 +67,7 @@ class PipeEnvironmentInitializer( PipeSegment ):
         history   = ctxobj.getDeploymentHistory()
         addService("ContentHistory", history )
 
-        addService("ContentStorage", ContentStorage(self) )
+        addService("ContentStorage", ContentStorage() )
+
 
         addService("DeploymentPolicy", ctxobj )
