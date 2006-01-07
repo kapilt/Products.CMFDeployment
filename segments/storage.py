@@ -78,9 +78,9 @@ class ContentStorageManager(object):
         
         for descriptor in descriptors:
             content_path = structure.getContentPathFromDescriptor( descriptor )
-            if content_path.endswith(sep):
-                log.warning('invalid content path detected %s ... fixing'%content_path)
-                content_path = content_path[:-1]
+            #if content_path.endswith(sep):
+            #log.warning('invalid content path detected %s ... fixing'%content_path)
+            #    content_path = content_path[:-1]
             self.storeDescriptor( content_path, descriptor )
 
         return True
@@ -107,8 +107,7 @@ class ContentStorageManager(object):
         """
         """
         filename = descriptor.getFileName()
-        location = sep.join( ( content_path, filename) )
-        content = descriptor.getContent()
+        location = path.join( content_path, filename )
         rendered = descriptor.getRendered()
 
         # creates directories as needed below mount point

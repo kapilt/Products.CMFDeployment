@@ -2,8 +2,6 @@
 
   <identification>
 
-    <filter id="no_members" 
-            expr="python: not memento.getPath().find('Members')+1" />
 
     <!--
     <filter id="review_state"

@@ -12,22 +12,13 @@ class ContentRuleMatch( Filter ):
 
     def __init__(self):
         self.prepared = []
-        self.factory = None
+        self.factory = None # descriptor factory
 
-    def getDescriptorFactory(self, pipe):
-        if self.factory:
-            return self.factory
-        factory_class = pipe.services["DescriptorFactory"]
-        policy  = pipe.services["DeploymentPolicy"]
-        self.factory = factory_class(policy)
-        return self.factory
-        
     def process( self, pipe, content ):
 
-        factory = self.getDescriptorFactory( pipe )
         rules = pipe.services["ContentRules"]
-        resolver = pipe.services['URIResolver']
-        
+        factory = self.getFactory( pipe )
+
         descriptor = factory( content )
 
         if not rules.prepare( descriptor ):
@@ -35,5 +26,12 @@ class ContentRuleMatch( Filter ):
             except: pass
             return OUTPUT_FILTERED
 
-        resolver.addResource( descriptor )
         return descriptor
+
+    def getFactory(self, pipe):
+        if self.factory:
+            return self.factory
+        factory_class = pipe.services["DescriptorFactory"]
+        # this could be trimmed down ..
+        self.factory = factory_class( pipe.services["DeploymentPolicy"] )
+        return self.factory

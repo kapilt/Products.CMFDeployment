@@ -41,8 +41,8 @@ class IncrementalPipelineFactory( PipelineFactory ):
         policy_pipeline = PolicyPipeline( 
             steps = (
                segments.environment.PipeEnvironmentInitializer(),
-               dv_pipeline,
-               deletion_pipeline,
+#               dv_pipeline,
+#               deletion_pipeline,
                content_pipeline,
                segments.transport.ContentTransport()
                )
@@ -88,9 +88,10 @@ class IncrementalPipelineFactory( PipelineFactory ):
                 segments.source.ContentSource(),
                 segments.filter.ContentFilter(),
                 segments.rule.ContentRuleMatch(),
+                segments.resolver.ResolverDatabase(),
                 segments.dependency.DeployDependencyInjector(),
                 segments.render.ContentRender(),
-                segments.resolver.ResolverDatabase(),
+                segments.resolver.ResolveContent,
                 segments.storage.ContentStorage(),
                 )
             )

@@ -114,6 +114,9 @@ class URIResolver:
 
         relative_url = descriptor.getSourcePath() or descriptor.content_url
         content_path = descriptor.getContentPath()
+
+        if relative_url[0] != '/':
+            relative_url = '/'+relative_url
         
         if content_path is None:
             mlen = len(self.mount_path)
@@ -128,9 +131,6 @@ class URIResolver:
                                             descriptor.getFileName() ) ),
                                  '/'
                                  )
-
-        if relative_url[0] != '/':
-            relative_url = '/'+relative_url
 
         log.debug("add %s -> %s"%(relative_url, content_path))
         self.uris[relative_url]=content_path

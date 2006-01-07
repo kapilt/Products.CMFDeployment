@@ -62,7 +62,7 @@ class DeploymentTool(UniqueObject, Folder):
         )
 
     security.declareProtected(CMFCorePermissions.ManagePortal, 'addPolicy')
-    def addPolicy(self, policy_id='', policy_title='', policy_pipeline_id='', policy_xml='', REQUEST=None):
+    def addPolicy(self, policy_id='', policy_title='', policy_pipeline_id='incremental', policy_xml='', REQUEST=None):
         """  """
 
         if policy_xml:

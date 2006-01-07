@@ -1,3 +1,7 @@
+"""
+$Id$
+"""
+
 from Products.CMFDeployment.Descriptor import DescriptorFactory
 from core import PipeSegment
 from storage import ContentStorage

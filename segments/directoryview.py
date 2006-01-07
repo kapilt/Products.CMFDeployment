@@ -18,5 +18,5 @@ class DirectoryViewDeploy( PipeSegment ):
         for dvc in contents:
             views.cookViewObject( dvc )
             resolver.resolve( dvc )
-            store( dvc )
+            store.add( pipe, dvc )
 

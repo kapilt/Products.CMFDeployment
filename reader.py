@@ -207,7 +207,7 @@ def make_policy(portal, policy_node, id=None, title=None):
         deployment_tool.addPolicy( id, title )
     else:
         id = policy_node.id
-        deployment_tool.addPolicy( policy_node.id, policy_node.id)
+        deployment_tool.addPolicy( id, id)
         
     policy = getattr(deployment_tool, id)
     

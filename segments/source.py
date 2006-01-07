@@ -14,6 +14,11 @@ class ContentSource( Producer ):
             for content in source.getContent():
                 if isinstance( content, AbstractCatalogBrain ):
                     content = content.getObject()
+
+                if content is None:
+                    print "egads",  source, content
+                    continue
+
                 yield content
 
 class ContentDeletion( Producer ):

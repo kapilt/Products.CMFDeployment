@@ -53,26 +53,24 @@ class PipeExecutor( object ):
                 if self.context_iterator is not None:
                     raise RuntimeError("only one producer per pipeline atm")
                 self.context_iterator = step.process( pipeline, context )
-
                 context = self.getNextContextObject()
-
             elif isinstance( step, Consumer ):
                 step.process( pipeline, context )
                 context = self.getNextContextObject()
                 idx = self.producer_idx
-                
             elif isinstance( step, Filter ):
                 value = step.process( pipeline, context )
-
                 if value is OUTPUT_FILTERED:
                     context = self.getNextContextObject()
                     idx = self.producer_idx
-                else:
+                elif value is None:
+                    print "filter returned none", step, value
+                else:                    
                     context = value
                     
             elif isinstance( step, PipeSegment ):
                 context = step.process( pipeline, context )
-            
+
             idx += 1
 
     def getNextContextObject( self ):
@@ -113,7 +111,7 @@ class VariableAggregator( PipeSegment ):
         self.variable_name = variable_name
 
     def process(self, pipeline, ctxobj ):
-        pipeline.vars[ self.variable_name ]=self.values
+        pipeline.variables[ self.variable_name ]=self.values
         self.values.append( ctxobj )
         return ctxobj
 

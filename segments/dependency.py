@@ -77,7 +77,7 @@ class DependencyManager( object ):
             source.addObject( rdep )
 
         return record
-    
+
 ##     def getIncrementalIndex(self):
 ##         policy = self.getDeploymentPolicy()
 ##         return getIncrementalIndex( policy )
