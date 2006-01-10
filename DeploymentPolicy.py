@@ -168,14 +168,12 @@ class DeploymentPolicy(Folder):
         return True
 
     def manage_afterAdd(self, item, container):
-        import DefaultConfiguration
         DefaultConfiguration.install(self)
 
         factory = pipeline.getPipeline( self.pipeline_id )
         factory.finishPolicyConstruction( self )
 
     def manage_beforeDelete(self, *args):
-
         factory = pipeline.getPipeline( self.pipeline_id )
         factory.beginPolicyRemoval( self )
         

@@ -70,8 +70,9 @@ class DeploymentTool(UniqueObject, Folder):
             policy = make_policy(self, policy_node,  policy_id, policy_title)
             policy_id = policy.getId()
         else:
-            self._setObject(policy_id,
-                            DeploymentPolicy(policy_id, policy_title, policy_pipeline_id))
+            policy = DeploymentPolicy(policy_id, policy_title, policy_pipeline_id)
+            self._setObject(policy_id, policy )
+                            
         
         if REQUEST is not None:
             policy = self._getOb(policy_id)

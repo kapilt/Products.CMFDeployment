@@ -33,3 +33,4 @@ class ContentDeletion( Producer ):
 
         for record in source.getContent():
             yield record
+            

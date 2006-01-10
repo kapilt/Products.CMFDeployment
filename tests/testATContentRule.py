@@ -53,8 +53,10 @@ class ATContentRuleTests( PloneTestCase ):
 
     def afterSetUp(self): 
         installer = getToolByName(self.portal, 'portal_quickinstaller')
+        installer.installProduct('Archetypes')                
         installer.installProduct('ATContentRule')        
         installer.installProduct('CMFDeployment')
+     
         self.loginPortalOwner()
         self.portal.invokeFactory('Sample Image Content', 'image_content')
         self.image_content = self.portal.image_content         

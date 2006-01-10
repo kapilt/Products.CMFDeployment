@@ -157,7 +157,7 @@ class ContentDescriptor(object):
         return self.source_path
 
     #################################
-    #
+    # child resource management - for non portal content 
     def addChildDescriptor(self, descriptor):
         if self.child_descriptors is None:
             self.child_descriptors = DescriptorContainer()

@@ -90,6 +90,8 @@ from BTrees.Length import Length
 from BTrees.IOBTree import IOBTree
 from Products.PluginIndexes.common.PluggableIndex import PluggableIndexInterface
 
+import DefaultConfiguration
+from Descriptor import DescriptorFactory
 
 #################################
 # pipeline processing of deletion records
@@ -107,19 +109,46 @@ class DeletionRecord( object ):
      really a deletion descriptor
      
      processed by deletion pipeline
+
+
+     -- uri resolver
+
+      - getdescriptors
+      - getSourcePath or content_url
+
+      
+     -- dependencies
+     
+      - getReverseDependencies
+
+
+     -- storage
+
+      - structure.getContentPathFromDescriptor( desc )
+      - getFileName
+      
     """
 
-    def __init__(self, descriptor ):
-        self.descriptor = descriptor
+    def __init__(self, content_id, content_path, dependencies ):
+        self.content_id = content_id
+        self.content_path = content_path
+        self.dependencies = dependencies
+        
 
 
 def getIncrementalIndexId( policy ):
     pid = policy.getId()
-    iid = "%s_incremental_idx"%pid
-    catalog = getToolByName( policy, 'portal_catalog')._catalog
-    if not iid in catalog.names():
-        return None
+    iid = "%s-policy_idx"%pid
+    return iid
+
+def getIncrementalIndex( policy ):
+    portal_catalog = getToolByName( policy, 'portal_catalog')
+    catalog = portal_catalog._catalog
+    iid = getIncrementalIndexId( policy )
+    if not iid in portal_catalog.indexes():
+        raise AttributeError( iid )
     return catalog.getIndex( iid )
+    
 
 addPolicyIncrementalIndexForm = DTMLFile('ui/IncrementalIndexForm', globals())
 
@@ -167,7 +196,7 @@ class PolicyIncrementalIndex( SimpleItem ):
     def index_object( self, documentId, obj, threshold=None):
         # policy execution directly populates through the
         # recordObject api.
-        return
+        return 1
 
     def unindex_object( self, documentId):
         # we get unindex call backs on renames and moves as well
@@ -176,16 +205,14 @@ class PolicyIncrementalIndex( SimpleItem ):
         # for data deployments this might be a little more tricky, since
         # we might not want the deletion, and we might have relational
         # referential integrity to deal with as well.
-        
+
         if not self._index.has_key(documentId):
             return
-        
+
         dtool = getToolByName( self, 'portal_deployment')
         policy = dtool._getOb( self.policy_id )
 
-        sources = policy.getContentSources()
-        deletion_source = sources._getOb('deletion_source', None)
-        
+        deletion_source = policy._getOb( DefaultConfiguration.DeletionSource, None )
         if deletion_source is None:
             return
 
@@ -237,9 +264,8 @@ class PolicyIncrementalIndex( SimpleItem ):
             key = catalog.uids.get( path )
             assert key is not None
   
-        if not key in self._index:
+        if not self._index.has_key( key ):
             self._length.change(1)
-            
-        self._index[ key ] = path
+            self._index[ key ] = path
 
 InitializeClass( PolicyIncrementalIndex )

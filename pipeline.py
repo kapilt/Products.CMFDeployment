@@ -58,7 +58,7 @@ class IncrementalPipelineFactory( PipelineFactory ):
 
         import incremental
         catalog = getToolByName( policy, 'portal_catalog' )
-        pidx_id = getPolicyIndexId( policy )
+        pidx_id = incremental.getIncrementalIndexId( policy )
         catalog.manage_addIndex( pidx_id,
                                  incremental.PolicyIncrementalIndex.meta_type )
 
@@ -74,8 +74,9 @@ class IncrementalPipelineFactory( PipelineFactory ):
         ie. policy incremental index
         """
 
+        import incremental
         catalog = getToolByName( policy, 'portal_catalog' )
-        pidx_id = getPolicyIndexId( policy )
+        pidx_id = incremental.getIncrementalIndexId( policy )
         catalog.manage_delIndex( ids=[ pidx_id ] )
               
 
@@ -91,6 +92,7 @@ class IncrementalPipelineFactory( PipelineFactory ):
                 segments.resolver.ResolverDatabase(),
                 segments.dependency.DeployDependencyInjector(),
                 segments.render.ContentRender(),
+                segments.deletion.RecordDeployment(),
                 segments.resolver.ResolveContent,
                 segments.storage.ContentStorage(),
                 )
@@ -108,11 +110,6 @@ class IncrementalPipelineFactory( PipelineFactory ):
 
     def constructDirectoryViewPipeline( self ):
         return segments.directoryview.DirectoryViewDeploy()
-
-
-def getPolicyIndexId( policy ):
-    pidx_id = "%s-%s"%(policy.getId(), "policy_index")
-    return pidx_id
 
 
 class PipelineDatabase( object ):
