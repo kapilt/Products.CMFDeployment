@@ -106,10 +106,8 @@ class DeletionRecord( object ):
     """
      models a content record ..
 
-     really a deletion descriptor
-     
-     processed by deletion pipeline
-
+     really a deletion descriptor, but supporting just enough descriptor
+     api to be processed by deletion pipeline and its components.
 
      -- uri resolver
 
@@ -125,15 +123,76 @@ class DeletionRecord( object ):
      -- storage
 
       - structure.getContentPathFromDescriptor( desc )
+
+        - content_path or getContent/getPhysicalPath :-(
+      
       - getFileName
       
     """
 
-    def __init__(self, content_id, content_path, dependencies ):
-        self.content_id = content_id
-        self.content_path = content_path
-        self.dependencies = dependencies
+    def __init__(self, policy, descriptor ):
+
+        content = descriptor.getContent()
         
+        self.content_id = content.getId()
+        self.content_url = descriptor.getContentURL()
+        self.file_name = descriptor.getFileName()
+
+        # lazy inits.. 
+        self.dependency_rids = None
+        self.child_descriptors = None
+        
+        # attach child descriptors
+        for cd in descriptor.getChildDescriptors():
+            if self.child_descriptors is None:
+                self.child_descriptors = []
+            self.child_descriptors.append( DeletionRecord( policy, cd ) )
+
+        # serialize dependencies
+        dependencies = descriptor.getReverseDependencies()
+        
+
+        for dep in dependencies:
+            if self.dependencies_rids is None:
+                getrid = getToolByName( content, 'portal_catalog').getrid
+                self.dependencies_rids = []
+            rid = getrid( "/".join( dep.getPhysicalPath() ) )
+            if rid is None: 
+                continue
+            self.dependency_rids.append( rid )
+
+        # get deployed to path
+        organization = policy.getContentOrganization()
+        self.content_path = organization.getActiveStructure().getContentRelativePath( content )
+
+
+    def getContentPath(self):
+        return self.content_path
+
+    def getSourcePath(self): # utilized by dv remapping, not of interest yet for content
+        return None
+
+    def getFileName(self):
+        return self.file_name
+    
+    def getDescriptors(self):
+        if not self.child_descriptors:
+            return [ self ]
+        else:
+            return (self,)+tuple(self.child_descriptors)
+
+    def getReverseDependencies( self, context ):
+
+        if not self.dependency_rids:
+            raise StopIteration
+        
+        catalog = getToolByName( context, 'portal_catalog')        
+        
+        for drid in self.dependency_rids:
+            dpath = catalog.getpath( drid )
+            dep = catalog.resolve_path( dpath )
+            if dep is not None:
+                yield dep
 
 
 def getIncrementalIndexId( policy ):
@@ -183,10 +242,6 @@ class PolicyIncrementalIndex( SimpleItem ):
         self._length = Length()
         self._index = IOBTree()
 
-    def _getPolicyId( self, id ):
-        idx = id.rfind('-')
-        return id[:idx]
-    
     def getId(self):
         return self.id
 
@@ -204,16 +259,20 @@ class PolicyIncrementalIndex( SimpleItem ):
         # record for the old content location for static deployments..
         # for data deployments this might be a little more tricky, since
         # we might not want the deletion, and we might have relational
-        # referential integrity to deal with as well.
+        # referential integrity to deal with as well, this actually
+        # references another scenario where the deletion index is inadequate
+        # namely workflow state change won't trigger a full reindex, hmmm..
+        # worst case is a dummy variable to the workflows matching this idx
+        # and check during index if the object is still deployable, and if
+        # not remove it from the index and create a deletion record.
 
         if not self._index.has_key(documentId):
             return
 
-        dtool = getToolByName( self, 'portal_deployment')
-        policy = dtool._getOb( self.policy_id )
-
+        policy = self._getPolicy()
         deletion_source = policy._getOb( DefaultConfiguration.DeletionSource, None )
         if deletion_source is None:
+            # XXX log me
             return
 
         content = self.getObjectFor( documentId )
@@ -222,17 +281,21 @@ class PolicyIncrementalIndex( SimpleItem ):
         descriptor = factory( content )
 
         if not rules.prepare( descriptor ):
-            # should still construct minimal deletion record
+            # XXX - we really do need to be able to create a deletion
+            # record from content which no longer matches a rule, ie.
+            # for example a workflow state change which entails that content
+            # no longer matches a rule condition, still needs to trigger
+            # deletion. thus we should record in an annotation the object's
+            # rule on deployment.
             return
 
-        record = DeletionRecord( descriptor )
+        record = DeletionRecord( policy, descriptor )
         deletion_source.addRecord( record )
         
         del self._index[documentId]
         self._length(-1)
 
     def _apply_index( request, cid=""):
-        # XXX return emtpy ruleset?
         return None
 
     def numObjects(self):
@@ -241,6 +304,16 @@ class PolicyIncrementalIndex( SimpleItem ):
     def clear(self):
         # i can't do that jim ;-)
         return
+
+    #################################
+    def _getPolicyId( self, id ):
+        idx = id.rfind('-')
+        return id[:idx]
+    
+    def _getPolicy(self): 
+        dtool = getToolByName( self, 'portal_deployment')
+        policy = dtool._getOb( self.policy_id )
+        return policy
 
     #################################
     def isObjectDeployed( self, object ):
@@ -257,7 +330,8 @@ class PolicyIncrementalIndex( SimpleItem ):
         key = catalog.uids.get( path, None )
         
         if key is None:
-            # not sure if we should do this.. 
+            # not sure if we should do this.. at min log this
+            # basically index the object if no rid is found for it.
             pcatalog = getToolByName(self, 'portal_catalog')
             pcatalog.indexObject( pcatalog )
 

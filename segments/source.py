@@ -16,10 +16,22 @@ class ContentSource( Producer ):
                     content = content.getObject()
 
                 if content is None:
-                    print "egads",  source, content
+                    #print "egads",  source, content
                     continue
 
                 yield content
+
+        dependency_source = pipe.services['DeploymentPolicy']._getOb(
+            DefaultConfiguration.DependencySource, None )
+
+        if dependency_source is None:
+            raise StopIteration
+
+        for content in dependency_source.getContent():
+            if content is None:
+                #print "bad dep"
+                continue
+            yield content
 
 class ContentDeletion( Producer ):
 

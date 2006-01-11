@@ -39,7 +39,7 @@ ContentURIs           = 'ContentURIs'
 DeploymentHistory     = 'DeploymentHistory'
 
 DeletionSource        = 'deletion_source'
-
+DependencySource      = 'dependency_source'
 
 ContentTransforms     = 'transforms'
 

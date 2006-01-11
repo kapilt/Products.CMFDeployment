@@ -164,7 +164,7 @@ class ContentDescriptor(object):
         self.child_descriptors.append( descriptor )
             
     def getChildDescriptors(self):
-        return self.child_descriptors
+        return self.child_descriptors or ()
 
 
     #################################

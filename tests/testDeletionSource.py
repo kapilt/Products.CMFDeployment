@@ -86,13 +86,14 @@ class TestDeletionSource(PloneTestCase):
 
         self.assertNotEqual( deletion_source, None, "Policy does not have a deletion source")
 
-        result= deletion_source.getContent()
-        tab= []
-        for content in result:
-            tab.append( content.getId() )
+        result = list(  deletion_source.getContent() )
 
-        print tab
-        self.assertEqual(tab, ['index_html', 'contact', 'about'], 'Deletion Record should be about instance')
+        expected = ['portal/about/index_html', 'portal/about/contact', 'portal/about']
+        
+        for content in result:
+            assert content.content_url in expected, "unexpected deletion record"
+
+        self.assertEqual( len( expected ), len( result ))
         
 def test_suite():
     suite = unittest.TestSuite()

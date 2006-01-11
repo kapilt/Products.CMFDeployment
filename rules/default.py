@@ -84,7 +84,7 @@ class ChildView( BaseRule ):
 
     def process( self, descriptor, expr_context):
         extension = self.extension( expr_context )
-        descriptor.setExtension( extension )
+        descriptor.setFileName( extension )
         if self.binary:
             descriptor.setBinary( binary )
         descriptor.setRenderMethod( self.view_method )

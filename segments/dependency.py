@@ -39,8 +39,11 @@ $Id$
 """
 
 from core import PipeSegment
+from Products.CMFDeployment import DefaultConfiguration
 
 class DependencyManager( object ):
+
+    dependency_source = None
         
     def processDeploy( self, pipe, descriptor ):
         dependencies = descriptor.getDependencies()
@@ -51,41 +54,39 @@ class DependencyManager( object ):
         if not source:
             return descriptor
 
-        # deploy objects that depend on descriptor
+        # (re)deploy objects that depend on descriptor
         for rdep in descriptor.getReverseDependencies():
-            source.addObject( rdep )
-
-        # XXX disable for now.
-        # deploy objects that are needed by descriptor
-        #  - check first that they aren't already deployed
-        #iidx = self.getIncrementalIndex()
+            source.addDependency( rdep )
 
         for dep in descriptor.getDependencies():
-            #if iidx.isObjectDeployed( dep ):
-            #    continue
-            source.addObject( dep )
+            source.addDependency( dep )
 
         return descriptor
 
     def processRemoval( self, pipe, record ):
-        # XXX deletion record needs to record deps on creation
         source = self.getDependencySource( pipe )
         if not source:
             return record
-        
-        for rdep in record.getReverseDependencies():
-            source.addObject( rdep )
+
+        policy = pipe.services['DeploymentPolicy']
+        # pass policy in as context
+        for rdep in record.getReverseDependencies( policy ):
+            source.addDependency( rdep )
 
         return record
 
-##     def getIncrementalIndex(self):
-##         policy = self.getDeploymentPolicy()
-##         return getIncrementalIndex( policy )
-    
     def getDependencySource(self):
-        source = pipe.services['ContentDependencySource']
-        return source
+
+        if self.dependency_source is not None:
+            return self.dependency_source
         
+        self.dependency_source = pipe.services['DeploymentPolicy']._getOb(
+            DefaultConfiguration.DependencySource, None )
+
+        if self.dependency_source is None:
+            raise AttributeError("no dependency source in policy")
+        
+        return self.dependency_source
 
 
 class DeployDependencyInjector( PipeSegment, DependencyManager ):

@@ -247,3 +247,11 @@ class CMFContentStructure(RootDirectory):
         return sep.join ( (self.mount_point,
                            sep.join(content.getPhysicalPath()[rlen:][:-1]) )
                           )
+
+
+    def getContentRelativePath( self, content ):
+        # return a path mount point relative
+        rlen = len(self.getCMFMountPoint().getPhysicalPath())
+        return sep.join( content.getPhysicalPath()[rlen:][:-1] )
+        
+        

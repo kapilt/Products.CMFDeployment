@@ -64,8 +64,10 @@ class IncrementalPipelineFactory( PipelineFactory ):
 
         import sources
         sources.deletion.addDeletionSource( policy,
-                                            DefaultConfiguration.DeletionSource)
+                                            DefaultConfiguration.DeletionSource )
         
+        sources.dependency.addDependencySource( policy,
+                                                DefaultConfiguration.DependencySource )
 
         
     def beginPolicyRemoval( self, policy ):
