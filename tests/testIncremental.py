@@ -26,6 +26,7 @@ from Products.CMFDeployment.DeploymentPolicy import DeploymentPolicy
 from Products.CMFDeployment.ExpressionContainer import getDeployExprContext
 from Products.CMFDeployment.Descriptor import ContentDescriptor
 from Products.CMFDeployment import incremental
+from Products.CMFDeployment.segments.core import PipeSegment
 
 from Products.CMFPlone.CatalogTool import CatalogTool
 from Products.CMFCore.CatalogTool import CatalogTool
@@ -94,6 +95,45 @@ class TestDeletionSource(PloneTestCase):
             assert content.content_url in expected, "unexpected deletion record"
 
         self.assertEqual( len( expected ), len( result ))
+
+    def testDependencySource(self):
+        # some serious monkey patches...
+
+        self.policy.execute()
+        get_transaction().commit(1)
+        import time; time.sleep(2)
+        self.portal.about.index_html.edit('text/plain', 'hello world')
+        self.portal.about.index_html.reindexObject()
+        get_transaction().commit(1)
+        
+        class PipeObserver( PipeSegment ):
+
+            def __init__(self):
+                self.content = []
+
+            def process( self, pipeline, descriptor ):
+                self.content.append( descriptor )
+                return descriptor
+            
+        observer = PipeObserver()
+        
+        def getPipeline():
+            pipeline = DeploymentPolicy.getPipeline( self.policy )
+            pipeline.steps[1].insert( 4, observer )
+            return pipeline
+
+        old_pipe = self.policy.getPipeline
+        
+        self.policy.getPipeline = getPipeline            
+        self.policy.execute()
+        self.policy.getPipeline = old_pipe
+        
+        expected = ['/portal', '/portal/about', '/portal/about/index_html']
+        for ob in observer.content:
+            opath =  "/".join( ob.getContent().getPhysicalPath())
+            assert opath in expected
+            
+
         
 def test_suite():
     suite = unittest.TestSuite()

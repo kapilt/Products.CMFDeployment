@@ -139,15 +139,16 @@ class ContentSourceContainer( OrderedFolder ):
             for c in source.getContent():
                 yield c
 
-    def manage_afterAdd(self, item, container):
-        import DefaultConfiguration
-        from sources import catalog
-        if not DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID in self.objectIds():
-            self._setObject(
-                DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID,
-                catalog.PortalCatalogSource(
-                  DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID )
-                )
+##     def manage_afterAdd(self, item, container):
+        
+##         import DefaultConfiguration
+##         from sources import catalog
+##         if not DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID in self.objectIds():
+##             self._setObject(
+##                 DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID,
+##                 catalog.PortalCatalogSource(
+##                   DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID )
+##                 )
                                                  
 
 InitializeClass( ContentSourceContainer )

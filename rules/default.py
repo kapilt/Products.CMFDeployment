@@ -3,6 +3,9 @@ $Id$
 """
 
 from Products.CMFCore.Expression import Expression
+from Products.CMFCore.PortalContent import PortalContent
+from Products.CMFCore.PortalFolder import PortalFolder
+
 from Products.CMFDeployment.Namespace import *
 from Products.CMFDeployment.DeploymentInterfaces import IContentRule
 
@@ -147,20 +150,44 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
             cview.process( descriptor, expr_context)
             yield descriptor
 
+    def getDependencies( self, descriptor, context ):
+        """
+        get the to be deployed content's dependencies
+        """
+        return ()
+
+    def getReverseDependencies( self, descriptor, context ):
+        """
+        get the objects which in turn depend on this object for them
+        to be deployed, processed when content is about to be
+        deleted.
+        """
+	object = descriptor.getContent().aq_inner.aq_parent
+        if not isinstance( object, (PortalContent, PortalFolder) ):
+           return ()
+        return (object,)
+
     def process(self, descriptor, context):
         """
         process a content descriptor, applying the rules specified by
         this deployment rule. 
         """
         extension = self.getExtension( context )
-        descriptor.setExtension( extension )
+        descriptor.setFileName( extension )
         if self.ghost:
             descriptor.setGhost( True )
             descriptor.setRenderMethod( None ) # xxx redundant
+            
         descriptor.setRenderMethod( self.view_method )
 
-        for cdesc in self.getChildDescriptors( self, context ):
+        for cdesc in self.getChildDescriptors( descriptor, context ):
             descriptor.addChildDescriptor( cdesc )
+
+        dependencies = self.getDependencies( descriptor, context )
+        descriptor.setDependencies( dependencies )
+
+        reverse_dependencies = self.getReverseDependencies( descriptor, context )
+        descriptor.setReverseDependencies( reverse_dependencies )
             
         return descriptor
 

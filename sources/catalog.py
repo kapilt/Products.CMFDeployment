@@ -82,10 +82,13 @@ class IncrementalCatalogSource(SimpleItem):
         last_deployment_time = self.getDeploymentHistory().getLastTime()
         
         if last_deployment_time is not None:
-            query = {'modified': {'query':last_time, 'range':'min'} }
+            query = {'modified': {'query':last_deployment_time, 'range':'min'} }
         else:
             query = {}
             
         objects = catalog(**query)
-        
+
+        print "##"*10
+        print "Results", len(objects)
         return objects
+            

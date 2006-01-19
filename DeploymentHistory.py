@@ -77,7 +77,7 @@ class DeploymentHistoryContainer(Folder):
     def getLastTime(self):
         if self._record_length() == 0:
             return None
-        return self._records[self._record_length()-1].bobobase_modification_time()
+        return self._records[self._record_length()-1].creation_time
 
     security.declarePrivate('makeHistory')
     def makeHistory(self):
@@ -105,7 +105,7 @@ class DeploymentHistory(SimpleItem):
     
     def __init__(self, id):
         self.id = id
-        self.creation_time = DateTime()
+        self.creation_time = DateTime()-2/(24*60*60)
         self.timeTime = str(int(self.creation_time.timeTime()))
         self.logs = []
         self.statistics = None

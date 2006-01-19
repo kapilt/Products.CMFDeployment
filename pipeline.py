@@ -89,6 +89,7 @@ class IncrementalPipelineFactory( PipelineFactory ):
             
             steps = (
                 segments.source.ContentSource(),
+                segments.unique.UniqueGuard(),
                 segments.filter.ContentFilter(),
                 segments.rule.ContentRuleMatch(),
                 segments.resolver.ResolverDatabase(),

@@ -46,20 +46,17 @@ class DependencyManager( object ):
     dependency_source = None
         
     def processDeploy( self, pipe, descriptor ):
-        dependencies = descriptor.getDependencies()
-        if not dependencies:
-            return descriptor
-
+        cpath = "/".join(descriptor.getContent().getPhysicalPath())        
+        print "Proceessing Deploy For", cpath
+        
         source = self.getDependencySource( pipe )
         if not source:
             return descriptor
-
+        
         # (re)deploy objects that depend on descriptor
         for rdep in descriptor.getReverseDependencies():
+            print "adding rdep", rdep
             source.addDependency( rdep )
-
-        for dep in descriptor.getDependencies():
-            source.addDependency( dep )
 
         return descriptor
 
@@ -75,7 +72,7 @@ class DependencyManager( object ):
 
         return record
 
-    def getDependencySource(self):
+    def getDependencySource(self, pipe):
 
         if self.dependency_source is not None:
             return self.dependency_source

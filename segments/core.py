@@ -39,9 +39,12 @@ class PipeExecutor( object ):
     """
 
     def __init__(self, steps ):
-        self.steps = steps
+        self.steps = list( steps )
         self.context_iterator = None
         self.producer_idx = 0
+
+    def insert( self, idx, step ):
+        self.steps.insert( idx, step )
         
     def process( self, pipeline, context ):
         idx = 0
@@ -70,6 +73,9 @@ class PipeExecutor( object ):
                     
             elif isinstance( step, PipeSegment ):
                 context = step.process( pipeline, context )
+                
+            else:
+                print "Unknown Step", step
 
             idx += 1
 

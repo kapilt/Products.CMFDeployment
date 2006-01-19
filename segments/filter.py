@@ -14,8 +14,11 @@ class ContentFilter( Filter ):
         portal = self.getPortal( pipe )
         
         path = "/".join( content.getPhysicalPath() )[mount_length:]
+        print "10"*10
+        print "Path Filter", restricted, path
         for rst in restricted:
             if rst in path:
+                print "Filtered"
                 return OUTPUT_FILTERED
 
         ec = getFilterExprContext( content, portal )

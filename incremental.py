@@ -153,9 +153,9 @@ class DeletionRecord( object ):
         
 
         for dep in dependencies:
-            if self.dependencies_rids is None:
+            if self.dependency_rids is None:
                 getrid = getToolByName( content, 'portal_catalog').getrid
-                self.dependencies_rids = []
+                self.dependency_rids = []
             rid = getrid( "/".join( dep.getPhysicalPath() ) )
             if rid is None: 
                 continue

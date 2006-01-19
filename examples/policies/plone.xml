@@ -2,6 +2,10 @@
 
   <identification>
 
+   <source 
+       id="catalog"
+       product="CMFDeployment" 
+       factory="addIncrementalCatalogSource" />
 
     <!--
     <filter id="review_state"

@@ -101,6 +101,11 @@ class PolicyReader(MetaReader):
     def endIdentidentification(self, chars):
         self.prefix =''
 
+    def startIdentsource(self, attrs):
+        sources =  self.policy.ident.setdefault('sources', [] )
+        source = PolicyNode( attrs )
+        sources.append( source )
+        
     def startIdentfilter(self, attrs):
         filters = self.policy.ident.setdefault('filters', [])
         filter = PolicyNode(attrs)
@@ -183,6 +188,10 @@ DEFAULT_RULE_FACTORY_MAP = {
     'filter_expr':'condition'
     }
 
+DEFAULTS = {
+    'source' : {'product':'CMFDeployment', 'factory':'addPortalCatalogSource' },
+    }
+
 def remap_default_rule_factory( m ):
     delk = []
     for key, factory_key in DEFAULT_RULE_FACTORY_MAP.items():
@@ -194,6 +203,16 @@ def remap_default_rule_factory( m ):
         del m.data[dk]
 
     return m
+
+def getFactory( ctx, node, type='source' ):
+    product_name = node.get('product', DEFAULTS[type]['product'])
+    factory_name = node.get('factory', DEFAULTS[type]['factory'])
+    factory = getattr( ctx.manage_addProduct[ product_name ], factory_name )
+    md = dict( node )
+    if 'product' in md: del md['product']
+    if 'factory' in md: del md['factory']
+    return factory, md
+    
 
 def make_policy(portal, policy_node, id=None, title=None):
  
@@ -216,6 +235,11 @@ def make_policy(portal, policy_node, id=None, title=None):
         for f in policy_node.ident.filters:
             identification.filters.addFilter(f.id, f.expr)
 
+    if hasattr(policy_node.ident, 'sources'):
+        container = identification.sources
+        for s in policy_node.ident.sources:
+            factory, md = getFactory( container, s )
+            factory( **md )
 
     ## mastering setup
     mastering = getattr(policy, DefaultConfiguration.ContentMastering)    

@@ -73,6 +73,9 @@ class ContentDescriptor(object):
         self.content_folderish_p = None
         self.composite_content_p = None
         self.child_descriptors = None
+
+        self.dependencies = None
+        self.reverse_dependencies = None
         
     def getId(self):
         return self.content.getId()
@@ -157,7 +160,8 @@ class ContentDescriptor(object):
         return self.source_path
 
     #################################
-    # child resource management - for non portal content 
+    # child resource management - for non portal content
+    
     def addChildDescriptor(self, descriptor):
         if self.child_descriptors is None:
             self.child_descriptors = DescriptorContainer()
@@ -171,7 +175,14 @@ class ContentDescriptor(object):
     # dependency management
 
     def getDependencies( self ):
-        return ()
+        return self.dependencies or ()
+
+    def setDependencies( self, dependencies ):
+        self.dependencies = dependencies 
 
     def getReverseDependencies( self ):
-        return ()
+        return self.reverse_dependencies or ()
+
+    def setReverseDependencies( self, reverse_dependencies ):
+        self.reverse_dependencies = reverse_dependencies
+
