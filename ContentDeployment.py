@@ -65,7 +65,7 @@ class ContentDeployment( OrderedFolder ):
     security.declarePrivate('deploy')
     def deploy(self, structure):
         for target in self.objectValues():
-            target.transport( structure )
+            target.execute( target, structure )
 
 InitializeClass( ContentDeployment )
 
