@@ -1,5 +1,5 @@
 <dtml-call "RESPONSE.setHeader('Content-Type', 'text/xml')">
-<DeploymentPolicy id="<dtml-var getId>">
+<DeploymentPolicy id="<dtml-var getId>" pipeline="<dtml-var pipeline_id>">
 
   <identification>
    <dtml-let identification="getContentIdentification()">
@@ -12,7 +12,7 @@
    </dtml-let>
   </identification>
 
-  <strategy id="<dtml-var "getDeploymentStrategy().strategy_id">" />
+  
 
   <skins>
     <dtml-in "getContentDirectoryViews().objectValues()">

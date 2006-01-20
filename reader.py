@@ -220,13 +220,15 @@ def make_policy(portal, policy_node, id=None, title=None):
     from App.Common import package_home
 
     deployment_tool = portal.portal_deployment
+
+    pipeline_id = policy_node.get('pipeline', 'incremental')
     
     if id:
         title = title or ''
-        deployment_tool.addPolicy( id, title )
     else:
         id = policy_node.id
-        deployment_tool.addPolicy( id, id)
+
+    deployment_tool.addPolicy( id, title, policy_pipeline_id=pipeline_id )
         
     policy = getattr(deployment_tool, id)
     
