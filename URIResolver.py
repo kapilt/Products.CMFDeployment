@@ -113,13 +113,16 @@ class URIResolver:
     def _addResource(self, descriptor):
 
         relative_url = descriptor.getSourcePath() or descriptor.content_url
-        content_path = descriptor.getContentPath()
 
+        content_path = descriptor.getContentPath()
+        
         if relative_url[0] != '/':
             relative_url = '/'+relative_url
         
         if content_path is None:
             mlen = len(self.mount_path)
+            if not self.mount_path.startswith('/'):
+                mlen += 1
                 
             # minus last path segment
             # find the path segment            

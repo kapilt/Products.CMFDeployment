@@ -30,6 +30,7 @@ class PipeEnvironmentInitializer( PipeSegment ):
         
 
     def setupURIResolver( self, pipe, ctxobj ):
+
         resolver = pipe.services['ContentResolver']
         uri_resolver = resolver.clone( persistent = 0 )
 
@@ -42,9 +43,9 @@ class PipeEnvironmentInitializer( PipeSegment ):
         # should setup an edit method for this
         uri_resolver.mount_path = mount_url_root
         uri_resolver.source_host = ctxobj.REQUEST['SERVER_URL']
-        uri_resolver.mlen = len(mount_url_root)
+        uri_resolver.mlen = mlen
 
-        pipe.services['URIResolver'] = uri_resolver
+        pipe.services['ContentResolver'] = uri_resolver
         
         
     def setupServices( self, pipe, ctxobj ):

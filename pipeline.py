@@ -31,19 +31,31 @@ class PipelineFactory( object ):
 class IncrementalPipelineFactory( PipelineFactory ):
     
     id = 'incremental'
+    
+    class IncrementalEnvironment( segments.core.PipeSegment ):
+
+        def process( self, pipeline, context ):
+            iresolver = pipeline.services['ContentResolver']
+            resolver  = pipeline.services['DeploymentPolicy'].getDeploymentURIs()
+            iresolver.uris = resolver.uris
+
+            return context
 
     def __call__( self ):
 
-        deletion_pipeline = self.constructDeletionPipeline()
-        content_pipeline = self.constructContentPipeline()
+        deletion_pipeline  = self.constructDeletionPipeline()
+        processor_pipeline = self.constructContentProcessorPipeline()
+        storage_pipeline   = self.constructContentStoragePipeline()
         dv_pipeline = self.constructDirectoryViewPipeline()
 
         policy_pipeline = PolicyPipeline( 
             steps = (
                segments.environment.PipeEnvironmentInitializer(),
-#               dv_pipeline,
+               self.IncrementalEnvironment(),
 #               deletion_pipeline,
-               content_pipeline,
+               processor_pipeline,
+               dv_pipeline,               
+               storage_pipeline,
                segments.transport.ContentTransport()
                )
             )
@@ -84,7 +96,7 @@ class IncrementalPipelineFactory( PipelineFactory ):
 
     #################################
     # private methods for easy subclass construction
-    def constructContentPipeline( self ):
+    def constructContentProcessorPipeline( self ):
         return PipeExecutor(
             
             steps = (
@@ -94,13 +106,24 @@ class IncrementalPipelineFactory( PipelineFactory ):
                 segments.rule.ContentRuleMatch(),
                 segments.resolver.ResolverDatabase(),
                 segments.dependency.DeployDependencyInjector(),
-                segments.render.ContentRender(),
-                segments.deletion.RecordDeployment(),
-                segments.resolver.ResolveContent,
-                segments.storage.ContentStorage(),
+                segments.core.VariableAggregator("descriptors")
                 )
             )
 
+    def constructContentStoragePipeline(self):
+        # a name almost long enough to be in java ;-)
+        return PipeExecutor(
+
+            steps = (
+                segments.core.VariableIterator("descriptors"),
+                segments.render.ContentRender(),
+                segments.deletion.RecordDeployment(),
+                segments.resolver.ResolveContent(),
+                segments.storage.ContentStorage()
+                )
+            )
+    
+                
     def constructDeletionPipeline( self ):
         return PipeExecutor(
             steps = (

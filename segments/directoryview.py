@@ -5,9 +5,8 @@ class DirectoryViewDeploy( PipeSegment ):
     """
 
     def process( self, pipe, content ):
-
         views = pipe.services["ContentDirectoryViews"]
-        resolver = pipe.services['URIResolver']
+        resolver = pipe.services['ContentResolver']
         store = pipe.services["ContentStorage"]
         
         contents = views.getContent()

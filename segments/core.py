@@ -48,6 +48,8 @@ class PipeExecutor( object ):
         
     def process( self, pipeline, context ):
         idx = 0
+        origin_ctx = context
+        
         while context is not _OUTPUT_FINISHED:
 
             step = self.steps[idx]
@@ -70,14 +72,14 @@ class PipeExecutor( object ):
                     print "filter returned none", step, value
                 else:                    
                     context = value
-                    
             elif isinstance( step, PipeSegment ):
                 context = step.process( pipeline, context )
-                
             else:
                 print "Unknown Step", step
 
             idx += 1
+            
+        return origin_ctx
 
     def getNextContextObject( self ):
         if self.context_iterator is None:
@@ -110,28 +112,31 @@ class Filter( PipeSegment ):
     __implements__ = IFilter
 
 
-class VariableAggregator( PipeSegment ):
+class VariableAggregator( Consumer ):
+    """
+    consume contexts into a variable
+    """
 
     def __init__(self, variable_name=""):
-        self.values = []
         self.variable_name = variable_name
 
     def process(self, pipeline, ctxobj ):
-        pipeline.variables[ self.variable_name ]=self.values
-        self.values.append( ctxobj )
-        return ctxobj
+        print "adding", ctxobj, "to", self.variable_name
+        values = pipeline.variables.setdefault( self.variable_name, [] )
+        values.append( ctxobj )
+        return None
 
+class VariableIterator( Producer ):
+    """
+    producer which iterate values from a variable
+    """
 
-## class VariableIterator( Producer ):
+    def __init__(self, variable_name ):
+        self.var_name = variable_name
 
-##     def __init__(self, variable_name, steps ):
-##         self.variable_name = variable_name
-##         self.steps = steps
-
-##     def process( self, pipeline, ctxobj ):
-##         for value in pipeline.vars.get( self.variable_name, () ):
-##             for s in self.steps:
-##                 s.process( pipeline, value )
+    def process( self, pipeline, ctxobj ):
+        for value in pipeline.variables.get( self.var_name, () ):
+            yield value
 
 
 ## class ConditionalBranch( PipeSegment ):

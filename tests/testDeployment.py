@@ -217,7 +217,7 @@ class DeploymentTests( PloneTestCase ):
         print "Files with Link Errors"
         for line in lines:
             print " ", line
-                
+
 
 def test_suite():
     suite = unittest.TestSuite()
