@@ -144,7 +144,17 @@ class ContentMastering(Folder):
         # sometimes the skindata can disappear mid request
         # xxx we now modify the portal root at the start to prevent
         # volatile disappearance, so this should be unesc.
-        if not self.portal_url.getPortalObject()._v_skindata:
+
+        # Ok, on Plone 2.1, _v_skindata doesn't exist...  So, we try
+        # to use getCurrentSkinName if available, and fallback to
+        # _v_skindata else
+        root = self.portal_url.getPortalObject()
+        skin = getattr(root, "getCurrentSkinName", None)
+        if skin:
+            skin = skin()
+        else:
+            skin = root._v_skindata
+        if not skin:
             self.site_skin._setSkin()
 
         for descriptor in descriptors:

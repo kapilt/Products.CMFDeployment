@@ -28,6 +28,7 @@ $Id$
 """
 
 import re
+import types
 import string
 import pprint
 
@@ -233,11 +234,17 @@ class URIResolver:
         if relative_url:
             url = relative_url
         parts = url.split('/')
-        if not parts[-1] and parts[-2]:
-            oid = parts[-2]
-        else:
-            oid = parts[-1]
+        if not parts[-1]:
+            del parts[-1]
+        oid = parts[-1]
         object = getattr( content, oid, None )
+
+        # Ok, on Plone 2.1, we can get a view object here.
+        # We don't want it, we want a real object.
+        if type(object) == types.MethodType:
+            oid = parts[-2]
+            object = getattr( content, oid, None )
+            
         if not object:
             return _marker
         return  self.uris.get("/"+object.absolute_url(1), _marker)

@@ -63,6 +63,12 @@ def setupContentTree( portal ):
 
     portal.portal_catalog.indexObject( portal )
 
+    # Try to remove news if it existed, like in plone 2.1
+    try:
+        portal.manage_delObjects(["news"])
+    except:
+        pass
+
     portal.invokeFactory('Folder', 'news')
     portal.news.invokeFactory('Document','index_html')
     
@@ -120,6 +126,12 @@ def setupContentTree( portal ):
     portal.about.index_html.edit(text_format="html", text=about_index_content)
     portal.about.invokeFactory('Document', 'contact')
     
+    # Try to remove events if it existed, like in plone 2.1
+    try:
+        portal.manage_delObjects(["events"])
+    except:
+        pass
+        
     portal.invokeFactory('Folder','events')
     portal.events.invokeFactory( 'Event', 'Snow Sprint')
     portal.events['Snow Sprint'].edit( 

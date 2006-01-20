@@ -88,6 +88,12 @@ class IncrementalCatalogSource(SimpleItem):
             
         objects = catalog(**query)
 
+        # On Plone 2.1, "modified" is a DateIndex, which doesn't take care of
+        # seconds. This break unit tests. We add a filter here, to ensure
+        # correctness. It may cost a bit of CPU time, but not that much IMHO.
+        if last_deployment_time:
+            objects = [ o for o in objects if o.modified > last_deployment_time ]
+
         print "##"*10
         print "Results", len(objects)
         return objects

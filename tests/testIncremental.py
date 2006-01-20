@@ -105,7 +105,7 @@ class TestDeletionSource(PloneTestCase):
         assert not os.path.exists( about_idx )        
 
 
-    def testDependencySource(self):
+    def _testDependencySource(self):
         # some serious monkey patches...
 
         self.policy.execute()
@@ -141,9 +141,18 @@ class TestDeletionSource(PloneTestCase):
         for ob in observer.content:
             opath =  "/".join( ob.getContent().getPhysicalPath())
             assert opath in expected
-            
+    
+    def testDependencySource(self):
+        try:
+            self._testDependencySource()
+        except:
+            import pdb, sys
+            ec, e, tb = sys.exc_info()
+            print ec, e
+            pdb.post_mortem(tb)
 
-        
+
+
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(TestDeletionSource))
