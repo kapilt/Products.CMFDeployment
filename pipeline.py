@@ -39,6 +39,9 @@ class IncrementalPipelineFactory( PipelineFactory ):
             resolver  = pipeline.services['DeploymentPolicy'].getDeploymentURIs()
             iresolver.uris = resolver.uris
 
+            dtime = pipeline.services['DeploymentPolicy'].getDeploymentHistory().getLastTime()
+            pipeline.variables['LastDeployTime'] = dtime
+
             return context
 
     def __call__( self ):
@@ -135,7 +138,7 @@ class IncrementalPipelineFactory( PipelineFactory ):
             )
 
     def constructDirectoryViewPipeline( self ):
-        return segments.directoryview.DirectoryViewDeploy()
+        return segments.directoryview.DirectoryViewDeploy( incremental=True)
 
 
 class PipelineDatabase( object ):
