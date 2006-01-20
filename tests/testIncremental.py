@@ -119,7 +119,7 @@ class TestDeletionSource(PloneTestCase):
         
         def getPipeline():
             pipeline = DeploymentPolicy.getPipeline( self.policy )
-            pipeline.steps[1].insert( 4, observer )
+            pipeline.steps[3].insert( 4, observer )
             return pipeline
 
         old_pipe = self.policy.getPipeline
