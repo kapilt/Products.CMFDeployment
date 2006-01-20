@@ -162,6 +162,7 @@ class DeploymentTests( PloneTestCase ):
             os.mkdir( TESTDEPLOYDIR )
 
         installer = getToolByName(self.portal, 'portal_quickinstaller')
+        installer.installProduct('Archetypes')
         installer.installProduct('ATContentRule')        
         installer.installProduct('CMFDeployment')
 
@@ -176,6 +177,7 @@ class DeploymentTests( PloneTestCase ):
         structure.mount_point = TESTDEPLOYDIR
         fh.close()
         get_transaction().commit(1)
+        self.portal.changeSkin( self.portal.portal_skins.getDefaultSkin() )
 
         rules = policy.getContentMastering().mime
         rules.manage_addProduct['ATContentRule'].addArchetypeContentRule(
@@ -198,15 +200,17 @@ class DeploymentTests( PloneTestCase ):
             ec, e, tb = sys.exc_info()
             print ec, e
             pdb.post_mortem(tb)
+
+        command = "grep -rl deploy_link_error %s/*"%TESTDEPLOYDIR
         
         status, output = commands.getstatusoutput(
-            "grep -rl deploy_link_error %s/*"%TESTDEPLOYDIR
+            command
             )
             
-        if status:
-            raise AssertionError, "Could not verify content %s"%(output)
+        if status and output:
+            raise AssertionError, "Could not verify content \n %s \n %s \n%s"%(command, status, output)
             
-        lines = output.strip().split('\n')
+        lines = filter(None, output.strip().split('\n'))
         if not lines:
             return
 
