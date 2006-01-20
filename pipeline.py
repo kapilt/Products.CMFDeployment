@@ -52,7 +52,7 @@ class IncrementalPipelineFactory( PipelineFactory ):
             steps = (
                segments.environment.PipeEnvironmentInitializer(),
                self.IncrementalEnvironment(),
-#               deletion_pipeline,
+               deletion_pipeline,
                processor_pipeline,
                dv_pipeline,               
                storage_pipeline,
