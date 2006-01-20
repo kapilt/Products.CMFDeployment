@@ -36,6 +36,7 @@ class ContentSource( Producer ):
 class ContentDeletion( Producer ):
 
     def process( self, pipe, ctxobj ):
+        
         source = pipe.services['DeploymentPolicy']._getOb(
             DefaultConfiguration.DeletionSource, None
             )

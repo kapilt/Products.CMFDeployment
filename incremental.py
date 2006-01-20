@@ -189,7 +189,10 @@ class DeletionRecord( object ):
         catalog = getToolByName( context, 'portal_catalog')        
         
         for drid in self.dependency_rids:
-            dpath = catalog.getpath( drid )
+            try:
+                dpath = catalog.getpath( drid )
+            except KeyError: # dependency has gone by bye
+                continue
             dep = catalog.resolve_path( dpath )
             if dep is not None:
                 yield dep

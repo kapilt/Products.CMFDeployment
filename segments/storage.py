@@ -33,6 +33,7 @@ from core import Consumer
 from Products.CMFDeployment.Log import LogFactory
 #from Products.CMFDeployment.Statistics import IOStatistics
 
+import os
 from os import sep, path, mkdir
 log = LogFactory('Content Storage')
 
@@ -89,19 +90,26 @@ class ContentStorageManager(object):
         """
         remove a rendered content object on the filesystem
         """
-        
-        descriptors = descriptors.getDescriptors()
+        print "XYZ"*10
+
+        descriptors = descriptor.getDescriptors()
         structure   = self.getStructure( pipe )
 
-        for descriptor in descriptor:
+        for descriptor in descriptors:
             content_path = structure.getContentPathFromDescriptor( descriptor )
             file_name = descriptor.getFileName()
-            location = os.path.join( content_path, file_name )
-            if not os.path.exists( location ) and os.path.isfile( location ):
-                # XXX log me
-                print "Invalid Content Path", location, descriptor
-            else:
-                os.path.remove( location )
+            location = path.join( content_path, file_name )
+            print "removing descriptor", file_name, location
+            if path.exists( location ) and os.path.isfile( location ):
+                os.remove( location )
+            elif os.path.exists( location ):
+                # removing directories is possible but requires a bit of work
+                # as we map folder descriptors to index files..
+                # basically need to store is_content_folderish on deletion descriptor
+                # and chop of the last part of the location.. could be dangerous
+                print "Invalid - Directory Path", location, descriptor
+            else: # already removed..
+                pass
                 
     def storeDescriptor(self, content_path, descriptor ):
         """

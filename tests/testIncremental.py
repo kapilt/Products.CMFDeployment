@@ -96,6 +96,15 @@ class TestDeletionSource(PloneTestCase):
 
         self.assertEqual( len( expected ), len( result ))
 
+
+    def testDeletionPipeline(self):
+        self.policy.execute()
+        self.portal.manage_delObjects(["about"]) 
+        self.policy.execute()
+        about_idx = os.path.join( TESTDEPLOYDIR, 'about','index.html')
+        assert not os.path.exists( about_idx )        
+
+
     def testDependencySource(self):
         # some serious monkey patches...
 
