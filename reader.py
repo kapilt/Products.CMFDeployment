@@ -157,6 +157,21 @@ class PolicyReader(MetaReader):
     def endSkinsskins(self,attrs):
 	self.prefix=''
 
+    def startRegistries(self, attrs):
+	registries = PolicyNode(attrs)
+	self.policy.registries = registries
+	self.prefix='Registries'
+        self.policy.registries.setdefault('registries',[])
+
+    def startRegistriesregistry(self, attrs):
+	dirs = self.policy.registries.setdefault('registries', [])
+	reg = PolicyNode(attrs)
+	dirs.append(reg)
+
+    def endRegistriesregistries(self,attrs):
+	self.prefix=''
+
+
 #    def startStrategy(self, attrs):
 #        self.policy.strategy = PolicyNode(attrs)
 
@@ -318,6 +333,22 @@ def make_policy(portal, policy_node, id=None, title=None):
 				sd.source_path, 
 				sd.deploy_path
 				)
+    ## registries setup
+    registries = getattr(policy, DefaultConfiguration.ContentRegistries, None)
+    try:
+        registries_node = policy_node.registries.registries
+    except KeyError:
+        registries_node = None
+    if registries_node is not None and registries is not None:
+        for reg in registries_node:
+            id = "reg_" + reg.get('id', reg.view_path.replace('/',''))
+            registries.addRegistryRule(
+                                id,
+				reg.view_path, 
+				reg.source_path, 
+				reg.deploy_path
+				)
+
   
     # strategy setup - XXX convert to pipeline id
 #    strategies = getattr(policy, DefaultConfiguration.DeploymentStrategy)

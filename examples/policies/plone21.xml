@@ -1,0 +1,107 @@
+<DeploymentPolicy id="plone21_example">
+
+  <identification>
+
+   <source 
+       id="catalog"
+       product="CMFDeployment" 
+       factory="addIncrementalCatalogSource" />
+
+    <!--
+    <filter id="review_state"
+            expr="python: memento.review_state in ('published','revision_draft', 'revision_submitted')" />
+    -->
+
+  </identification>
+
+  <strategy id="default" />
+
+  <skins>
+
+    <directory view_path="/plone_images"
+               deploy_path="/images"
+               source_path="/" />
+
+  </skins>
+
+  <registries>
+
+    <registry view_path="/portal_css"
+               deploy_path="/css"
+               source_path="/portal_css" />
+
+    <registry view_path="/portal_javascripts"
+               deploy_path="/javascript"
+               source_path="/portal_javascripts" />
+   
+  </registries>
+
+  <organization cmf_mount="/" 
+		fs_mount="*/examples/static/plone21">
+
+    <restricted id="Members" />
+    <restricted id="content_type_registry" />
+    <restricted id="acl_users" />
+    <restricted id="mimetypes_registry" />
+    <restricted id="archetype_tool" />
+    <restricted id="uid_catalog" />
+    <restricted id="reference_catalog" />
+
+  </organization>
+  
+  <!-- <chain_user user="plone"  udb_path="/plone/acl_users" /> -->
+
+  <mastering skin="Plone Deployment">
+
+    <!-- executed in order and order is important -->
+
+    <mime id="Site"
+          filter_expr="python: object.portal_type == 'Plone Site'"
+          ext_expr="string:index.html"
+          view_method="index_html"
+	  ghost="1"
+          />
+
+    <mime id="Folder"
+          filter_expr="python: object.portal_type == 'Folder'"
+          ext_expr="python: '%s/index.html'%object.getId()"
+          view_method="folder_listing"
+          />
+
+<!-- Example of adding the plone root object to the policy
+    <mime id="PloneSite"
+          filter_expr="python: object.portal_type == 'Plone Site'"
+	  ext_expr="python: 'index.html'"
+	  view_method="index_html"
+	  />
+-->
+    <mime id="IndexDocument"
+          filter_expr="python: object.getId()=='index_html'"
+          ext_expr="python: 'index.html'"
+          view_method=""
+          />
+
+    <mime id="Document"
+          filter_expr="python: object.portal_type == 'Document'"
+          ext_expr="python: '%s.html'%object.getId()"
+          view_method=""
+          />
+
+    <mime id="Image"
+          filter_expr="python: object.portal_type == 'Image'"
+          ext_expr="python: object.getId()"
+          view_method=""
+          />
+
+    <mime id="Event"
+          filter_expr="python: object.portal_type == 'Event'"
+	  ext_expr="python: '%s.html'%object.getId()"
+	  view_method=""
+	  />
+
+
+  </mastering>
+
+</DeploymentPolicy>
+
+

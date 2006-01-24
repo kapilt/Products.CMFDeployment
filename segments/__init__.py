@@ -7,6 +7,7 @@ import core
 import deletion
 import dependency
 import directoryview
+import registry
 import environment
 import filter
 import render

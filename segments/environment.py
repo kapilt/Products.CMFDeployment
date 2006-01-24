@@ -51,25 +51,28 @@ class PipeEnvironmentInitializer( PipeSegment ):
     def setupServices( self, pipe, ctxobj ):
         addService = pipe.services.__setitem__
 
-        source    = ctxobj.getContentIdentification()
+        source     = ctxobj.getContentIdentification()
         addService("ContentIdentification", source)
         
-        structure = ctxobj.getContentOrganization()
+        structure  = ctxobj.getContentOrganization()
         addService("ContentOrganization", structure)
         
-        mastering = ctxobj.getContentMastering()
+        mastering  = ctxobj.getContentMastering()
         addService("ContentRules", mastering)
         
-        deployer  = ctxobj.getContentDeployment()
+        deployer   = ctxobj.getContentDeployment()
         addService("ContentTransports", deployer)
         
-        views     = ctxobj.getContentDirectoryViews()
+        views      = ctxobj.getContentDirectoryViews()
         addService("ContentDirectoryViews", views)
-        
-        resolver  = ctxobj.getDeploymentURIs()
+
+        registries = ctxobj.getContentRegistries()
+        addService("ContentRegistries", registries)
+
+        resolver   = ctxobj.getDeploymentURIs()
         addService("ContentResolver", resolver )
         
-        history   = ctxobj.getDeploymentHistory()
+        history    = ctxobj.getDeploymentHistory()
         addService("ContentHistory", history )
 
         addService("ContentStorage", ContentStorage() )

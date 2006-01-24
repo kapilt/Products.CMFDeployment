@@ -35,6 +35,7 @@ ContentOrganization   = 'ContentOrganization'
 ContentMastering      = 'ContentMastering'
 ContentDeployment     = 'ContentDeployment'
 ContentDirectoryViews = 'ContentDirectoryViews'
+ContentRegistries     = 'ContentRegistries'
 ContentURIs           = 'ContentURIs'
 DeploymentHistory     = 'DeploymentHistory'
 
@@ -51,6 +52,7 @@ from ContentMastering import ContentMastering as KlassContentMastering
 from ContentDeployment import ContentDeployment as KlassContentDeployment
 from DeploymentHistory import DeploymentHistoryContainer as KlassDeploymentHistory
 from ContentDirectoryViews import ContentDirectoryView as KlassContentDirectoryView
+from ContentRegistries import ContentRegistry as KlassContentRegistry
 from ContentURI import ContentURI as KlassContentURI
 from ContentTransforms import ContentTransforms as KlassContentTransforms
 
@@ -79,6 +81,11 @@ def add_view(policy):
     ob = KlassContentDirectoryView(ContentDirectoryViews)
     policy._setObject(ContentDirectoryViews, ob)
 
+def add_registry(policy):
+    
+    ob = KlassContentRegistry(ContentRegistries)
+    policy._setObject(ContentRegistries, ob)
+
 def add_history(policy):
 
     ob = KlassDeploymentHistory(DeploymentHistory)
@@ -100,6 +107,7 @@ _add_funcs = [
     ( ContentMastering, add_mastering ),
     ( ContentDeployment, add_deployment ),
     ( ContentDirectoryViews, add_view ),
+    ( ContentRegistries, add_registry ),
     ( DeploymentHistory, add_history ),
     ( ContentURIs, add_uris ),
     ( ContentTransforms, add_filter ),

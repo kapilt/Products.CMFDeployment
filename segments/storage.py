@@ -68,6 +68,10 @@ class ContentStorageManager(object):
         store a rendered content object on the filesystem.
         """
 
+        f = open("/tmp/debug.log", "a")
+        f.write("ContentStorageManager => %r, %r\n" % (descriptor, descriptor.isGhost()))
+        f.close()
+
         # sometimes we want to have content in the uri db
         # but we don't actually want to store it... either because
         # of an error during rendering or based on configuration.
@@ -79,6 +83,9 @@ class ContentStorageManager(object):
         
         for descriptor in descriptors:
             content_path = structure.getContentPathFromDescriptor( descriptor )
+            f = open("/tmp/debug.log", "a")
+            f.write("ContentStorageManager, loop => %r, %r\n" % (descriptor, content_path))
+            f.close()
             #if content_path.endswith(sep):
             #log.warning('invalid content path detected %s ... fixing'%content_path)
             #    content_path = content_path[:-1]

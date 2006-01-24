@@ -56,6 +56,8 @@ class DeploymentPolicy(Folder):
 
         {'label':'Skins',
          'action':'%s/manage_workspace'%DefaultConfiguration.ContentDirectoryViews},
+        {'label':'Registries',
+         'action':'%s/manage_workspace'%DefaultConfiguration.ContentRegistries},
 
         {'label':'URIs',
          'action':'%s/manage_workspace'%DefaultConfiguration.ContentURIs},
@@ -103,6 +105,9 @@ class DeploymentPolicy(Folder):
 
     def getContentDirectoryViews(self):
         return self._getOb(DefaultConfiguration.ContentDirectoryViews)
+
+    def getContentRegistries(self):
+        return self._getOb(DefaultConfiguration.ContentRegistries)
 
     def getContentTransforms(self):
         return self._getOb(DefaultConfiguration.ContentTransforms)

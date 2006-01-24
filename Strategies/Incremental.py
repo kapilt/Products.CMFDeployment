@@ -34,13 +34,14 @@ from DateTime import DateTime
 def IncrementalStrategy(self):
     #################################
     #
-    source    = self.getContentIdentification()
-    structure = self.getContentOrganization()
-    mastering = self.getContentMastering()
-    deployer  = self.getContentDeployment()
-    views     = self.getContentDirectoryViews()
-    resolver  = self.getDeploymentURIs()
-    history   = self.getDeploymentHistory()
+    source     = self.getContentIdentification()
+    structure  = self.getContentOrganization()
+    mastering  = self.getContentMastering()
+    deployer   = self.getContentDeployment()
+    views      = self.getContentDirectoryViews()
+    registries = self.getContentRegistries()
+    resolver   = self.getDeploymentURIs()
+    history    = self.getDeploymentHistory()
     
     store = ContentStorage(self)
     stats = TimeStatistics()
@@ -51,6 +52,7 @@ def IncrementalStrategy(self):
 
     log.debug('setting up structure')
     views.mountDirectories(structure.getActiveStructure())
+    registries.mountDirectories(structure.getActiveStructure())
     structure.mount()
 
     # these need to get an aggregator facade
@@ -125,6 +127,14 @@ def IncrementalStrategy(self):
             views.cookViewObject(dvo)
             uri_resolver.resolve(dvo)
             store(dvo)
+
+        # handle registries merging...        
+        directory_contents = registries.getContent()
+        map(uri_resolver.addResource, directory_contents)        
+        for ro in directory_contents:
+            registries.cookViewObject(ro) # FIXME ?
+            uri_resolver.resolve(ro)
+            store(ro)
 
         # we now return you to your regularly scheduled deployment        
         stats('1st pass, content prep', relative='retrieving content')

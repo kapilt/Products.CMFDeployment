@@ -25,6 +25,17 @@
     </dtml-in>
   </skins>
 
+  <registries>
+    <dtml-in "getContentRegistries().objectValues()">
+     <dtml-with sequence-item>
+      <registry id="<dtml-var id>"
+	         view_path="<dtml-var view_path>"
+                 deploy_path="<dtml-var deployment_path>"
+                 source_path="<dtml-var source_path>" />
+     </dtml-with>
+    </dtml-in>
+  </registries>
+
  <dtml-with "getContentOrganization().structure">
  
   <organization 

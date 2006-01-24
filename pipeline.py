@@ -50,6 +50,7 @@ class IncrementalPipelineFactory( PipelineFactory ):
         processor_pipeline = self.constructContentProcessorPipeline()
         storage_pipeline   = self.constructContentStoragePipeline()
         dv_pipeline = self.constructDirectoryViewPipeline()
+        reg_pipeline = self.constructRegistryPipeline()
 
         policy_pipeline = PolicyPipeline( 
             steps = (
@@ -57,7 +58,8 @@ class IncrementalPipelineFactory( PipelineFactory ):
                self.IncrementalEnvironment(),
                deletion_pipeline,
                processor_pipeline,
-               dv_pipeline,               
+               dv_pipeline,
+               reg_pipeline,               
                storage_pipeline,
                segments.transport.ContentTransport()
                )
@@ -139,6 +141,9 @@ class IncrementalPipelineFactory( PipelineFactory ):
 
     def constructDirectoryViewPipeline( self ):
         return segments.directoryview.DirectoryViewDeploy( incremental=True)
+
+    def constructRegistryPipeline( self ):
+        return segments.registry.RegistryDeploy( incremental=True)
 
 
 class PipelineDatabase( object ):
