@@ -90,7 +90,15 @@ class ChildView( BaseRule ):
         descriptor.setFileName( extension )
         if self.binary:
             descriptor.setBinary( binary )
-        descriptor.setRenderMethod( self.view_method )
+
+        # The view method needs to be an expresison now
+        if self.view_method:
+            vm = Expression(self.view_method)
+            vm = vm( expr_context )
+        else:
+            vm = ""
+        
+        descriptor.setRenderMethod( vm )
     
 InitializeClass( ChildView )
     
@@ -178,8 +186,14 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
             descriptor.setGhost( True )
             descriptor.setRenderMethod( None ) # xxx redundant
             
-        descriptor.setRenderMethod( self.view_method )
-
+        # The view method needs to be an expresison now
+        if self.view_method:
+            vm = Expression(self.view_method)
+            vm = vm( context )
+        else:
+            vm = ""       
+        descriptor.setRenderMethod( vm )
+    
         for cdesc in self.getChildDescriptors( descriptor, context ):
             descriptor.addChildDescriptor( cdesc )
 

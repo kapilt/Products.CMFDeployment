@@ -68,7 +68,7 @@ customizations.
       filter_expr="python: object.portal_type == 'Plone Site'"
       ghost="1"
       ext_expr="python: 'index.html'%object.getId()"
-      view_method="index_html" />
+      view_method="string:index_html" />
 
                 	 
 <mime id="Folder"
@@ -77,7 +77,7 @@ customizations.
       ghost="1"
       filter_expr="python: object.portal_type == 'Folder'"
       ext_expr="python: '%s/index.html'%object.getId()"
-      view_method="index_html" />
+      view_method="string:index_html" />
 
                 	 
 <mime id="IndexDocument"
