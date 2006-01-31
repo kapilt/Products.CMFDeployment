@@ -178,10 +178,9 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
            return ()
         rdeps = [parent,]
 
-        try: # plone 2.1 related items support
+        try: # archetypes reference support ( like plone2.1 related items)
             schema = content.Schema()
-            if 'relatedItems' in schema.keys():
-                rdeps.extend( content.getBRefs('relatesTo') )
+            rdeps.extend( content.getBRefs() )
         except AttributeError:
             pass
         
