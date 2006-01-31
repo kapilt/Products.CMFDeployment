@@ -56,11 +56,15 @@ class IncrementalPipelineFactory( PipelineFactory ):
             steps = (
                segments.environment.PipeEnvironmentInitializer(),
                self.IncrementalEnvironment(),
+               segments.skin.SkinLock(),
                deletion_pipeline,
+               segments.user.UserLock(),
                processor_pipeline,
                dv_pipeline,
                reg_pipeline,               
                storage_pipeline,
+               segments.user.UserUnlock(),
+               segments.skin.SkinUnlock(),
                segments.transport.ContentTransport()
                )
             )
