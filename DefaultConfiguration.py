@@ -82,6 +82,10 @@ def add_view(policy):
     policy._setObject(ContentDirectoryViews, ob)
 
 def add_registry(policy):
+    try: # conditionally add this based on presence of plone 2.1 registries
+        policy.portal_css
+    except AttributeError:
+        return
     
     ob = KlassContentRegistry(ContentRegistries)
     policy._setObject(ContentRegistries, ob)

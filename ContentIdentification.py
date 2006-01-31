@@ -109,7 +109,7 @@ class ContentIdentification(Folder):
 
     security.declarePrivate('manage_afterAdd')
     def manage_afterAdd(self, item, container):
-        self._setObject('sources',  ContentSourceContainer('source'))
+        self._setObject('sources',  ContentSourceContainer('sources'))
         self._setObject('filters',  ContentFilterContainer('filters'))
 
 InitializeClass(ContentIdentification)

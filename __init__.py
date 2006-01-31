@@ -113,23 +113,32 @@ def initialize(context):
         visibility = None
         )
         
-    dependency = sources.dependency
-    context.registerClass(
-        dependency.DependencySource,
-        permission = 'CMFDeploy: Add Content Source',
-        constructors= (dependency.addDependencySourceForm,
-                       dependency.addDependencySource, ),
-        visibility = None
-        )
+#    dependency = sources.dependency
+#    context.registerClass(
+#        dependency.DependencySource,
+#        permission = 'CMFDeploy: Add Content Source',
+#        constructors= (dependency.addDependencySourceForm,
+#                       dependency.addDependencySource, ),
+#        visibility = None
+#        )
 
-    deletion = sources.deletion
+#    deletion = sources.deletion
+#    context.registerClass(
+#        deletion.DeletionSource,
+#        permission = 'CMFDeploy: Add Content Source',
+#        constructors= (deletion.addDeletionSourceForm,
+#                       deletion.addDeletionSource, ),
+#        visibility = None
+#        )
+
+    topic = sources.topic
     context.registerClass(
-        deletion.DeletionSource,
+        topic.TopicSource,
         permission = 'CMFDeploy: Add Content Source',
-        constructors= (deletion.addDeletionSourceForm,
-                       deletion.addDeletionSource, ),
+        constructors= (topic.addTopicSourceForm,
+                       topic.addTopicSource, ),
         visibility = None
-        )
+        )    
 
     context.registerClass(
         incremental.PolicyIncrementalIndex,

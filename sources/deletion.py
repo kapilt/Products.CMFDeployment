@@ -23,6 +23,8 @@ class DeletionSource( SimpleItem ):
     """
 
     __implements__ = IContentSource
+
+    meta_type = "Deletion Source"
     
     def __init__(self, id, title=""):
         self.id = id
