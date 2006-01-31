@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2005 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,7 +21,7 @@
 ##################################################################
 """
 Purpose: Identify Content that should be deployed
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2005
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 License: GPL
 Created: 8/10/2002
 $Id$

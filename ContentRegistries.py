@@ -1,7 +1,7 @@
 ##################################################################
 #
-# (C) Copyright 2002-2005 Kapil Thangavelu <k_vertigo@objectrealms.net>
-#                         Gael Le Mignot <gael@pilotsystems.net>
+# (C) Copyright 2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
+#                    Gael Le Mignot <gael@pilotsystems.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
