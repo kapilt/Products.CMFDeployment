@@ -172,6 +172,8 @@ CMFDeployment
     "Kapil Thangavelu":mailto://k_vertigo@objectrealms.net - Author
 
     "Tahara Yusei":tahara * timedia.co.jp - Patches for Plone2/CMF 1.4
+
+    "Gael Le Mignot": gael * pilotsystems.net - Plone2.1 support
   
     "Calvin Hendryx-Parker": calvinhp * sixfeetup.com - Deployment Skin, Use Cases, and Sponsoring
 

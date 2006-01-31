@@ -26,7 +26,7 @@ Purpose:
     
 implements merging of registries into a deployment
 
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+Author: Gael Le Mignot <gael@pilotsystems.net>
 $Id$
 License: GPL
 
