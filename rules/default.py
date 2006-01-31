@@ -170,10 +170,22 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
         to be deployed, processed when content is about to be
         deleted.
         """
-	object = descriptor.getContent().aq_inner.aq_parent
-        if not isinstance( object, (PortalContent, PortalFolder) ):
+        content = descriptor.getContent()
+	parent = content.aq_inner.aq_parent
+            
+        
+        if not isinstance( parent, (PortalContent, PortalFolder) ):
            return ()
-        return (object,)
+        rdeps = [parent,]
+
+        try: # plone 2.1 related items support
+            schema = content.Schema()
+            if 'relatedItems' in schema.keys():
+                rdeps.extend( content.getBRefs('relatesTo') )
+        except AttributeError:
+            pass
+        
+        return rdeps
 
     def process(self, descriptor, context):
         """
