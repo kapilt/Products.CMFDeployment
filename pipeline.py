@@ -8,6 +8,7 @@ from segments.core import PolicyPipeline, PipeExecutor
 
 from Namespace import getToolByName
 import DefaultConfiguration
+from ContentRegistries import HAS_REGISTRY
 
 class PipelineFactory( object ):
 
@@ -52,22 +53,24 @@ class IncrementalPipelineFactory( PipelineFactory ):
         dv_pipeline = self.constructDirectoryViewPipeline()
         reg_pipeline = self.constructRegistryPipeline()
 
-        policy_pipeline = PolicyPipeline( 
-            steps = (
-               segments.environment.PipeEnvironmentInitializer(),
-               self.IncrementalEnvironment(),
-               segments.skin.SkinLock(),
-               deletion_pipeline,
-               segments.user.UserLock(),
-               processor_pipeline,
-               dv_pipeline,
-               reg_pipeline,               
-               storage_pipeline,
-               segments.user.UserUnlock(),
-               segments.skin.SkinUnlock(),
-               segments.transport.ContentTransport()
-               )
-            )
+        steps = (
+           segments.environment.PipeEnvironmentInitializer(),
+           self.IncrementalEnvironment(),
+           segments.skin.SkinLock(),
+           deletion_pipeline,
+           segments.user.UserLock(),
+           processor_pipeline,
+           dv_pipeline)
+        if HAS_REGISTRY:
+           steps += reg_pipeline
+        steps += (
+           storage_pipeline,
+           segments.user.UserUnlock(),
+           segments.skin.SkinUnlock(),
+           segments.transport.ContentTransport()
+           )
+
+        policy_pipeline = PolicyPipeline( steps = steps )
 
         return policy_pipeline
 

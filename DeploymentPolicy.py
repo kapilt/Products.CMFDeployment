@@ -34,6 +34,8 @@ import pipeline
 from Namespace import *
 from DeploymentInterfaces import IDeploymentPolicy
 
+from ContentRegistries import HAS_REGISTRY
+
 class DeploymentPolicy(Folder):
 
     meta_type = 'Deployment Policy'
@@ -107,7 +109,10 @@ class DeploymentPolicy(Folder):
         return self._getOb(DefaultConfiguration.ContentDirectoryViews)
 
     def getContentRegistries(self):
-        return self._getOb(DefaultConfiguration.ContentRegistries)
+        if HAS_REGISTRY:
+            return self._getOb(DefaultConfiguration.ContentRegistries)
+        else:
+            return None
 
     def getContentTransforms(self):
         return self._getOb(DefaultConfiguration.ContentTransforms)
