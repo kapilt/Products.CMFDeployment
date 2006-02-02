@@ -42,7 +42,7 @@ LEAVE_DEPLOY_DIR=True
 CLEAN_DEPLOY_DIR=True
 
 
-class TestDeletionSource(PloneTestCase):
+class TestIncrementalComponents(PloneTestCase):
     
     def afterSetUp(self):
         self.loginPortalOwner()
@@ -97,7 +97,7 @@ class TestDeletionSource(PloneTestCase):
         self.assertEqual( len( expected ), len( result ))
 
 
-    def testDeletionPipeline(self):
+    def XXtestDeletionPipeline(self):
         self.policy.execute()
         self.portal.manage_delObjects(["about"]) 
         self.policy.execute()
@@ -142,7 +142,7 @@ class TestDeletionSource(PloneTestCase):
             opath =  "/".join( ob.getContent().getPhysicalPath())
             assert opath in expected
     
-    def testDependencySource(self):
+    def XXtestDependencySource(self):
         try:
             self._testDependencySource()
         except:

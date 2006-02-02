@@ -90,8 +90,11 @@ from BTrees.Length import Length
 from BTrees.IOBTree import IOBTree
 from Products.PluginIndexes.common.PluggableIndex import PluggableIndexInterface
 
+
 import DefaultConfiguration
 from Descriptor import DescriptorFactory
+from ExpressionContainer import getDeployExprContext
+from utils import unwrap_object
 
 #################################
 # pipeline processing of deletion records
@@ -251,10 +254,59 @@ class PolicyIncrementalIndex( SimpleItem ):
     def getEntryForObject( self, documentId, default=None):
         return self._index.get( documentId, default )
 
-    def index_object( self, documentId, obj, threshold=None):
+    def index_object( self, *args, **kw):
+
+        try:
+            return self.dindex_object( *args, **kw)
+        except:
+            import sys, traceback, pdb
+            print "XXX"*10, "error in idx"
+            ec, e, tb = sys.exc_info()
+            print ec, e
+            traceback.print_tb( tb )
+            pdb.post_mortem( tb )
+            raise
+        
+    def dindex_object( self, documentId, obj, threshold=None):
         # policy execution directly populates through the
         # recordObject api.
+
+        # this implementation focuses on checking whether an
+        # object is already deployed, and if it is then we check
+        # whether or not it still matches to a content rule
+        # if doesn't then we create a deletion record for it.
+
+        # in order to process workflow changes, the policy index id
+        # needs to be added as a dummy workflow variable.
+
+        # note of caution filters operate out of band from this...
+        # XXX for completeness we should do filter matching as well.
+        if not self._index.has_key(documentId):
+            return 1
+
+        obj = unwrap_object( obj )
+
+        policy = self._getPolicy()
+        deletion_source = policy._getOb( DefaultConfiguration.DeletionSource, None )
+        if deletion_source is None: # XXX log me
+            return 1
+
+        portal = getToolByName( self, 'portal_url').getPortalObject()
+        ctx = getDeployExprContext( obj, portal )
+
+        match_found = None
+        rules = policy.getContentMastering().mime
+        for rule in rules.objectValues():
+            if rule.isValid( None, ctx ):
+                match_found = rule
+                break
+
+        if match_found is not None:
+            return 1
+
+        self._processDeletion( policy, rules, deletion_source, documentId, content, ctx)
         return 1
+
 
     def unindex_object( self, documentId):
         # we get unindex call backs on renames and moves as well
@@ -272,31 +324,17 @@ class PolicyIncrementalIndex( SimpleItem ):
         if not self._index.has_key(documentId):
             return
 
+        import pdb; pdb.set_trace()
+
         policy = self._getPolicy()
         deletion_source = policy._getOb( DefaultConfiguration.DeletionSource, None )
         if deletion_source is None:
             # XXX log me
             return
-
-        content = self.getObjectFor( documentId )
-        rules = policy.getContentRules()
-        factory = DescriptorFactory( policy )
-        descriptor = factory( content )
-
-        if not rules.prepare( descriptor ):
-            # XXX - we really do need to be able to create a deletion
-            # record from content which no longer matches a rule, ie.
-            # for example a workflow state change which entails that content
-            # no longer matches a rule condition, still needs to trigger
-            # deletion. thus we should record in an annotation the object's
-            # rule on deployment.
-            return
-
-        record = DeletionRecord( policy, descriptor )
-        deletion_source.addRecord( record )
         
-        del self._index[documentId]
-        self._length(-1)
+        content = self.getObjectFor( documentId )
+        rules = policy.getContentMastering().mime
+        self._processDeletion( policy, rules, deletion_source, documentId, content )
 
     def _apply_index( request, cid=""):
         return None
@@ -318,6 +356,29 @@ class PolicyIncrementalIndex( SimpleItem ):
         policy = dtool._getOb( self.policy_id )
         return policy
 
+    def _processDeletion( self, policy, rules, deletion_source, documentId, content, ctx=None ):
+        # all of this seems a little expensive for inline to index/unindex    
+        factory = DescriptorFactory( policy )
+        descriptor = factory( content )
+
+        rule_id, path = self._index[ documentId ]
+        rule = rules._getOb( rule_id, None )
+        if rule is None:
+            print "XXX", "Rule not found", rule_id
+            mastering = policy.getContentMastering()
+            if not mastering.prepare( descriptor ):
+                print "XXX"*2, "Can't process deletion"
+                return
+        else:
+            rule.process( descriptor )
+
+        record = DeletionRecord( policy, descriptor )
+        deletion_source.addRecord( record )
+        
+        del self._index[documentId]
+        self._length(-1)
+
+
     #################################
     def isObjectDeployed( self, object ):
         path = '/'.join( object.getPhysicalPath() )
@@ -327,7 +388,8 @@ class PolicyIncrementalIndex( SimpleItem ):
     def getObjectFor( self, documentId ):
         return self.getobject( documentId )
     
-    def recordObject(self, object):
+    def recordObject(self, rule_id, object):
+        assert rule_id is not None
         catalog = self.aq_parent
         path = '/'.join( object.getPhysicalPath() )
         key = catalog.uids.get( path, None )
@@ -343,6 +405,10 @@ class PolicyIncrementalIndex( SimpleItem ):
   
         if not self._index.has_key( key ):
             self._length.change(1)
-            self._index[ key ] = path
-
+            self._index[ key ] = ( rule_id, path )
+        else:
+            srule_id, spath = self._index[ key ]
+            if rule_id != srule_id or spath != path:
+                self._index[key] = ( rule_id, path )
+                
 InitializeClass( PolicyIncrementalIndex )

@@ -20,7 +20,7 @@ class RecordDeployment( PipeSegment ):
     def process( self, pipeline, descriptor ):
 
         idx = self.getPolicyIndex( pipeline )
-        idx.recordObject( descriptor.getContent() )
+        idx.recordObject( descriptor.rule_id, descriptor.getContent() )
 
         return descriptor
 

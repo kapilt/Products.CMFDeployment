@@ -74,6 +74,8 @@ class ContentDescriptor(object):
         self.composite_content_p = None
         self.child_descriptors = None
 
+        self.rule_id = None # id of rule that processed descriptor / matched content
+
         self.dependencies = None
         self.reverse_dependencies = None
         

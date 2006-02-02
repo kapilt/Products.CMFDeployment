@@ -82,3 +82,33 @@ def file2string(o):
 
     return ''.join(buf)
     
+
+
+# taken from code i wrote for proxyindex
+
+# used latter when constructing an object wrapper to determine if the
+# object is already wrapped.
+try:
+    from Products.CMFCore.CatalogTool import IndexableObjectWrapper, ICatalogTool
+    CMF_FOUND = True
+except ImportError:
+    CMF_FOUND = False
+    class ICatalogTool(Interface): pass
+    IndexableObjectWrapper = None
+
+try:
+    from Products.CMFPlone import ExtensibleIndexableObjectWrapper
+    PLONE_FOUND = True
+except:
+    PLONE_FOUND = False
+    ExtensibleIndexableObjectWrapper = None
+
+def unwrap_object( obj ):
+
+    if CMF_FOUND and isinstance( obj, IndexableObjectWrapper ):
+        return obj._IndexableObjectWrapper__ob
+
+    elif PLONE_FOUND and instance( obj, ExtensibleIndexableObjectWrapper ):
+        return obj._obj
+        
+    return obj

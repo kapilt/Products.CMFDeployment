@@ -213,7 +213,9 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
 
         reverse_dependencies = self.getReverseDependencies( descriptor, context )
         descriptor.setReverseDependencies( reverse_dependencies )
-            
+
+        descriptor.rule_id = self.getId()
+        
         return descriptor
 
     def editMapping(self, extension_expression, condition, view_method, ghost=0, RESPONSE=None):
