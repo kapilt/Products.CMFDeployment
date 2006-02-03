@@ -324,8 +324,6 @@ class PolicyIncrementalIndex( SimpleItem ):
         if not self._index.has_key(documentId):
             return
 
-        import pdb; pdb.set_trace()
-
         policy = self._getPolicy()
         deletion_source = policy._getOb( DefaultConfiguration.DeletionSource, None )
         if deletion_source is None:
@@ -357,20 +355,26 @@ class PolicyIncrementalIndex( SimpleItem ):
         return policy
 
     def _processDeletion( self, policy, rules, deletion_source, documentId, content, ctx=None ):
-        # all of this seems a little expensive for inline to index/unindex    
+        # all of this seems a little expensive for inline to index/unindex
+
         factory = DescriptorFactory( policy )
         descriptor = factory( content )
 
         rule_id, path = self._index[ documentId ]
         rule = rules._getOb( rule_id, None )
         if rule is None:
+            # try to find any matching rule
             print "XXX", "Rule not found", rule_id
             mastering = policy.getContentMastering()
             if not mastering.prepare( descriptor ):
                 print "XXX"*2, "Can't process deletion"
                 return
         else:
-            rule.process( descriptor )
+            # we know which rule to use
+            if ctx is None:
+                portal = getToolByName( policy, 'portal_url').getPortalObject()
+                ctx = getDeployExprContext( content, portal )
+            rule.process( descriptor, ctx )
 
         record = DeletionRecord( policy, descriptor )
         deletion_source.addRecord( record )

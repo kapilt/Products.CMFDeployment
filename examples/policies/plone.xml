@@ -73,7 +73,7 @@
 -->
     <mime id="IndexDocument"
           filter_expr="python: object.getId()=='index_html'"
-          ext_expr="python: 'index.html'"
+          ext_expr="string:index.html"
           view_method=""
           />
 
@@ -85,7 +85,7 @@
 
     <mime id="Image"
           filter_expr="python: object.portal_type == 'Image'"
-          ext_expr="python: object.getId()"
+          ext_expr="object/getId"
           view_method=""
           />
 

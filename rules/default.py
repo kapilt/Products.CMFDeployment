@@ -231,6 +231,8 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
+    edit = editMapping
+
     #################################
     def addChildView(self, id, extension_expression, view_method, binary=False, RESPONSE=None):
         """

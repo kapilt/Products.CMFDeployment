@@ -97,12 +97,21 @@ class TestIncrementalComponents(PloneTestCase):
         self.assertEqual( len( expected ), len( result ))
 
 
-    def XXtestDeletionPipeline(self):
+    def testDeletionPipeline(self):
         self.policy.execute()
         self.portal.manage_delObjects(["about"]) 
         self.policy.execute()
         about_idx = os.path.join( TESTDEPLOYDIR, 'about','index.html')
         assert not os.path.exists( about_idx )        
+
+    def testContentModification(self):
+        #rule = self.policy.getContentMastering.mime.IndexDocument
+        #rule.edit( rule.extension_text,
+        #           "python: object.getId() == 'index_html' and 'rabbit' in object.EditableBody()"
+            
+        #self.policy.execute()
+        #self
+        pass
 
 
     def _testDependencySource(self):
@@ -142,7 +151,7 @@ class TestIncrementalComponents(PloneTestCase):
             opath =  "/".join( ob.getContent().getPhysicalPath())
             assert opath in expected
     
-    def XXtestDependencySource(self):
+    def testDependencySource(self):
         try:
             self._testDependencySource()
         except:
