@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -22,7 +22,7 @@
 
 """
 Purpose: Renders Content For Deployment
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 License: GPL
 Created: 8/10/2002
 $Id$
@@ -36,11 +36,6 @@ from ExpressionContainer import getDeployExprContext
 from utils import file2string
 
 from Log import LogFactory
-
-try:
-    from Products.Archetypes.BaseUnit import BaseUnit
-except ImportError:
-    class BaseUnit: pass
 
 log = LogFactory('Mastering')
 
@@ -59,7 +54,7 @@ class ContentMastering(Folder):
         {'label':'User',
          'action':'user'},
 
-        {'label':'MimeMapping',
+        {'label':'Rules',
          'action':'mime/manage_main'},        
 
         {'label':'Policy',
@@ -149,7 +144,17 @@ class ContentMastering(Folder):
         # sometimes the skindata can disappear mid request
         # xxx we now modify the portal root at the start to prevent
         # volatile disappearance, so this should be unesc.
-        if not self.portal_url.getPortalObject()._v_skindata:
+
+        # Ok, on Plone 2.1, _v_skindata doesn't exist...  So, we try
+        # to use getCurrentSkinName if available, and fallback to
+        # _v_skindata else
+        root = self.portal_url.getPortalObject()
+        skin = getattr(root, "getCurrentSkinName", None)
+        if skin:
+            skin = skin()
+        else:
+            skin = root._v_skindata
+        if not skin:
             self.site_skin._setSkin()
 
         for descriptor in descriptors:
@@ -168,10 +173,7 @@ class ContentMastering(Folder):
                                                  
         if render is None:
             try:
-                log.error(
-                    "couldn't find render method for %s %s"%(
-                      str(descriptor.content_url), str(c.getPortalTypeName()) )
-                    )
+                log.error(" couldn't find render method for %s %s"%( str(descriptor.content_url), str(c.getPortalTypeName()) ))
             except Exception, e:
                 print e
                       
@@ -181,18 +183,15 @@ class ContentMastering(Folder):
         try: 
             if getattr(aq_base(render), 'isDocTemp', 0):
                 descriptor.setRendered(apply(render, (self, self.REQUEST)))
-                
-            # AT baseunits inherit from file, but store data in a different attr.
-            elif (hasattr(aq_base(c), 'precondition') and 
-                  not isinstance(aq_base(c), BaseUnit)):
+            elif hasattr(aq_base(c), 'precondition'): # test if its a file object
                 descriptor.setRendered(file2string(c))
                 descriptor.setBinary(1)
             else:
                 descriptor.setRendered(render())
         except:
             log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
-            descriptor.setGhost(1) # ghostify it
-
+            descriptor.setGhost(1) # ghostify it        
+            raise
     #################################
     def setup(self):
         #self.site_root.lock()
@@ -259,8 +258,6 @@ class SiteChainSkin(SimpleItem):
         skin_name = self._v_saved_skin_name or skins.getDefaultSkin()
         portal.changeSkin( skin_name )
         self._v_saved_skin_name = None
-        self._v_active = None
-
         
     def manage_afterAdd(self, item, container):
         self.skin_name  = getToolByName(self, 'portal_skins').getDefaultSkin()	
@@ -303,7 +300,6 @@ class SiteChainUser(SimpleItem):
             log.debug('not chaining user')
             return
         
-        from AccessControl import User
         from AccessControl.SecurityManagement import newSecurityManager
         from AccessControl import SpecialUsers
 

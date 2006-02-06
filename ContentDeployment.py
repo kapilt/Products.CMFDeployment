@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2005 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -24,7 +24,7 @@ Purpose: Defines Mechanisms and Data needed
          to transport content from zope server
          fs to deployment target(s).
 
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 License: GPL
 Created: 8/10/2002
 $Id$
@@ -62,16 +62,10 @@ class ContentDeployment( OrderedFolder ):
     def __init__(self, id):
         self.id = id
 
-    def getProtocolTypes(self):
-        return getProtocolNames()
-
     security.declarePrivate('deploy')
     def deploy(self, structure):
-        for target in self.objectValues('Deployment Target'):
-            target.transport( structure )
+        for target in self.objectValues():
+            target.execute( target, structure )
 
 InitializeClass( ContentDeployment )
 
-
-#################################
-# all transports/protocols/thingies moved to transport package

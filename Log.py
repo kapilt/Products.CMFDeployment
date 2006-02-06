@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -27,12 +27,12 @@ Description:
   Provides an abstraction to the underlying logging
   framework.
 
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2003          
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 License: GPL
 $Id$
 """
 
-from zLOG import register_subsystem, LOG
+from zLOG import LOG
 from threading import Lock
 from thread import get_ident
 
@@ -57,6 +57,7 @@ class ComponentLogging:
         return "[%s] : %s "%(self._component, msg)
 
     def write(self, msg, level):
+        #print msg
         record_p, zlog_p = configuration.getConfigurationFor(self._component)
         if record_p or level >= OVERRIDE_THRESHOLD_LEVEL:
             monitors = getMonitors()

@@ -21,7 +21,7 @@
 ##################################################################
 
 """
-Purpose: Filters and Transforms Rendered Content Before Storage
+Purpose: Transforms for Rendered Content Before Storage
 Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
 License: GPL
 Created: 8/10/2002
@@ -32,13 +32,13 @@ from Namespace import *
 from Log import LogFactory
 from Products.CMFCore.Expression import Expression
 from ExpressionContainer import ExpressionContainer, getDeployExprContext
-from Filters.registry import getFilter, listFilters
+from transforms.registry import getTransform, listTransforms
 
-log = LogFactory('Storage Filter')
+log = LogFactory('Storage Transform')
 
-class ContentFilter(Folder):
+class ContentTransforms(Folder):
 
-    meta_type = 'Content Filter'
+    meta_type = 'Content Transforms'
 
     security = ClassSecurityInfo()
 
@@ -47,7 +47,7 @@ class ContentFilter(Folder):
         {'label':'Overview',
          'action':'overview'},
         
-        {'label':'Rules',
+        {'label':'Transforms',
          'action':'rules/manage_main'},
 
         {'label':'Policy',
@@ -55,14 +55,14 @@ class ContentFilter(Folder):
 
         )
 
-    overview = DTMLFile('ui/ContentFiltersOverview', globals())
+    overview = DTMLFile('ui/ContentTransformsOverview', globals())
     
     def __init__(self, id):
         self.id = id
         self.enabled = 0
 
-    security.declarePrivate('filter')
-    def filter(self, descriptor, rendered, file_path):
+    security.declarePrivate('transform')
+    def transform(self, descriptor, rendered, file_path):
         
         if not self.enabled:
             return rendered
@@ -71,49 +71,49 @@ class ContentFilter(Folder):
         content = descriptor.getContent()
         context = getDeployExprContext(content, portal)
         
-        for fr in self.rules.objectValues('Content Filter Rule'):
+        for fr in self.rules.objectValues('Content Transform Rule'):
             if not fr.valid(context):
                 continue
             
             try:
-                script = getFilter(fr.script_id)
+                script = getTransform(fr.script_id)
             except:
-                log.warning('Content Filter Script %s Not Found'%str(fr.script_id))
+                log.warning('Content Transform Script %s Not Found'%str(fr.script_id))
             try:
                 rendered = script(descriptor, rendered, file_path)
             except:
-                log.warning('Content Filter Exception from %s on %s '%(
+                log.warning('Content Transform Exception from %s on %s '%(
                     script_id,
                     descriptor.content_url)
                 )
                 
         return rendered
 
-    def editFilters(self, enable_flag, RESPONSE=None):
+    def editTransforms(self, enable_flag, RESPONSE=None):
         """ """
         self.enabled = not not int(enable_flag)
         if RESPONSE:
             RESPONSE.redirect('./overview')
         
     def manage_afterAdd(self, item, container):
-        ob = FilterRulesContainer('rules')
+        ob = TransformRulesContainer('rules')
         self._setObject('rules', ob)
 
 
-class ContentFilterRule(SimpleItem):
+class ContentTransformRule(SimpleItem):
 
-    meta_type = 'Content Filter Rule'
+    meta_type = 'Content Transform Rule'
 
     manage_options = (
         {'label':'Rule',
          'action':'editRuleForm'},
         {'label':'All Rules',
          'action':'../manage_main'},
-        {'label':'Content Filters',
+        {'label':'Content Transforms',
          'action':'../../overview'}
         )
     
-    editRuleForm = DTMLFile('ui/ContentFilterRuleEditForm', globals())
+    editRuleForm = DTMLFile('ui/ContentTransformRuleEditForm', globals())
     
     def __init__(self, id, condition, script_id):
         self.id = id
@@ -127,7 +127,7 @@ class ContentFilterRule(SimpleItem):
     def editRule(self, condition, script_id, RESPONSE=None):
         """ """
 
-        assert script_id in listFilters(), "Invalid Filter Id"
+        assert script_id in listTransforms(), "Invalid Transform Id"
         
         self.condition = Expression(condition)
         self.condition_text = condition
@@ -136,40 +136,40 @@ class ContentFilterRule(SimpleItem):
         if RESPONSE is not None:
             RESPONSE.redirect('../manage_main')
 
-class FilterRulesContainer(ExpressionContainer):
+class TransformRulesContainer(ExpressionContainer):
 
-    meta_type = 'Content Filter Rules Container'
+    meta_type = 'Content Transform Rules Container'
 
     manage_options = (
         {'label':'Rules',
          'action':'manage_main'},
 
-        {'label':'Content Filters',
+        {'label':'Content Transforms',
          'action':'../overview'},        
 
         {'label':'Policy',
          'action':'../../overview'}
         )
 
-    addRuleForm = DTMLFile('ui/ContentFilterRuleAddForm', globals())
+    addRuleForm = DTMLFile('ui/ContentTransformRuleAddForm', globals())
 
     all_meta_types = (
-        {'name':ContentFilterRule.meta_type,
+        {'name':ContentTransformRule.meta_type,
          'action':'addRuleForm'},
         )
 
     def __init__(self, id):
         self.id = id
 
-    def listFilterScripts(self):
-        return listFilters()
+    def listTransformScripts(self):
+        return listTransforms()
 
     def addRule(self, id, condition, script_id, RESPONSE=None):
         """ """
 
-        assert script_id in listFilters(), "Invalid Filter Id"
+        assert script_id in listTransforms(), "Invalid Transform Id"
         
-        rule = ContentFilterRule(id=id,
+        rule = ContentTransformRule(id=id,
                                  condition=condition,
                                  script_id=script_id)
         

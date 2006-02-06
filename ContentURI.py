@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -66,6 +66,7 @@ class ContentURI(SimpleItem, URIResolver):
         if persistent:
             r.__dict__.update(self.__dict__) # create a shared ref to the uri db
         else:
+            r.source_host = self.source_host
             r.target_path = self.target_path
             r.vhost_path   = self.vhost_path
             r.link_error_url = self.link_error_url

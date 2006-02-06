@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,14 +21,14 @@
 ##################################################################
 """
 Purpose: read an xml serialization of a deployment policy into python objects
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 $Id$
 """
 
 from xml.sax import make_parser, ContentHandler
 from UserDict import UserDict
 
-from ZPublisher.mapply import mapply
+#from ZPublisher.mapply import mapply
 
 marker = []
 class PolicyNode(UserDict):
@@ -101,6 +101,11 @@ class PolicyReader(MetaReader):
     def endIdentidentification(self, chars):
         self.prefix =''
 
+    def startIdentsource(self, attrs):
+        sources =  self.policy.ident.setdefault('sources', [] )
+        source = PolicyNode( attrs )
+        sources.append( source )
+        
     def startIdentfilter(self, attrs):
         filters = self.policy.ident.setdefault('filters', [])
         filter = PolicyNode(attrs)
@@ -152,8 +157,23 @@ class PolicyReader(MetaReader):
     def endSkinsskins(self,attrs):
 	self.prefix=''
 
-    def startStrategy(self, attrs):
-        self.policy.strategy = PolicyNode(attrs)
+    def startRegistries(self, attrs):
+	registries = PolicyNode(attrs)
+	self.policy.registries = registries
+	self.prefix='Registries'
+        self.policy.registries.setdefault('registries',[])
+
+    def startRegistriesregistry(self, attrs):
+	dirs = self.policy.registries.setdefault('registries', [])
+	reg = PolicyNode(attrs)
+	dirs.append(reg)
+
+    def endRegistriesregistries(self,attrs):
+	self.prefix=''
+
+
+#    def startStrategy(self, attrs):
+#        self.policy.strategy = PolicyNode(attrs)
 
     def startUris(self, attrs):
         self.policy.uris = PolicyNode(attrs)
@@ -172,18 +192,42 @@ def read_policy(file):
     parser.parse(file)
     return reader.getPolicy()
 
-DEFAULT_RULE_PRODUCT = 'CMFDeployment'
+REMAP_TYPES = ( ( 'CMFDeployment', 'addContentRule' ),
+                ( 'CMFDeployment', 'addMimeMapping' ), )
+                
+
+DEFAULT_RULE_PRODUCT = 'CMFDeployment'    
 DEFAULT_RULE_FACTORY = 'addContentRule'
 DEFAULT_RULE_FACTORY_MAP = {
     'ext_expr':'extension_expression',
     'filter_expr':'condition'
     }
 
+DEFAULTS = {
+    'source' : {'product':'CMFDeployment', 'factory':'addPortalCatalogSource' },
+    }
+
 def remap_default_rule_factory( m ):
+    delk = []
     for key, factory_key in DEFAULT_RULE_FACTORY_MAP.items():
         value = m.get(key, '')
         m[factory_key] = value
+        delk.append(key)
+
+    for dk in delk:
+        del m.data[dk]
+
     return m
+
+def getFactory( ctx, node, type='source' ):
+    product_name = node.get('product', DEFAULTS[type]['product'])
+    factory_name = node.get('factory', DEFAULTS[type]['factory'])
+    factory = getattr( ctx.manage_addProduct[ product_name ], factory_name )
+    md = dict( node )
+    if 'product' in md: del md['product']
+    if 'factory' in md: del md['factory']
+    return factory, md
+    
 
 def make_policy(portal, policy_node, id=None, title=None):
  
@@ -191,13 +235,15 @@ def make_policy(portal, policy_node, id=None, title=None):
     from App.Common import package_home
 
     deployment_tool = portal.portal_deployment
+
+    pipeline_id = policy_node.get('pipeline', 'incremental')
     
     if id:
         title = title or ''
-        deployment_tool.addPolicy( id, title )
     else:
         id = policy_node.id
-        deployment_tool.addPolicy( policy_node.id, policy_node.id)
+
+    deployment_tool.addPolicy( id, title, policy_pipeline_id=pipeline_id )
         
     policy = getattr(deployment_tool, id)
     
@@ -206,6 +252,11 @@ def make_policy(portal, policy_node, id=None, title=None):
         for f in policy_node.ident.filters:
             identification.filters.addFilter(f.id, f.expr)
 
+    if hasattr(policy_node.ident, 'sources'):
+        container = identification.sources
+        for s in policy_node.ident.sources:
+            factory, md = getFactory( container, s )
+            factory( **md )
 
     ## mastering setup
     mastering = getattr(policy, DefaultConfiguration.ContentMastering)    
@@ -214,13 +265,23 @@ def make_policy(portal, policy_node, id=None, title=None):
         # transparently map old policies to the expected format
         product = m.get('product', DEFAULT_RULE_PRODUCT)
         factory = m.get('factory', DEFAULT_RULE_FACTORY)
+        #import pprint
+        #print 'ee', product, factory
+        #pprint.pprint(dict(m.items()))
         
-        if (product, factory) == (DEFAULT_RULE_PRODUCT, DEFAULT_RULE_FACTORY):
+        if (product, factory) in REMAP_TYPES:
+            #print 'remapped'
             m.setdefault('ghost',0)
             m = remap_default_rule_factory( m )
+
+        #pprint.pprint( dict( m.items() ) )
             
         factory = getattr(mastering.mime.manage_addProduct[product], factory)
-        mapply(factory, keyword=m)
+        md = dict(m)
+        if 'product' in md: del md['product']
+        if 'factory' in md: del md['factory']
+        factory( **md )
+        #mapply(factory, keyword=m)
         
     ## chain stuff
     deployment_skin = policy_node.mastering.skin.strip()
@@ -272,11 +333,27 @@ def make_policy(portal, policy_node, id=None, title=None):
 				sd.source_path, 
 				sd.deploy_path
 				)
+    ## registries setup
+    registries = getattr(policy, DefaultConfiguration.ContentRegistries, None)
+    try:
+        registries_node = policy_node.registries.registries
+    except KeyError:
+        registries_node = None
+    if registries_node is not None and registries is not None:
+        for reg in registries_node:
+            id = "reg_" + reg.get('id', reg.view_path.replace('/',''))
+            registries.addRegistryRule(
+                                id,
+				reg.view_path, 
+				reg.source_path, 
+				reg.deploy_path
+				)
+
   
-    # strategy setup
-    strategies = getattr(policy, DefaultConfiguration.DeploymentStrategy)
-    if policy_node.has_key('strategy') and policy_node.strategy.has_key('id'):
-        strategies.setStrategy(policy_node.strategy.id)
+    # strategy setup - XXX convert to pipeline id
+#    strategies = getattr(policy, DefaultConfiguration.DeploymentStrategy)
+#    if policy_node.has_key('strategy') and policy_node.strategy.has_key('id'):
+#        strategies.setStrategy(policy_node.strategy.id)
 
     return policy
     

@@ -3,9 +3,11 @@ $Id$
 """
 
 from Products.CMFCore.Expression import Expression
+from Products.CMFCore.PortalContent import PortalContent
+from Products.CMFCore.PortalFolder import PortalFolder
+
 from Products.CMFDeployment.Namespace import *
 from Products.CMFDeployment.DeploymentInterfaces import IContentRule
-from Products.CMFDeployment.Descriptor import DescriptorFactory
 
 addContentRuleForm = DTMLFile('../ui/MimeExtensionMappingAddForm', globals())
 
@@ -22,6 +24,18 @@ def addContentRule(self, id, extension_expression, condition, view_method, ghost
     if RESPONSE is not None:
         RESPONSE.redirect('manage_main')
 
+class RuleConfigurator( object ):
+
+    def importRule(self, ctx, **kw):
+        md = {}
+        md['extension_expression'] = kw.get('ext_expr', '')
+        md['condition'] = kw.get('filter_expr', '')
+        md['view_method'] = kw.get('view_method', '')
+        md['ghost'] = kw.get('ghost', '')
+        md['id'] = kw.get('id', '')
+
+        return addContentRule( ctx, **md )
+
 xml_export_template = """
 <mime id="%(id)s"
       product="%(product)s"
@@ -30,6 +44,7 @@ xml_export_template = """
       ext_expr="%(ext_expr)s"
       view_method="%(view_method)s" />
 """
+
 
 class BaseRule( SimpleItem ):
 
@@ -64,19 +79,26 @@ class ChildView( BaseRule ):
         self.view_method = ''
         self.binary = False
 
-    def edit(self,  extension_expression, view_method, binary):
-        """edit"""
-        self.extension_text = extension_expression
-        self.extension = Expression( extension_expression)
+    def edit(self,  extension_text, view_method, binary):
+        self.extension_text = extension_text
+        self.extension = Expression( extension_text )
         self.view_method = view_method
         self.binary = not not binary
 
     def process( self, descriptor, expr_context):
         extension = self.extension( expr_context )
-        descriptor.setExtension( extension )
+        descriptor.setFileName( extension )
         if self.binary:
             descriptor.setBinary( binary )
-        descriptor.setRenderMethod( self.view_method )
+
+        # The view method needs to be an expresison now
+        if self.view_method:
+            vm = Expression(self.view_method)
+            vm = vm( expr_context )
+        else:
+            vm = ""
+        
+        descriptor.setRenderMethod( vm )
     
 InitializeClass( ChildView )
     
@@ -136,21 +158,64 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
             cview.process( descriptor, expr_context)
             yield descriptor
 
+    def getDependencies( self, descriptor, context ):
+        """
+        get the to be deployed content's dependencies
+        """
+        return ()
+
+    def getReverseDependencies( self, descriptor, context ):
+        """
+        get the objects which in turn depend on this object for them
+        to be deployed, processed when content is about to be
+        deleted.
+        """
+        content = descriptor.getContent()
+	parent = content.aq_inner.aq_parent
+            
+        
+        if not isinstance( parent, (PortalContent, PortalFolder) ):
+           return ()
+        rdeps = [parent,]
+
+        try: # archetypes reference support ( like plone2.1 related items)
+            schema = content.Schema()
+            rdeps.extend( content.getBRefs() )
+        except AttributeError:
+            pass
+        
+        return rdeps
+
     def process(self, descriptor, context):
         """
         process a content descriptor, applying the rules specified by
         this deployment rule. 
         """
         extension = self.getExtension( context )
-        descriptor.setExtension( extension )
+        descriptor.setFileName( extension )
         if self.ghost:
             descriptor.setGhost( True )
             descriptor.setRenderMethod( None ) # xxx redundant
-        descriptor.setRenderMethod( self.view_method )
-
+            
+        # The view method needs to be an expresison now
+        if self.view_method:
+            vm = Expression(self.view_method)
+            vm = vm( context )
+        else:
+            vm = ""       
+        descriptor.setRenderMethod( vm )
+    
         for cdesc in self.getChildDescriptors( descriptor, context ):
             descriptor.addChildDescriptor( cdesc )
-            
+
+        dependencies = self.getDependencies( descriptor, context )
+        descriptor.setDependencies( dependencies )
+
+        reverse_dependencies = self.getReverseDependencies( descriptor, context )
+        descriptor.setReverseDependencies( reverse_dependencies )
+
+        descriptor.rule_id = self.getId()
+        
         return descriptor
 
     def editMapping(self, extension_expression, condition, view_method, ghost=0, RESPONSE=None):
@@ -165,6 +230,8 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
 
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
+
+    edit = editMapping
 
     #################################
     def addChildView(self, id, extension_expression, view_method, binary=False, RESPONSE=None):

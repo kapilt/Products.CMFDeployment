@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,20 +21,17 @@
 ##################################################################
 """
 Purpose: Update Intra Content URL References
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 License: GPL
 Created: 8/10/2002
 $Id$
 """
 
 import re
+import types
 import string
 import pprint
 
-
-
-
-from Acquisition import aq_base
 from urlparse import urlparse
 
 from Log import LogFactory
@@ -103,13 +100,30 @@ class URIResolver:
         for descriptor in descriptor.getDescriptors():
             self._addResource( descriptor )
 
+    def removeResource( self, descriptor ):
+        for descriptor in descriptor.getDescriptors():
+            self._removeResource( descriptor )
+            
+    def _removeResource(self, descriptor):
+        relative_url = descriptor.getSourcePath() or descriptor.content_url
+        if not relative_url.startswith('/'):
+            relative_url = '/'+relative_url
+        del self.uris[relative_url]
+        
+        
     def _addResource(self, descriptor):
 
         relative_url = descriptor.getSourcePath() or descriptor.content_url
+
         content_path = descriptor.getContentPath()
+        
+        if relative_url[0] != '/':
+            relative_url = '/'+relative_url
         
         if content_path is None:
             mlen = len(self.mount_path)
+            if not self.mount_path.startswith('/'):
+                mlen += 1
                 
             # minus last path segment
             # find the path segment            
@@ -121,9 +135,6 @@ class URIResolver:
                                             descriptor.getFileName() ) ),
                                  '/'
                                  )
-
-        if relative_url[0] != '/':
-            relative_url = '/'+relative_url
 
         log.debug("add %s -> %s"%(relative_url, content_path))
         self.uris[relative_url]=content_path
@@ -150,6 +161,7 @@ class URIResolver:
         """
 
         rnu = None
+        
         if not u:
             return
 
@@ -222,25 +234,20 @@ class URIResolver:
         if relative_url:
             url = relative_url
         parts = url.split('/')
-        if not parts[-1] and parts[-2]:
-            oid = parts[-2]
-        else:
-            oid = parts[-1]
+        if not parts[-1]:
+            del parts[-1]
+        oid = parts[-1]
         object = getattr( content, oid, None )
-        if not object:
-            object = content.unrestrictedTraverse(oid, None)
+
+        # Ok, on Plone 2.1, we can get a view object here.
+        # We don't want it, we want a real object.
+        if type(object) == types.MethodType:
+            oid = parts[-2]
+            object = getattr( content, oid, None )
+            
         if not object:
             return _marker
-        try:
-            object_url = object.absolute_url(1)
-        except AttributeError:
-            res = _marker
-        else:
-            if not object_url.startswith('/'):
-                object_url = '/' + object_url
-            res = self.uris.get(object_url, _marker)
-        
-        return res
+        return  self.uris.get("/"+object.absolute_url(1), _marker)
     
     def resolve(self, descriptor):
 

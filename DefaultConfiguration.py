@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -20,32 +20,41 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 ##################################################################
 """
-Purpose: Organizes Content in a Deployment Target Structure
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+Purpose: Default Ids and Policy Installation Configuration
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 License: GPL
 Created: 8/10/2002
 $Id$
 """
+
+ContentSources        = 'sources'
+ContentFilters        = 'filters'
 
 ContentIdentification = 'ContentIdentification'
 ContentOrganization   = 'ContentOrganization'
 ContentMastering      = 'ContentMastering'
 ContentDeployment     = 'ContentDeployment'
 ContentDirectoryViews = 'ContentDirectoryViews'
+ContentRegistries     = 'ContentRegistries'
 ContentURIs           = 'ContentURIs'
 DeploymentHistory     = 'DeploymentHistory'
-DeploymentStrategy    = 'DeploymentStrategy'
-ContentFilters        = 'ContentFilters'
+
+DeletionSource        = 'deletion_source'
+DependencySource      = 'dependency_source'
+
+ContentTransforms     = 'transforms'
+
+DEFAULT_CONTENT_SOURCE_ID = "portal_catalog_source"
 
 from ContentOrganization import ContentOrganization as KlassContentOrganization
 from ContentIdentification import ContentIdentification as KlassContentIdentification
 from ContentMastering import ContentMastering as KlassContentMastering
 from ContentDeployment import ContentDeployment as KlassContentDeployment
 from DeploymentHistory import DeploymentHistoryContainer as KlassDeploymentHistory
-from DeploymentStrategy import DeploymentStrategy as KlassDeploymentStrategy
 from ContentDirectoryViews import ContentDirectoryView as KlassContentDirectoryView
+from ContentRegistries import ContentRegistry as KlassContentRegistry
 from ContentURI import ContentURI as KlassContentURI
-from ContentFilters import ContentFilter as KlassContentFilters
+from ContentTransforms import ContentTransforms as KlassContentTransforms
 
 def add_structure(policy):
 
@@ -72,15 +81,19 @@ def add_view(policy):
     ob = KlassContentDirectoryView(ContentDirectoryViews)
     policy._setObject(ContentDirectoryViews, ob)
 
+def add_registry(policy):
+    try: # conditionally add this based on presence of plone 2.1 registries
+        policy.portal_css
+    except AttributeError:
+        return
+    
+    ob = KlassContentRegistry(ContentRegistries)
+    policy._setObject(ContentRegistries, ob)
+
 def add_history(policy):
 
     ob = KlassDeploymentHistory(DeploymentHistory)
     policy._setObject(DeploymentHistory, ob)
-
-def add_strategy(policy):
-    
-    ob = KlassDeploymentStrategy(DeploymentStrategy)
-    policy._setObject(DeploymentStrategy, ob)
 
 def add_uris(policy):
     
@@ -89,8 +102,8 @@ def add_uris(policy):
 
 def add_filter(policy):
 
-    ob = KlassContentFilters(ContentFilters)
-    policy._setObject(ContentFilters, ob)
+    ob = KlassContentTransforms(ContentTransforms)
+    policy._setObject(ContentTransforms, ob)
         
 _add_funcs = [
     ( ContentOrganization, add_structure ),
@@ -98,10 +111,10 @@ _add_funcs = [
     ( ContentMastering, add_mastering ),
     ( ContentDeployment, add_deployment ),
     ( ContentDirectoryViews, add_view ),
+    ( ContentRegistries, add_registry ),
     ( DeploymentHistory, add_history ),
-    ( DeploymentStrategy, add_strategy ),
     ( ContentURIs, add_uris ),
-    ( ContentFilters, add_filter ),
+    ( ContentTransforms, add_filter ),
     ]
 
 def install(deployment_policy):

@@ -28,43 +28,45 @@ Created: 8/10/2002
 $Id$
 """
 
-from Interface import Base as Interface
-from Log import LogFactory
-from Statistics import IOStatistics
+from core import Consumer
 
+from Products.CMFDeployment.Log import LogFactory
+#from Products.CMFDeployment.Statistics import IOStatistics
+
+import os
 from os import sep, path, mkdir
 log = LogFactory('Content Storage')
 
-class IContentStorage(Interface):
-    """
-    convienent point of collecting stats, and
-    centralizing storage of rendered content.
+class StorageManifest( object ):
 
-    actual storage location is determined by
-    content organization. should get refactored
-    over here.
-    """
+    # XXX todo
+    def __init__(self):
+        self._items = []
 
-    def store(self, descriptor):
-        """
-        
-        """
+    def add(self, path ):
+        pass
 
-class ContentStorage:
+    def remove( self, path ):
+        pass
 
-    def __init__(self, ctx):
-        self.stats = IOStatistics()
-        self.structure = ctx.getContentOrganization().getActiveStructure()
-        self.filters = ctx.getContentFilters()
-        
+
+class ContentStorageManager(object):
+
+    stats = None
+    structure = None
+    
     def getStatistics(self):
         return self.stats
-    
-    def __call__(self, descriptor):
+
+    def getStructure(self, pipe):
+        if self.structure is None:
+            self.structure = pipe.services['ContentOrganization'].getActiveStructure()
+        return self.structure
+        
+    def add(self, pipe, descriptor):
         """
         store a rendered content object on the filesystem.
         """
-
         # sometimes we want to have content in the uri db
         # but we don't actually want to store it... either because
         # of an error during rendering or based on configuration.
@@ -72,35 +74,59 @@ class ContentStorage:
             return 
 
         descriptors = descriptor.getDescriptors()
-
+        structure = self.getStructure( pipe )
+        
         for descriptor in descriptors:
-            content_path = self.structure.getContentPathFromDescriptor( descriptor )
-            if content_path.endswith(sep):
-                log.warning('invalid content path detected %s ... fixing'%content_path)
-                content_path = content_path[:-1]
+            content_path = structure.getContentPathFromDescriptor( descriptor )
+            #if content_path.endswith(sep):
+            #log.warning('invalid content path detected %s ... fixing'%content_path)
+            #    content_path = content_path[:-1]
             self.storeDescriptor( content_path, descriptor )
 
         return True
     
-    store = __call__
-    
+    def remove(self, pipe, descriptor):
+        """
+        remove a rendered content object on the filesystem
+        """
+        
+
+        descriptors = descriptor.getDescriptors()
+        structure   = self.getStructure( pipe )
+
+        for descriptor in descriptors:
+            content_path = structure.getContentPathFromDescriptor( descriptor )
+            file_name = descriptor.getFileName()
+            location = path.join( content_path, file_name )
+            #print "removing descriptor", file_name, location
+            if path.exists( location ) and os.path.isfile( location ):
+                os.remove( location )
+            elif os.path.exists( location ):
+                pass
+                # removing directories is possible but requires a bit of work
+                # as we map folder descriptors to index files..
+                # basically need to store is_content_folderish on deletion descriptor
+                # and chop of the last part of the location.. could be dangerous
+                #print "Invalid - Directory Path", location, descriptor
+            else: # already removed..
+                pass
+                
     def storeDescriptor(self, content_path, descriptor ):
         """
         """
         filename = descriptor.getFileName()
-        location = sep.join( ( content_path, filename) )
-        content = descriptor.getContent()
+        location = path.join( content_path, filename )
         rendered = descriptor.getRendered()
 
         # creates directories as needed below mount point
         if not self.createParentDirectories( location ):
             return
             
-        self.stats( location, len(rendered) )
+#        self.stats( location, len(rendered) )
 
-        rendered = self.filters.filter(descriptor, rendered, location)
-        if not rendered:
-            return
+#        rendered = self.transforms.transform(descriptor, rendered, location)
+#        if not rendered:
+#            return
 
         log.debug("storing content %s at %s"%(descriptor.content_url, location))
         
@@ -130,6 +156,11 @@ class ContentStorage:
         return True
                         
         
+class ContentStorage( Consumer, ContentStorageManager ):
 
-            
+    process = ContentStorageManager.add
+
+class ContentRemoval( Consumer, ContentStorageManager ):
+
+    process = ContentStorageManager.remove            
 

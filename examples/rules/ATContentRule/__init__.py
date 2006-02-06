@@ -94,6 +94,8 @@ class ArchetypeContentRule(SimpleItem):
             descriptor.setFileName( "%s/index.html"%content.getId() )
         else:
             descriptor.setFileName( self.getResourceName( content ) )
+
+        descriptor.rule_id = self.getId()
             
         return descriptor
 

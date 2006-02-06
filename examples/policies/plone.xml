@@ -2,8 +2,10 @@
 
   <identification>
 
-    <filter id="no_members" 
-            expr="python: not memento.getPath().find('Members')+1" />
+   <source 
+       id="catalog"
+       product="CMFDeployment" 
+       factory="addIncrementalCatalogSource" />
 
     <!--
     <filter id="review_state"
@@ -52,26 +54,26 @@
     <mime id="Site"
           filter_expr="python: object.portal_type == 'Plone Site'"
           ext_expr="string:index.html"
-          view_method="index_html"
+          view_method="string:index_html"
 	  ghost="1"
           />
 
     <mime id="Folder"
           filter_expr="python: object.portal_type == 'Folder'"
           ext_expr="python: '%s/index.html'%object.getId()"
-          view_method="folder_listing"
+          view_method="string:folder_listing"
           />
 
 <!-- Example of adding the plone root object to the policy
     <mime id="PloneSite"
           filter_expr="python: object.portal_type == 'Plone Site'"
 	  ext_expr="python: 'index.html'"
-	  view_method="index_html"
+	  view_method="string:index_html"
 	  />
 -->
     <mime id="IndexDocument"
           filter_expr="python: object.getId()=='index_html'"
-          ext_expr="python: 'index.html'"
+          ext_expr="string:index.html"
           view_method=""
           />
 
@@ -83,7 +85,7 @@
 
     <mime id="Image"
           filter_expr="python: object.portal_type == 'Image'"
-          ext_expr="python: object.getId()"
+          ext_expr="object/getId"
           view_method=""
           />
 

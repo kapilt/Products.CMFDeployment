@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,19 +21,17 @@
 ##################################################################
 """
 Purpose: Organizes Content in a Deployment Target Structure
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 License: GPL
 Created: 8/10/2002
 $Id$
 """
 
 import DefaultConfiguration
-import DeploymentStrategy
 import Log
+import pipeline
 
 from Namespace import *
-from Descriptor import ContentDescriptor
-from ComputedAttribute import ComputedAttribute
 from DeploymentInterfaces import IDeploymentPolicy
 
 class DeploymentPolicy(Folder):
@@ -58,6 +56,8 @@ class DeploymentPolicy(Folder):
 
         {'label':'Skins',
          'action':'%s/manage_workspace'%DefaultConfiguration.ContentDirectoryViews},
+        {'label':'Registries',
+         'action':'%s/manage_workspace'%DefaultConfiguration.ContentRegistries},
 
         {'label':'URIs',
          'action':'%s/manage_workspace'%DefaultConfiguration.ContentURIs},
@@ -68,12 +68,9 @@ class DeploymentPolicy(Folder):
         {'label':'Deployment', 
          'action':'%s/manage_workspace'%DefaultConfiguration.ContentDeployment},
 
-        {'label':'Filters',
-         'action':'%s/manage_workspace'%DefaultConfiguration.ContentFilters},
+        {'label':'Transforms',
+         'action':'%s/manage_workspace'%DefaultConfiguration.ContentTransforms},
         
-        {'label':'Strategies',
-         'action':'%s/manage_workspace'%DefaultConfiguration.DeploymentStrategy},
-
         {'label':'History',
          'action':'%s/manage_workspace'%DefaultConfiguration.DeploymentHistory},
         
@@ -87,8 +84,12 @@ class DeploymentPolicy(Folder):
 
     icon = 'misc_/CMFDeployment/policy.png'
     
-    def __init__(self, id):
-        self.id = id 
+    def __init__(self, id, title, pipeline_id):
+        self.id = id
+        self.title = title
+        self.pipeline_id = pipeline_id
+
+        assert pipeline_id in pipeline.getPipelineNames(), "invalid pipeline"
 
     def getContentIdentification(self):
         return self._getOb(DefaultConfiguration.ContentIdentification)
@@ -105,20 +106,33 @@ class DeploymentPolicy(Folder):
     def getContentDirectoryViews(self):
         return self._getOb(DefaultConfiguration.ContentDirectoryViews)
 
-    def getContentFilters(self):
-        return self._getOb(DefaultConfiguration.ContentFilters)
+    def getContentRegistries(self):
+        # registries only installed in plone 2.1
+        return self._getOb(DefaultConfiguration.ContentRegistries, None)
 
+    def getContentTransforms(self):
+        return self._getOb(DefaultConfiguration.ContentTransforms)
+
+    def getContentSources( self ):
+        return self.getContentIdentification().sources
+
+    def getContentRules( self ):
+        return self.getContentMastering().mime
+    
     def getDeploymentHistory(self):
         return self._getOb(DefaultConfiguration.DeploymentHistory)
-
-    def getDeploymentStrategy(self):
-        return self._getOb(DefaultConfiguration.DeploymentStrategy)
 
     def getDeploymentURIs(self):
         return self._getOb(DefaultConfiguration.ContentURIs)
 
     def getDeploymentPolicy(self):
         return self
+
+    security.declarePrivate('getPipeline')
+    def getPipeline(self):
+        factory = pipeline.getPipeline( self.pipeline_id )
+        deployment_pipeline = factory()
+        return deployment_pipeline
 
     def setActive(self, flag, RESPONSE=None):
         self._active = not not flag
@@ -132,40 +146,43 @@ class DeploymentPolicy(Folder):
         """ """
         if not self.isActive():
             return
-     
-	# set the changed flag so the portal isn't evicted from
-        # the zodb cache during garbage collection which would cause
-        # its volatiles leading to skin issues during rendering.
-        portal = getToolByName( self, 'portal_url').getPortalObject()
-        portal._p_changed = 1
 
         histories = self.getDeploymentHistory()
         history = histories.makeHistory()
-
+    
         Log.attachLogMonitor(history)
+        
         try:
-            strategy = self.getDeploymentStrategy().getStrategy()
-            display = strategy(self)            
+            try:
+                pipeline = self.getPipeline()
+                pipeline.process( self )
+            except:
+                import sys, pdb, traceback
+                ec, e, tb = sys.exc_info()
+                print ec, e
+                print traceback.print_tb( tb )
+                pdb.post_mortem( tb )
+                raise e
         finally:
             Log.detachLogMonitor(history)
-            
-        history.recordStatistics(display)
+
+        #history.recordStatistics(display)
         histories.attachHistory(history)
 
-        # explicitly set response status, to avoid any potential redirects
-        # as a side affect from rendered content.
         if RESPONSE:
-            RESPONSE.setStatus(200)
-            try:
-                del RESPONSE.headers['location']
-            except KeyError:
-                pass
-            return "<html><pre>%s</pre></body</html>"%display
+            return "<html><pre>deployed</pre></body</html>"
         return True
 
     def manage_afterAdd(self, item, container):
-        import DefaultConfiguration
         DefaultConfiguration.install(self)
+
+        factory = pipeline.getPipeline( self.pipeline_id )
+        factory.finishPolicyConstruction( self )
+
+    def manage_beforeDelete(self, *args):
+        factory = pipeline.getPipeline( self.pipeline_id )
+        factory.beginPolicyRemoval( self )
+        
     
 InitializeClass(DeploymentPolicy)
     

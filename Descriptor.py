@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,7 +21,7 @@
 ##################################################################
 """
 Purpose: Data object to track a deployed content object
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 License: GPL
 Created: 8/10/2002
 $Id$
@@ -73,6 +73,11 @@ class ContentDescriptor(object):
         self.content_folderish_p = None
         self.composite_content_p = None
         self.child_descriptors = None
+
+        self.rule_id = None # id of rule that processed descriptor / matched content
+
+        self.dependencies = None
+        self.reverse_dependencies = None
         
     def getId(self):
         return self.content.getId()
@@ -157,11 +162,29 @@ class ContentDescriptor(object):
         return self.source_path
 
     #################################
-    #
+    # child resource management - for non portal content
+    
     def addChildDescriptor(self, descriptor):
         if self.child_descriptors is None:
             self.child_descriptors = DescriptorContainer()
         self.child_descriptors.append( descriptor )
             
     def getChildDescriptors(self):
-        return self.child_descriptors
+        return self.child_descriptors or ()
+
+
+    #################################
+    # dependency management
+
+    def getDependencies( self ):
+        return self.dependencies or ()
+
+    def setDependencies( self, dependencies ):
+        self.dependencies = dependencies 
+
+    def getReverseDependencies( self ):
+        return self.reverse_dependencies or ()
+
+    def setReverseDependencies( self, reverse_dependencies ):
+        self.reverse_dependencies = reverse_dependencies
+

@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2005 Kapil Thangavelu <k_vertigo@objectrealms.net
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -47,7 +47,6 @@ License: GPL
 
 """
 
-import os
 import types
 
 from Globals import HTML
@@ -55,11 +54,10 @@ from AccessControl import getSecurityManager
 from OFS.OrderedFolder import OrderedFolder
 
 from Products.CMFCore.utils import getToolByName
-from Products.CMFCore.DirectoryView import DirectoryView
 
 from Namespace import *
 from Log import LogFactory
-from Descriptor import ContentDescriptor, DescriptorFactory
+from Descriptor import ContentDescriptor
 from URIResolver import clstrip, extend_relative_path
 
 from DeploymentExceptions import InvalidDirectoryView
@@ -95,7 +93,6 @@ class DirectoryViewRule( SimpleItem ):
 
     security.declareProtected(CMFCorePermissions.ManagePortal, 'edit')
     def edit(self, view_path, source_path, deployment_path, RESPONSE=None):
-        """edit"""
         cdv = self.getParentNode()
         if not cdv.isValidDirectoryView( view_path.strip() ):
             raise InvalidDirectoryView("%s is not valid"%str(view_path)) 

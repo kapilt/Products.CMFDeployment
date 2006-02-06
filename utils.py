@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,7 +21,7 @@
 ##################################################################
 """
 Purpose: general utility functions
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 License: GPL
 Created: 8/10/2002
 $Id$
@@ -82,3 +82,33 @@ def file2string(o):
 
     return ''.join(buf)
     
+
+
+# taken from code i wrote for proxyindex
+
+# used latter when constructing an object wrapper to determine if the
+# object is already wrapped.
+try:
+    from Products.CMFCore.CatalogTool import IndexableObjectWrapper, ICatalogTool
+    CMF_FOUND = True
+except ImportError:
+    CMF_FOUND = False
+    class ICatalogTool(Interface): pass
+    IndexableObjectWrapper = None
+
+try:
+    from Products.CMFPlone.CatalogTool import ExtensibleIndexableObjectWrapper
+    PLONE_FOUND = True
+except:
+    PLONE_FOUND = False
+    ExtensibleIndexableObjectWrapper = None
+
+def unwrap_object( obj ):
+
+    if CMF_FOUND and isinstance( obj, IndexableObjectWrapper ):
+        return obj._IndexableObjectWrapper__ob
+
+    elif PLONE_FOUND and isinstance( obj, ExtensibleIndexableObjectWrapper ):
+        return obj._obj
+        
+    return obj

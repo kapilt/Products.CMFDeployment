@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -22,7 +22,7 @@
 
 """
 Purpose: das deployment tool
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 License: GPL
 Created: 8/10/2002
 $Id$
@@ -31,7 +31,7 @@ $Id$
 
 from Namespace import *
 from DeploymentPolicy import DeploymentPolicy
-from PolicyReader import read_policy, make_policy
+from reader import read_policy, make_policy
 
 class DeploymentTool(UniqueObject, Folder):
 
@@ -62,7 +62,7 @@ class DeploymentTool(UniqueObject, Folder):
         )
 
     security.declareProtected(CMFCorePermissions.ManagePortal, 'addPolicy')
-    def addPolicy(self, policy_id='', policy_title='', policy_xml='', REQUEST=None):
+    def addPolicy(self, policy_id='', policy_title='', policy_pipeline_id='incremental', policy_xml='', REQUEST=None):
         """  """
 
         if policy_xml:
@@ -70,7 +70,9 @@ class DeploymentTool(UniqueObject, Folder):
             policy = make_policy(self, policy_node,  policy_id, policy_title)
             policy_id = policy.getId()
         else:
-            self._setObject(policy_id, DeploymentPolicy(policy_id))
+            policy = DeploymentPolicy(policy_id, policy_title, policy_pipeline_id)
+            self._setObject(policy_id, policy )
+                            
         
         if REQUEST is not None:
             policy = self._getOb(policy_id)

@@ -179,3 +179,17 @@ class IDeploymentPolicy(Interface):
         """
         deactivate this policy
         """
+
+class IContentStorage(Interface):
+    """
+    convienent point of collecting stats, and
+    centralizing storage of rendered content.
+
+    actual storage location is determined by
+    content organization. should get refactored
+    over here.
+    """
+
+    def store(self, descriptor):
+        """
+        """

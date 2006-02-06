@@ -39,20 +39,22 @@ import ContentOrganization
 import ContentMastering
 import ContentDeployment
 import ContentIdentification
-import DeploymentStrategy
+#import DeploymentStrategy
 import Descriptor
 import MimeMapping
 
 import rules
 import transports
-
+import sources
+import incremental
+import pipeline
 
 DeploymentProductHome = package_home( globals() )
 
 registerDirectory('skins', globals())
 
 methods = {
-    'ContentDeploymentStrategyIds':DeploymentStrategy.getStrategyNames
+    'DeploymentPipelineIds':pipeline.getPipelineNames
     }
 
 def initialize(context):
@@ -66,6 +68,7 @@ def initialize(context):
     utils.registerIcon('identify.png')
     utils.registerIcon('protocol.png')     
 
+    # register default plugin components
     rsync = transports.rsync
     context.registerClass(
         rsync.RsyncSSHTransport,
@@ -84,9 +87,7 @@ def initialize(context):
         visibility = None        
         )
 
-
     crule = rules.default
-
     context.registerClass(
         crule.MimeExtensionMapping,
         permission = 'CMFDeploy: Add Content Rule',
@@ -95,8 +96,54 @@ def initialize(context):
         visibility = None
         )
 
+    catalog = sources.catalog
     context.registerClass(
-        ContentIdentification.ZopeFindSource,
-        permission = 'CMFDeploy: Add Deployment Source',
-        constructors=(ContentIdentification.addZopeFindsource,))
+        catalog.PortalCatalogSource,
+        permission = 'CMFDeploy: Add Content Source',
+        constructors = ( catalog.addPortalCatalogSourceForm,
+                         catalog.addPortalCatalogSource, ),
+        visibility = None
+        )
+
+    context.registerClass(
+        catalog.IncrementalCatalogSource,
+        permission = 'CMFDeploy: Add Content Source',        
+        constructors = ( catalog.addIncrementalCatalogSourceForm,
+                         catalog.addIncrementalCatalogSource, ),
+        visibility = None
+        )
         
+#    dependency = sources.dependency
+#    context.registerClass(
+#        dependency.DependencySource,
+#        permission = 'CMFDeploy: Add Content Source',
+#        constructors= (dependency.addDependencySourceForm,
+#                       dependency.addDependencySource, ),
+#        visibility = None
+#        )
+
+#    deletion = sources.deletion
+#    context.registerClass(
+#        deletion.DeletionSource,
+#        permission = 'CMFDeploy: Add Content Source',
+#        constructors= (deletion.addDeletionSourceForm,
+#                       deletion.addDeletionSource, ),
+#        visibility = None
+#        )
+
+    topic = sources.topic
+    context.registerClass(
+        topic.TopicSource,
+        permission = 'CMFDeploy: Add Content Source',
+        constructors= (topic.addTopicSourceForm,
+                       topic.addTopicSource, ),
+        visibility = None
+        )    
+
+    context.registerClass(
+        incremental.PolicyIncrementalIndex,
+        permission = 'Add Pluggable Index',
+        constructors = (incremental.addPolicyIncrementalIndexForm,),
+        icon='www/index.gif',
+        visibility=None
+        )    

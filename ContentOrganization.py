@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2004 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,7 +21,7 @@
 ##################################################################
 """
 Purpose: Organizes Content in a Deployment Target Structure
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2004
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 License: GPL
 Created: 8/10/2002
 $Id$
@@ -29,7 +29,7 @@ $Id$
 from __future__ import nested_scopes
 from os import sep
 from Namespace import *
-from FileStructure import RootDirectory, descendant_filtered_folder_collector as\
+from structure import RootDirectory, descendant_filtered_folder_collector as\
      folder_collector
 from DeploymentExceptions import InvalidCMFMountPoint, InvalidPortalType
 
@@ -247,3 +247,11 @@ class CMFContentStructure(RootDirectory):
         return sep.join ( (self.mount_point,
                            sep.join(content.getPhysicalPath()[rlen:][:-1]) )
                           )
+
+
+    def getContentRelativePath( self, content ):
+        # return a path mount point relative
+        rlen = len(self.getCMFMountPoint().getPhysicalPath())
+        return sep.join( content.getPhysicalPath()[rlen:][:-1] )
+        
+        

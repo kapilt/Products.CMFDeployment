@@ -1,6 +1,6 @@
 ##################################################################
 #
-# (C) Copyright 2002-2005 Kapil Thangavelu <k_vertigo@objectrealms.net>
+# (C) Copyright 2002-2006 Kapil Thangavelu <k_vertigo@objectrealms.net>
 # All Rights Reserved
 #
 # This file is part of CMFDeployment.
@@ -21,7 +21,7 @@
 ##################################################################
 """
 Purpose: Identify Content that should be deployed
-Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2005
+Author: kapil thangavelu <k_vertigo@objectrealms.net> @2002-2006
 License: GPL
 Created: 8/10/2002
 $Id$
@@ -29,16 +29,13 @@ $Id$
 
 from Namespace import *
 from Products.CMFCore.Expression import Expression
-from Products.CMFTopic import Topic
 from Products.PageTemplates.Expressions import SecureModuleImporter, getEngine
 from Log import LogFactory
 
 from DeploymentInterfaces import *
-from ExpressionContainer import ExpressionContainer
 
 log = LogFactory('ContentIdentification')
 
-DEFAULT_CONTENT_SOURCE_ID = "portal_catalog_source"
 
 class ContentIdentification(Folder):
 
@@ -112,14 +109,14 @@ class ContentIdentification(Folder):
 
     security.declarePrivate('manage_afterAdd')
     def manage_afterAdd(self, item, container):
-        self._setObject('sources',  ContentSourceContainer('source'))
+        self._setObject('sources',  ContentSourceContainer('sources'))
         self._setObject('filters',  ContentFilterContainer('filters'))
 
 InitializeClass(ContentIdentification)
 
 
 #################################
-# Sources
+# Source Container 
 
 class ContentSourceContainer( OrderedFolder ):
 
@@ -142,114 +139,27 @@ class ContentSourceContainer( OrderedFolder ):
             for c in source.getContent():
                 yield c
 
-    def manage_afterAdd(self, item, container):
-
-        if not DEFAULT_CONTENT_SOURCE_ID in self.objectIds():
-            self._setObject(
-                DEFAULT_CONTENT_SOURCE_ID,
-                PortalCatalogSource(DEFAULT_CONTENT_SOURCE_ID)
-                )
+##     def manage_afterAdd(self, item, container):
+        
+##         import DefaultConfiguration
+##         from sources import catalog
+##         if not DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID in self.objectIds():
+##             self._setObject(
+##                 DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID,
+##                 catalog.PortalCatalogSource(
+##                   DefaultConfiguration.DEFAULT_CONTENT_SOURCE_ID )
+##                 )
                                                  
 
 InitializeClass( ContentSourceContainer )
 
-def addPortalCatalogSource( self,
-                            id=DEFAULT_CONTENT_SOURCE_ID,
-                            title='',
-                            RESPONSE=''):
-    """ riddle me this, why is a doc string here..
-        answer: bobo
-    """
-
-    self._setObject( id, PortalCatalogSource(id, title ) )
-
-    if RESPONSE:
-        RESPONSE.redirect('manage_workspace')
-
-addPortalCatalogSourceForm = DTMLFile('ui/IdentificationPortalCatalogSourceForm', globals() )
-
-class PortalCatalogSource(SimpleItem):
-
-    meta_type = 'Catalog Content Source'
-
-    __implements__ = IContentSource
-
-    manage_options = (
-        {'label':'Source',
-         'action':'source'},        
-        )
-    
-    source = DTMLFile('ui/ContentSourceView', globals())
-
-    def __init__(self, id, title='retrieves content from portal_catalog'):
-        self.id = id
-        self.title = title
-        
-    def getContent(self):
-        catalog = getToolByName(self, 'portal_catalog')
-        objects = catalog()
-        return objects
-
-
-def addZopeFindsource(self, RESPONSE=None):
-    """add zope find source"""
-    id = 'zope_find_source'
-    self._setObject(id, ZopeFindSource(id))
-    if RESPONSE:
-        RESPONSE.redirect('manage_workspace')
-
-class BrainMock:
-    """mocks catalog brain"""
-    
-    __allow_access_to_unprotected_subobjects__ = 1
-
-    brain_attrs = ['portal_type', 'getId']
-
-    def __init__(self, ob):
-        self.ob = ob
-        
-    def getPath(self):
-        return '/'.join(self.ob.getPhysicalPath())
-
-    def getObject(self):
-        return self.ob
-
-    def __getattr__(self, key):
-        if key in self.brain_attrs:
-            value = getattr(self.ob, key)
-            if callable(value):
-                value = value()
-        else:
-            raise AttributeError
-        
-        return value
-        
-   
-class ZopeFindSource(PortalCatalogSource):
-    """find objects through zope find
-
-    currently only returns images
-    """
-
-    meta_type = 'ZopeFind Source'
-    
-    def __init__(self, id, title='retrieves content via ZopeFind'):
-        self.id = id
-        self.title = title
-
-    def getContent(self):
-        portal = getToolByName(self, 'portal_url').getPortalObject()
-        for path, obj in portal.ZopeFind(
-            portal, obj_metatypes=('Image',), search_sub=1):
-            yield BrainMock(obj)
-            
 
 #################################
 # Filters
 
 class ContentFilter(SimpleItem):
 
-    meta_type = 'Content Filter'
+    meta_type = 'Content Filters'
     __implements__ = IContentFilter
     
     filter_manage_options = (
