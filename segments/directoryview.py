@@ -30,7 +30,7 @@ class DirectoryViewDeploy( PipeSegment ):
 
             original_count = len(contents)
             contents = filter( time_filter, contents )
-            print "Time Filtered %s Directory View Objects"%(original_count-len(contents))
+            #print "Time Filtered %s Directory View Objects"%(original_count-len(contents))
 
         for dvc in contents:
             resolver.addResource( dvc )

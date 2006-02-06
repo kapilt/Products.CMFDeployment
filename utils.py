@@ -97,7 +97,7 @@ except ImportError:
     IndexableObjectWrapper = None
 
 try:
-    from Products.CMFPlone import ExtensibleIndexableObjectWrapper
+    from Products.CMFPlone.CatalogTool import ExtensibleIndexableObjectWrapper
     PLONE_FOUND = True
 except:
     PLONE_FOUND = False
@@ -108,7 +108,7 @@ def unwrap_object( obj ):
     if CMF_FOUND and isinstance( obj, IndexableObjectWrapper ):
         return obj._IndexableObjectWrapper__ob
 
-    elif PLONE_FOUND and instance( obj, ExtensibleIndexableObjectWrapper ):
+    elif PLONE_FOUND and isinstance( obj, ExtensibleIndexableObjectWrapper ):
         return obj._obj
         
     return obj

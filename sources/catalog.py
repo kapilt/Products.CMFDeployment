@@ -94,7 +94,7 @@ class IncrementalCatalogSource(SimpleItem):
         if last_deployment_time:
             objects = [ o for o in objects if o.modified > last_deployment_time ]
 
-        print "##"*10
-        print "Results", len(objects)
+        #print "##"*10
+        #print "Results", len(objects)
         return objects
             

@@ -265,16 +265,16 @@ def make_policy(portal, policy_node, id=None, title=None):
         # transparently map old policies to the expected format
         product = m.get('product', DEFAULT_RULE_PRODUCT)
         factory = m.get('factory', DEFAULT_RULE_FACTORY)
-        import pprint
-        print 'ee', product, factory
-        pprint.pprint(dict(m.items()))
+        #import pprint
+        #print 'ee', product, factory
+        #pprint.pprint(dict(m.items()))
         
         if (product, factory) in REMAP_TYPES:
-            print 'remapped'
+            #print 'remapped'
             m.setdefault('ghost',0)
             m = remap_default_rule_factory( m )
 
-        pprint.pprint( dict( m.items() ) )
+        #pprint.pprint( dict( m.items() ) )
             
         factory = getattr(mastering.mime.manage_addProduct[product], factory)
         md = dict(m)

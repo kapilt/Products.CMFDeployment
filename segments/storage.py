@@ -89,7 +89,7 @@ class ContentStorageManager(object):
         """
         remove a rendered content object on the filesystem
         """
-        print "XYZ"*10
+        
 
         descriptors = descriptor.getDescriptors()
         structure   = self.getStructure( pipe )
@@ -98,15 +98,16 @@ class ContentStorageManager(object):
             content_path = structure.getContentPathFromDescriptor( descriptor )
             file_name = descriptor.getFileName()
             location = path.join( content_path, file_name )
-            print "removing descriptor", file_name, location
+            #print "removing descriptor", file_name, location
             if path.exists( location ) and os.path.isfile( location ):
                 os.remove( location )
             elif os.path.exists( location ):
+                pass
                 # removing directories is possible but requires a bit of work
                 # as we map folder descriptors to index files..
                 # basically need to store is_content_folderish on deletion descriptor
                 # and chop of the last part of the location.. could be dangerous
-                print "Invalid - Directory Path", location, descriptor
+                #print "Invalid - Directory Path", location, descriptor
             else: # already removed..
                 pass
                 

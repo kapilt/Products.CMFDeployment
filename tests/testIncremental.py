@@ -12,6 +12,7 @@ if __name__ == '__main__':
 
 from Testing import ZopeTestCase
 from Products.CMFPlone.tests.PloneTestCase import PloneTestCase
+from DateTime import DateTime
 
 ZopeTestCase.installProduct('CMFDeployment')
 ZopeTestCase.installProduct('MimetypesRegistry')
@@ -105,16 +106,36 @@ class TestIncrementalComponents(PloneTestCase):
         assert not os.path.exists( about_idx )        
 
     def testContentModification(self):
-        #rule = self.policy.getContentMastering.mime.IndexDocument
-        #rule.edit( rule.extension_text,
-        #           "python: object.getId() == 'index_html' and 'rabbit' in object.EditableBody()"
-            
-        #self.policy.execute()
-        #self
-        pass
+        self.policy.execute()
+        event_fs_path = os.path.join( TESTDEPLOYDIR, 'events', 'cignex_sprint.html')
+        assert os.path.exists( event_fs_path )
+        
+        rule = self.policy.getContentMastering().mime.Event
+        rule.edit( rule.extension_text,
+                   "python: 'rabbit' in object.Description()",
+                   rule.view_method )
 
+        self.portal.events.cignex_sprint.reindexObject()
+        self.policy.execute()
+        
+        assert not os.path.exists( event_fs_path ), "path still exists"
 
-    def _testDependencySource(self):
+        rule.edit( rule.extension_text,
+                   "python: 'Event' == object.portal_type",
+                   rule.view_method )
+
+        # interesting tidbit, this doesn't really work because of notifyModified
+        # which auto sets modification date, but it works enough for the unit test
+        # which just wants to set the mod date to some future point past the
+        # the last deploy
+        mod_time = DateTime()+3600.0/(60*60*24) # 1 hr into the future
+        self.portal.events.cignex_sprint.setModificationDate( mod_time )
+        self.portal.events.cignex_sprint.reindexObject(idxs=('modified',))
+        
+        self.policy.execute()
+        assert os.path.exists( event_fs_path )        
+
+    def testDependencySource(self):
         # some serious monkey patches...
 
         self.policy.execute()
@@ -151,16 +172,6 @@ class TestIncrementalComponents(PloneTestCase):
             opath =  "/".join( ob.getContent().getPhysicalPath())
             assert opath in expected
     
-    def testDependencySource(self):
-        try:
-            self._testDependencySource()
-        except:
-            import pdb, sys
-            ec, e, tb = sys.exc_info()
-            print ec, e
-            pdb.post_mortem(tb)
-
-
 
 def test_suite():
     suite = unittest.TestSuite()

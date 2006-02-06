@@ -254,20 +254,7 @@ class PolicyIncrementalIndex( SimpleItem ):
     def getEntryForObject( self, documentId, default=None):
         return self._index.get( documentId, default )
 
-    def index_object( self, *args, **kw):
-
-        try:
-            return self.dindex_object( *args, **kw)
-        except:
-            import sys, traceback, pdb
-            print "XXX"*10, "error in idx"
-            ec, e, tb = sys.exc_info()
-            print ec, e
-            traceback.print_tb( tb )
-            pdb.post_mortem( tb )
-            raise
-        
-    def dindex_object( self, documentId, obj, threshold=None):
+    def index_object( self, documentId, obj, threshold=None):
         # policy execution directly populates through the
         # recordObject api.
 
@@ -304,7 +291,7 @@ class PolicyIncrementalIndex( SimpleItem ):
         if match_found is not None:
             return 1
 
-        self._processDeletion( policy, rules, deletion_source, documentId, content, ctx)
+        self._processDeletion( policy, rules, deletion_source, documentId, obj, ctx)
         return 1
 
 

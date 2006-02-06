@@ -16,6 +16,7 @@ class ContentRuleMatch( Filter ):
 
     def process( self, pipe, content ):
 
+            
         rules = pipe.services["ContentRules"]
         factory = self.getFactory( pipe )
 
@@ -25,6 +26,9 @@ class ContentRuleMatch( Filter ):
             try: content._p_deactivate()
             except: pass
             return OUTPUT_FILTERED
+
+        #path = "/".join( content.getPhysicalPath())
+        #print "Processing", path, descriptor.rule_id
 
         return descriptor
 

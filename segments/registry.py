@@ -30,7 +30,7 @@ class RegistryDeploy( PipeSegment ):
 
             original_count = len(contents)
             contents = filter( time_filter, contents )
-            print "Time Filtered %s Directory View Objects"%(original_count-len(contents))
+            #print "Time Filtered %s Directory View Objects"%(original_count-len(contents))
 
         for dr in contents:
             resolver.addResource( dr )

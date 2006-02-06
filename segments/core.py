@@ -68,8 +68,9 @@ class PipeExecutor( object ):
                 if value is OUTPUT_FILTERED:
                     context = self.getNextContextObject()
                     idx = self.producer_idx
-                elif value is None:
-                    print "filter returned none", step, value
+                elif value is None: 
+                    pass
+                    #print "filter returned none", step, value
                 else:                    
                     context = value
             elif isinstance( step, PipeSegment ):
@@ -121,7 +122,7 @@ class VariableAggregator( Consumer ):
         self.variable_name = variable_name
 
     def process(self, pipeline, ctxobj ):
-        print "adding", ctxobj, "to", self.variable_name
+        #print "adding", ctxobj, "to", self.variable_name
         values = pipeline.variables.setdefault( self.variable_name, [] )
         values.append( ctxobj )
         return None
