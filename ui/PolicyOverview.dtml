@@ -9,6 +9,7 @@ how it should be displayed when deployed, and how it should be deployed </p>
 
 <form action="execute" method="POST">
 <input type="submit" value="Execute Policy">
+<input type="checkbox" name="reset_date:int" value="1"> Reset Deployment Date
 </form>
 
 <p>Download Policy as <a href="policy_xml">XML</a></p>

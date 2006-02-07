@@ -80,6 +80,7 @@ class DeploymentPolicy(Folder):
 
     identification = DTMLFile('ui/ContentIdentification', globals())
     _active = 1
+    _reset_date = False
     policy_xml = DTMLFile('ui/PolicyExport', globals())
 
     icon = 'misc_/CMFDeployment/policy.png'
@@ -141,11 +142,24 @@ class DeploymentPolicy(Folder):
 
     def isActive(self):
         return self._active
+    
+    def setResetDate(self, flag):
+        """ Set the state of the reset flag
+        """
+        self._reset_date = flag
 
-    def execute(self, RESPONSE=None):
+    def getResetDate(self):
+        """ Returns true if the incremental date should be ignored in the next deploy
+        """
+        return self._reset_date
+
+    def execute(self, REQUEST=None, RESPONSE=None):
         """ """
         if not self.isActive():
             return
+        
+        if getattr(REQUEST, 'reset_date', False):
+            self.setResetDate(True)
 
         histories = self.getDeploymentHistory()
         history = histories.makeHistory()
@@ -168,6 +182,8 @@ class DeploymentPolicy(Folder):
 
         #history.recordStatistics(display)
         histories.attachHistory(history)
+
+        self.getDeploymentPolicy().setResetDate(False)
 
         if RESPONSE:
             return "<html><pre>deployed</pre></body</html>"

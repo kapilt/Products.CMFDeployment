@@ -80,8 +80,9 @@ class IncrementalCatalogSource(SimpleItem):
         """
         catalog = getToolByName(self, 'portal_catalog')
         last_deployment_time = self.getDeploymentHistory().getLastTime()
-        
-        if last_deployment_time is not None:
+        reset_date = self.getDeploymentPolicy().getResetDate()
+                
+        if not reset_date and last_deployment_time is not None:
             query = {'modified': {'query':last_deployment_time, 'range':'min'} }
         else:
             query = {}
@@ -91,7 +92,7 @@ class IncrementalCatalogSource(SimpleItem):
         # On Plone 2.1, "modified" is a DateIndex, which doesn't take care of
         # seconds. This break unit tests. We add a filter here, to ensure
         # correctness. It may cost a bit of CPU time, but not that much IMHO.
-        if last_deployment_time:
+        if not reset_date and last_deployment_time:
             objects = [ o for o in objects if o.modified > last_deployment_time ]
 
         #print "##"*10
