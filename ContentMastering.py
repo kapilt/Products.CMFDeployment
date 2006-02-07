@@ -33,7 +33,7 @@ from Namespace import *
 from DeploymentExceptions import InvalidSkinName
 from MimeMapping import MimeMappingContainer
 from ExpressionContainer import getDeployExprContext
-from utils import file2string
+from utils import file2string, is_baseunit
 
 from Log import LogFactory
 
@@ -183,7 +183,9 @@ class ContentMastering(Folder):
         try: 
             if getattr(aq_base(render), 'isDocTemp', 0):
                 descriptor.setRendered(apply(render, (self, self.REQUEST)))
-            elif hasattr(aq_base(c), 'precondition'): # test if its a file object
+            elif hasattr(aq_base(c), 'precondition') and \
+                 not is_baseunit(c):
+                # test if its a file object, but not an AT BaseUnit
                 descriptor.setRendered(file2string(c))
                 descriptor.setBinary(1)
             else:
@@ -191,7 +193,8 @@ class ContentMastering(Folder):
         except:
             log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
             descriptor.setGhost(1) # ghostify it        
-            raise
+            #raise
+            
     #################################
     def setup(self):
         #self.site_root.lock()
@@ -258,6 +261,7 @@ class SiteChainSkin(SimpleItem):
         skin_name = self._v_saved_skin_name or skins.getDefaultSkin()
         portal.changeSkin( skin_name )
         self._v_saved_skin_name = None
+        self._v_active = False
         
     def manage_afterAdd(self, item, container):
         self.skin_name  = getToolByName(self, 'portal_skins').getDefaultSkin()	

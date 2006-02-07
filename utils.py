@@ -28,7 +28,7 @@ $Id$
 """
 
 
-
+from Acquisition import aq_base
 import OFS, App
 
 def registerIcon(filename):
@@ -82,6 +82,17 @@ def file2string(o):
 
     return ''.join(buf)
     
+
+try:
+    from Products.Archetypes.BaseUnit import BaseUnit
+    AT_FOUND = True
+except ImportError:
+    AT_FOUND = False
+    
+def is_baseunit( ob ):
+    if not AT_FOUND:
+        return False
+    return isinstance( aq_base(ob), BaseUnit )
 
 
 # taken from code i wrote for proxyindex

@@ -15,7 +15,7 @@ CMFDeployment
     - allows for business logic to filter deployed content
       using TALES expressions and Python Scripts
 
-    - Pluggable Deployment Strategies (Incremental, Full)
+    - Pluggable Deployment Pipelines (Incremental, Full)
 
     - Pluggable Deployment Protocols, (currently RsyncSSH)
 
