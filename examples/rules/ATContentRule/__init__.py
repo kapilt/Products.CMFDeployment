@@ -74,8 +74,8 @@ class ArchetypeContentRule(SimpleItem):
         self.condition_text = condition
         self.title = condition
 
-    def isValid(self, descriptor, context):
-        if not isinstance( descriptor.getContent(), (atapi.BaseContent, atapi.BaseFolder) ):
+    def isValid(self, content, context):
+        if not isinstance( content, (atapi.BaseContent, atapi.BaseFolder) ):
             return False
         elif self.condition_text and not self.condition( context ):
             return False

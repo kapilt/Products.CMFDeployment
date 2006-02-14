@@ -136,7 +136,7 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
         self.ghost = ghost
         self.title = condition
         
-    def isValid(self, descriptor, context):
+    def isValid(self, content, context):
         return not not self.condition(context)
 
     def getExtension(self, context):

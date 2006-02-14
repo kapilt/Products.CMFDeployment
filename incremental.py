@@ -284,7 +284,7 @@ class PolicyIncrementalIndex( SimpleItem ):
         match_found = None
         rules = policy.getContentMastering().mime
         for rule in rules.objectValues():
-            if rule.isValid( None, ctx ):
+            if rule.isValid( obj, ctx):
                 match_found = rule
                 break
 

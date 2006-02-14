@@ -92,7 +92,7 @@ class ATContentRuleTests( PloneTestCase ):
         context = getDeployExprContext( self.image_content, self.portal)
         
         self.assertEqual(
-            self.rules.at_image_content.isValid( descriptor, context),
+            self.rules.at_image_content.isValid( self.image_content, context),
             True
             )
 

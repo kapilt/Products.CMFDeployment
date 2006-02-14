@@ -124,7 +124,7 @@ class ContentMastering(Folder):
         ctx = getDeployExprContext(c, portal) 
         mappings = self.mime.objectValues()
         for m in mappings:
-            if m.isValid(descriptor, ctx):
+            if m.isValid( c, ctx):
                 m.process( descriptor, ctx )
                 return True
         log.debug('no mime mapping (%s)->(%s)'%(str(c.portal_type), descriptor.content_url))
