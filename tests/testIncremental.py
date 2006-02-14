@@ -135,6 +135,30 @@ class TestIncrementalComponents(PloneTestCase):
         self.policy.execute()
         assert os.path.exists( event_fs_path )        
 
+    def testCutPasteRerendersSourceFolder(self):
+        self.policy.execute()
+
+        # need accurate fs mod times for this test
+        event_dir_path = os.path.join( TESTDEPLOYDIR, 'events', 'index.html')
+        event_mod_time = os.path.getmtime( event_dir_path )
+
+        import time; time.sleep(2)
+        
+        cp = self.portal.events.manage_cutObjects( ('Snow Sprint' ,) )
+        self.portal.news.manage_pasteObjects( cp )
+
+        # this is bad.. a move doesn't actually change the content's modification date
+        # we could work around it by having the incremental index set the mod date on
+        # unindex but that seems potentially bad and arbitrary.
+        self.portal.news['Snow Sprint'].reindexObject()
+        self.policy.execute()
+
+        assert os.path.getmtime( event_dir_path ) > event_mod_time
+
+        snow_sprint_path = os.path.join( TESTDEPLOYDIR, 'news', 'Snow Sprint.html')
+        assert os.path.exists( snow_sprint_path )
+        
+
     def testDependencySource(self):
         # some serious monkey patches...
 
