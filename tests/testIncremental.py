@@ -135,7 +135,7 @@ class TestIncrementalComponents(PloneTestCase):
         self.policy.execute()
         assert os.path.exists( event_fs_path )        
 
-    def testCutPasteRerendersSourceFolder(self):
+    def testCutPasteContent(self):
         self.policy.execute()
 
         # need accurate fs mod times for this test

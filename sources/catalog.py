@@ -83,7 +83,7 @@ class IncrementalCatalogSource(SimpleItem):
         reset_date = self.getDeploymentPolicy().getResetDate()
                 
         if not reset_date and last_deployment_time is not None:
-            query = {'modified': {'query':last_deployment_time, 'range':'min'} }
+            query = {'bobobase_modification_time': {'query':last_deployment_time, 'range':'min'} }
         else:
             query = {}
             
