@@ -241,7 +241,8 @@ class URIResolver:
 
         # Ok, on Plone 2.1, we can get a view object here.
         # We don't want it, we want a real object.
-        if type(object) == types.MethodType:
+        
+        if isinstance( object, (types.FunctionType, types.MethodType)):
             oid = parts[-2]
             object = getattr( content, oid, None )
             
