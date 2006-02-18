@@ -25,7 +25,7 @@
     </dtml-in>
   </skins>
 
-  <dtml-if getContentRegistries>
+  <dtml-if "getContentRegistries()">
   <registries>
     <dtml-in "getContentRegistries().objectValues()">
      <dtml-with sequence-item>
