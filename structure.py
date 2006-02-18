@@ -245,7 +245,7 @@ class descendant_filtered_folder_collector(descender):
                     oc._p_deactivate()
             if self.obj_count % self.gc_threshold == 0:
                 if hasattr(o, '_p_jar'):
-                    o._p_jar._incrgc()
+                    o._p_jar.cacheGC()
         return r
 
 def descendant_filter_collector(o, filter):
