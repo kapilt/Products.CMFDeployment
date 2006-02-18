@@ -54,13 +54,16 @@ class ContentDeployment( OrderedFolder ):
 
     overview = DTMLFile('ui/ContentDeploymentOverview', globals())
     
-    all_meta_types = IFAwareObjectManager.all_meta_types
     _product_interfaces = ( IDeploymentTarget, )
 
     security = ClassSecurityInfo()
 
     def __init__(self, id):
         self.id = id
+
+    def all_meta_types(self):
+        """Delegate the call passing our allowed interfaces"""
+        return OrderedFolder.all_meta_types(self, interfaces=self._product_interfaces)
 
     security.declarePrivate('deploy')
     def deploy(self, structure):

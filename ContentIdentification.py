@@ -122,7 +122,6 @@ class ContentSourceContainer( OrderedFolder ):
 
     meta_type = 'Content Source Container'
 
-    all_meta_types = IFAwareObjectManager.all_meta_types
     _product_interfaces = ( IContentSource, )
 
     manage_options = (
@@ -134,6 +133,11 @@ class ContentSourceContainer( OrderedFolder ):
         self.id = id
         self.title = title
         
+    def all_meta_types(self):
+        """Delegate the call to IFAwareObjectManager"""
+        return OrderedFolder.all_meta_types(self,
+                                            interfaces=self._product_interfaces)
+
     def getContent( self ):
         for source in self.objectValues():
             for c in source.getContent():

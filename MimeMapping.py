@@ -30,11 +30,12 @@ $Id$
 from Namespace import *
 from DeploymentInterfaces import IContentRule
 
-class MimeMappingContainer(OrderedFolder, IFAwareObjectManager):
+class MimeMappingContainer(OrderedFolder):
 
     meta_type = 'Mime Mapping Container'
 
     manage_options = (
+
         {'label':'Mappings',
          'action':'manage_main'},
 
@@ -45,12 +46,15 @@ class MimeMappingContainer(OrderedFolder, IFAwareObjectManager):
          'action':'../../overview'}
         )
 
-    all_meta_types = IFAwareObjectManager.all_meta_types
     _product_interfaces = ( IContentRule, )
     
     def __init__(self, id, title=''):
         self.id = id
         self.title = title or id
+
+    def all_meta_types(self):
+        """Delegate the call passing our allowed interfaces"""
+        return OrderedFolder.all_meta_types(self, interfaces=self._product_interfaces)
         
     def addMimeMapping(self, *args, **kw):
         return self.manage_addProduct['CMFDeployment'].addContentRule(*args, **kw)
