@@ -62,7 +62,7 @@ class IncrementalPipelineFactory( PipelineFactory ):
            processor_pipeline,
            dv_pipeline)
         if HAS_REGISTRY:
-           steps += reg_pipeline
+           steps += (reg_pipeline,)
         steps += (
            storage_pipeline,
            segments.user.UserUnlock(),

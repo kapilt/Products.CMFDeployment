@@ -186,7 +186,8 @@ class DeploymentPolicy(Folder):
         self.getDeploymentPolicy().setResetDate(False)
 
         if RESPONSE:
-            return "<html><pre>deployed</pre></body</html>"
+            RESPONSE.setHeader('Content-Type', 'text/html')
+            return "<html><pre>deployed</pre></body></html>"
         return True
 
     def manage_afterAdd(self, item, container):

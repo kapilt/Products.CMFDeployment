@@ -173,9 +173,13 @@ CMFDeployment
 
     "Tahara Yusei":tahara * timedia.co.jp - Patches for Plone2/CMF 1.4
 
-    "Gael Le Mignot": gael * pilotsystems.net - Plone2.1 support
-  
     "Calvin Hendryx-Parker": calvinhp * sixfeetup.com - Deployment Skin, Use Cases, and Sponsoring
+
+    "Gael Le Mignot": gael * pilotsystems.net - Plone2.1 support
+
+    "Kai Hänninen": kai.hanninen * mbconcert.fi - Plone 2.1 / Zope 2.8 support
+
+    "Osma Suominen": osma.suominen * mbconcert.fi - Plone 2.1 / Zope 2.8 support
 
     I'd like to thank alan runyaga for much dicussion
     and feedback on this tool. It has benefited greatly 

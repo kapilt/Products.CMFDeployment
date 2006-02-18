@@ -37,7 +37,7 @@
   </registries>
 
   <organization cmf_mount="/" 
-		fs_mount="*/examples/static/plone21">
+		fs_mount="*/examples/static/plone_2_1">
 
     <restricted id="Members" />
     <restricted id="content_type_registry" />
