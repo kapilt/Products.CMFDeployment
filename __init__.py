@@ -131,14 +131,16 @@ def initialize(context):
 #        visibility = None
 #        )
 
-    topic = sources.topic
-    context.registerClass(
-        topic.TopicSource,
-        permission = 'CMFDeploy: Add Content Source',
-        constructors= (topic.addTopicSourceForm,
-                       topic.addTopicSource, ),
-        visibility = None
-        )    
+
+    if sources.topic is not None:
+        topic = sources.topic
+        context.registerClass(
+            topic.TopicSource,
+            permission = 'CMFDeploy: Add Content Source',
+            constructors= (topic.addTopicSourceForm,
+                           topic.addTopicSource, ),
+            visibility = None
+            )    
 
     context.registerClass(
         incremental.PolicyIncrementalIndex,

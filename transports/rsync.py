@@ -196,7 +196,7 @@ class RsyncSSHTransport(SimpleItem):
     security.declareProtected(CMFCorePermissions.ManagePortal, 'transfer')
     def transfer(self, structure ):
         protocol = self.getProtocol()
-        protocol.execute(target, structure)
+        protocol.execute( self, structure)
         
     security.declareProtected(CMFCorePermissions.ManagePortal, 'getProtocol')
     def getProtocol(self):

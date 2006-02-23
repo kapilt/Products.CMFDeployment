@@ -44,6 +44,8 @@ DependencySource      = 'dependency_source'
 
 ContentTransforms     = 'transforms'
 
+DEPLOYMENT_DEBUG      = False
+
 DEFAULT_CONTENT_SOURCE_ID = "portal_catalog_source"
 
 from ContentOrganization import ContentOrganization as KlassContentOrganization

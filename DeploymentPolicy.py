@@ -171,6 +171,8 @@ class DeploymentPolicy(Folder):
                 pipeline = self.getPipeline()
                 pipeline.process( self )
             except:
+                if not DefaultConfiguration.DEPLOYMENT_DEBUG:
+                    raise
                 import sys, pdb, traceback
                 ec, e, tb = sys.exc_info()
                 print ec, e
