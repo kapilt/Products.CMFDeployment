@@ -97,7 +97,7 @@ class RsyncSSHProtocol(object):
         conn = pexpect.spawn(rendered_command)
         conn.setlog(log)
         try:
-            conn.expect_exact(['password:', 'Enter passphrase'])
+            conn.expect_exact(['password:', 'Enter passphrase', 'Password:'])
         except pexpect.EOF:
             conn.kill(1)
             log.seek(0)
