@@ -83,16 +83,20 @@ class IncrementalPipelineFactory( PipelineFactory ):
         import incremental
         catalog = getToolByName( policy, 'portal_catalog' )
         pidx_id = incremental.getIncrementalIndexId( policy )
-        catalog.manage_addIndex( pidx_id,
-                                 incremental.PolicyIncrementalIndex.meta_type )
+
+        if pidx_id not in catalog.indexes():
+            catalog.manage_addIndex( pidx_id,
+                                     incremental.PolicyIncrementalIndex.meta_type )
 
         import sources
-        sources.deletion.addDeletionSource( policy,
-                                            DefaultConfiguration.DeletionSource )
         
-        sources.dependency.addDependencySource( policy,
-                                                DefaultConfiguration.DependencySource )
+        if DefaultConfiguration.DeletionSource not in policy.objectIds():
+            sources.deletion.addDeletionSource( policy,
+                                                DefaultConfiguration.DeletionSource )
 
+        if DefaultConfiguration.DependencySource not in policy.objectIds():
+            sources.dependency.addDependencySource( policy,
+                                                    DefaultConfiguration.DependencySource )
         
     def beginPolicyRemoval( self, policy ):
         """
@@ -103,8 +107,10 @@ class IncrementalPipelineFactory( PipelineFactory ):
         import incremental
         catalog = getToolByName( policy, 'portal_catalog' )
         pidx_id = incremental.getIncrementalIndexId( policy )
-        catalog.manage_delIndex( ids=[ pidx_id ] )
-              
+        if pidx_id in catalog.indexes():
+            catalog.manage_delIndex( ids=[ pidx_id ] )
+
+        policy.setResetDate( True )
 
     #################################
     # private methods for easy subclass construction
