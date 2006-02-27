@@ -1,6 +1,7 @@
 <dtml-call "RESPONSE.setHeader('Content-Type', 'text/xml')">
 <DeploymentPolicy id="<dtml-var getId>" pipeline="<dtml-var pipeline_id>">
 
+
   <identification>
    <dtml-let identification="getContentIdentification()">
     <dtml-in "identification.filters.objectValues()">
@@ -9,10 +10,15 @@
               expr="<dtml-var expression_text>"/>
      </dtml-with>
     </dtml-in>
+
+    <dtml-in "identification.sources.objectValues()">
+     <dtml-with sequence-item>
+      <dtml-var toXml>
+     </dtml-with>
+    </dtml-in>
    </dtml-let>
   </identification>
 
-  
 
   <skins>
     <dtml-in "getContentDirectoryViews().objectValues()">

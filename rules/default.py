@@ -24,23 +24,12 @@ def addContentRule(self, id, extension_expression, condition, view_method, ghost
     if RESPONSE is not None:
         RESPONSE.redirect('manage_main')
 
-class RuleConfigurator( object ):
-
-    def importRule(self, ctx, **kw):
-        md = {}
-        md['extension_expression'] = kw.get('ext_expr', '')
-        md['condition'] = kw.get('filter_expr', '')
-        md['view_method'] = kw.get('view_method', '')
-        md['ghost'] = kw.get('ghost', '')
-        md['id'] = kw.get('id', '')
-
-        return addContentRule( ctx, **md )
 
 xml_export_template = """
-<mime id="%(id)s"
+<rule id="%(id)s"
       product="%(product)s"
       factory="%(factory)s"
-      filter_expr="%(filter_expr)s"
+      condition="%(filter_expr)s"
       ext_expr="%(ext_expr)s"
       view_method="%(view_method)s" />
 """

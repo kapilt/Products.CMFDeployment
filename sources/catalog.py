@@ -5,6 +5,8 @@ $Id$
 from Products.CMFDeployment.Namespace import *
 from Products.CMFDeployment.DeploymentInterfaces import IContentSource
 
+from base import BaseSource
+
 def addPortalCatalogSource( self,
                             id,
                             title='',
@@ -20,7 +22,7 @@ def addPortalCatalogSource( self,
 
 addPortalCatalogSourceForm = DTMLFile('../ui/SourceCatalogForm', globals() )
 
-class PortalCatalogSource(SimpleItem):
+class PortalCatalogSource(BaseSource):
 
     meta_type = 'Catalog Content Source'
 
@@ -30,6 +32,8 @@ class PortalCatalogSource(SimpleItem):
         {'label':'Source',
          'action':'source'},        
         )
+
+    xml_factory = 'addPortalCatalogSource'
     
     source = DTMLFile('../ui/ContentSourceView', globals())
 
@@ -57,7 +61,7 @@ def addIncrementalCatalogSource( self,
 
 addIncrementalCatalogSourceForm = DTMLFile('../ui/SourceIncrementalCatalogForm', globals() )
 
-class IncrementalCatalogSource(SimpleItem):
+class IncrementalCatalogSource(BaseSource):
 
     meta_type = 'Incremental Catalog Content Source'
 
@@ -67,6 +71,8 @@ class IncrementalCatalogSource(SimpleItem):
         {'label':'Source',
          'action':'source'},        
         )
+
+    xml_factory = 'addIncrementalCatalogSource'
     
     source = DTMLFile('../ui/ContentSourceView', globals())
 

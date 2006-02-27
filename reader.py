@@ -143,6 +143,8 @@ class PolicyReader(MetaReader):
             mime['ghost'] = int(mime.ghost)
         mimes.append(mime)
 
+    startMasteringrule = startMasteringmime
+
     def startSkins(self, attrs):
 	skins = PolicyNode(attrs)
 	self.policy.skins = skins
@@ -215,7 +217,8 @@ def remap_default_rule_factory( m ):
         delk.append(key)
 
     for dk in delk:
-        del m.data[dk]
+        if dk in m:
+            del m.data[dk]
 
     return m
 

@@ -240,7 +240,7 @@ class PolicyIncrementalIndex( SimpleItem ):
 
     security = ClassSecurityInfo()
 
-    index_overview = DTMLFile('zmi/IncrementalIndexView', globals())    
+    index_overview = DTMLFile('ui/IncrementalIndexView', globals())    
 
     def __init__(self, id, extra=None, caller=None):
         self.id = id
@@ -327,6 +327,12 @@ class PolicyIncrementalIndex( SimpleItem ):
     def numObjects(self):
         return self._length()
 
+    def __len__(self):
+        return self._length()
+
+    def indexSize(self):
+        return self._length()
+
     def clear(self):
         # i can't do that jim ;-)
         return
@@ -351,7 +357,7 @@ class PolicyIncrementalIndex( SimpleItem ):
         rule = rules._getOb( rule_id, None )
         if rule is None:
             # try to find any matching rule
-            print "XXX", "Rule not found", rule_id
+            #print "XXX", "Rule not found", rule_id
             mastering = policy.getContentMastering()
             if not mastering.prepare( descriptor ):
                 print "XXX"*2, "Can't process deletion"

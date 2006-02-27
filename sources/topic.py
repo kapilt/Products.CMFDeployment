@@ -12,7 +12,7 @@ from Products.ZMITopic.topic import ZMITopic
 from Globals import DTMLFile
 from OFS.Folder import Folder
 from Products.CMFDeployment.DeploymentInterfaces import IContentSource
-
+from base import BaseSource
 
 def addTopicSource( self,
                     id,
@@ -30,10 +30,12 @@ def addTopicSource( self,
 
 addTopicSourceForm = DTMLFile('../ui/SourceTopicForm', globals())
 
-class TopicSource( Folder ):
+class TopicSource( Folder, BaseSource ):
 
     meta_type = "Topic Content Source"
 
+    xml_factory = 'addTopicSource'
+    
     __implements__ = IContentSource
 
     def all_meta_types(self):
