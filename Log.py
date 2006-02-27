@@ -35,6 +35,7 @@ $Id$
 from zLOG import LOG
 from threading import Lock
 from thread import get_ident
+import DefaultConfiguration
 
 APP_NAME = '[Deployment]'
 
@@ -57,6 +58,8 @@ class ComponentLogging:
         return "[%s] : %s "%(self._component, msg)
 
     def write(self, msg, level):
+        if not DefaultConfiguration.DEPLOYMENT_DEBUG:
+            return
         #print msg
         record_p, zlog_p = configuration.getConfigurationFor(self._component)
         if record_p or level >= OVERRIDE_THRESHOLD_LEVEL:

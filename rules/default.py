@@ -4,7 +4,11 @@ $Id$
 
 from Products.CMFCore.Expression import Expression
 from Products.CMFCore.PortalContent import PortalContent
-from Products.CMFCore.PortalFolder import PortalFolder
+
+try: # in plone 2.1
+    from Products.CMFCore.PortalFolder import PortalFolderBase
+except: # 2.0
+    from Products.CMFCore.PortalFolder import PortalFolder as PortalFolderBase
 
 from Products.CMFDeployment.Namespace import *
 from Products.CMFDeployment.DeploymentInterfaces import IContentRule
@@ -163,7 +167,7 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
 	parent = content.aq_inner.aq_parent
             
         
-        if not isinstance( parent, (PortalContent, PortalFolder) ):
+        if not isinstance( parent, (PortalContent, PortalFolderBase) ):
            return ()
         rdeps = [parent,]
 
