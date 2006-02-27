@@ -85,7 +85,7 @@ class ContentRegistry(ContentDirectoryView):
     security.declareProtected(CMFCorePermissions.ManagePortal, 'addRegistryRule')
     def addRegistryRule(self, id, view_path, source_path, deployment_path, RESPONSE=None):
         """
-        add a registry to the listing of deployable registriesxb, after
+        add a registry to the listing of deployable registries, after
         verifying the the view_path. 
         
         view_path - dv path relative to portal_skin
@@ -163,6 +163,9 @@ class ContentRegistry(ContentDirectoryView):
             # get rid of trailing and leading slashes and join to base path
             source_path = extend_relative_path(clstrip('/'.join( (vhost_path, base_path, '/'.join(filter(None, source_path.split('/'))))), '/'))
             deploy_path = '/'.join(filter(None, deploy_path.split('/')))
+
+            # XXX the escaping seems weak.. - use a std lib func, and allow for multiple source paths.
+            skin_name = self.getCurrentSkinName().replace(' ', '%20')
             
             for c in content:
                 inline = getattr(c, "getInline", None) and c.getInline() or False
@@ -172,10 +175,11 @@ class ContentRegistry(ContentDirectoryView):
                 c.registry = r
                 d.setContentPath(deploy_path)
                 d.setFileName(c.getId())
-                # XXX reconsider some of this manip
-                v = "%s/%s"%(source_path, c.getId())
+                
+                v = "%s/%s/%s"%(source_path, skin_name, c.getId())
                 d.setSourcePath('/'.join(filter(None,v.split('/'))))
                 d.setRenderMethod('')
+                
                 res.append(d)
                 
         return res
@@ -233,11 +237,9 @@ class ContentRegistry(ContentDirectoryView):
     security.declarePrivate('cookRegistryObject')
     def cookRegistryObject(self, descriptor):
         obj = descriptor.getContent()
-
         registry = obj.registry.__of__(self)
-        content = str(registry[obj.getId()])
-        
-        descriptor.setRendered(content)
+        rendered, content_type = registry[ obj.getId() ]
+        descriptor.setRendered( rendered )
     
 
 
