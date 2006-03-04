@@ -18,6 +18,11 @@
 <tr><td>View Method (optional)</td>
     <td><input type="text" name="view_method" size="50"></td></tr>
 
+<tr><td>Aliases</td>
+    <td><textarea name="aliases:lines"></textarea></td>
+</tr>
+
+
 <tr><td colspan="2">
     <input type="submit" value="Add Mime Mapping"> </td></tr>
 

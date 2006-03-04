@@ -78,6 +78,7 @@ class ContentDescriptor(object):
 
         self.dependencies = None
         self.reverse_dependencies = None
+        self.aliases = None
         
     def getId(self):
         return self.content.getId()
@@ -87,6 +88,9 @@ class ContentDescriptor(object):
         if descriptors is None:
             return (self,)
         return (self,)+tuple(descriptors)
+
+    def getAliases(self):
+        return self.aliases or ()
 
     def getContent(self):
         return self.content

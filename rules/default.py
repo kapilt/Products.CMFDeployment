@@ -15,14 +15,15 @@ from Products.CMFDeployment.DeploymentInterfaces import IContentRule
 
 addContentRuleForm = DTMLFile('../ui/MimeExtensionMappingAddForm', globals())
 
-def addContentRule(self, id, extension_expression, condition, view_method, ghost=0, RESPONSE=None):
+def addContentRule(self, id, extension_expression, condition, view_method, ghost=0, aliases=(), RESPONSE=None):
     """ add content rule """
 
     mapping = MimeExtensionMapping(id=id,
                                    extension_expression=extension_expression,
                                    condition=condition,
                                    view_method=view_method,
-                                   ghost=ghost)
+                                   ghost=ghost,
+                                   aliases=aliases)
 
     self._setObject(id, mapping)
 
@@ -120,7 +121,9 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
          'action':'addChildViewForm'},
         )
 
-    def __init__(self, id, extension_expression, condition, view_method, ghost):
+    aliases = ()
+
+    def __init__(self, id, extension_expression, condition, view_method, ghost, aliases):
         self.id = id
         self.extension = Expression(extension_expression)
         self.extension_text = extension_expression
@@ -128,7 +131,10 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
         self.condition_text = condition
         self.view_method = view_method.strip()
         self.ghost = ghost
+        aliases = filter(None, [a.strip() for a in aliases ] )
+        self.aliases = aliases
         self.title = condition
+
         
     def isValid(self, content, context):
         return not not self.condition(context)
@@ -198,6 +204,9 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
         else:
             vm = ""       
         descriptor.setRenderMethod( vm )
+        
+        if self.aliases:
+            descriptor.aliases = self.aliases
     
         for cdesc in self.getChildDescriptors( descriptor, context ):
             descriptor.addChildDescriptor( cdesc )
@@ -212,7 +221,7 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
         
         return descriptor
 
-    def editMapping(self, extension_expression, condition, view_method, ghost=0, RESPONSE=None):
+    def editMapping(self, extension_expression, condition, view_method, ghost=0, aliases=None, RESPONSE=None):
         """ """
         self.extension = Expression(extension_expression)
         self.extension_text = extension_expression
@@ -221,6 +230,8 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
         self.view_method = view_method.strip()
         self.ghost = not not ghost
         self.title= condition
+        aliases = filter(None, [a.strip() for a in aliases ] )
+        self.aliases =  aliases or ()
 
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')

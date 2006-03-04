@@ -143,8 +143,10 @@ class URIResolver:
             self.uris[relative_url+'/']=content_path
 
         # lets add in the generic CMF view method as well
-        self.uris[normalize(relative_url+'/view', '/')]=content_path
+        self.uris[normalize(relative_url+'/view', '/')] = content_path
 
+        for alias in descriptor.getAliases():
+            self.uris[ normalize( relative_url+'/'+alias, '/')] = content_path
         
     def resolveURI(self, u, content_url, content_folderish_p, default=_marker, content=None):
         """
@@ -320,6 +322,7 @@ class URIResolver:
     def __getitem__(self, key):
         return self.uris[key]
 
+    security.declarePrivate('pprint')
     def pprint(self):
         pprint.pprint(dict(self.uris.items()))
             

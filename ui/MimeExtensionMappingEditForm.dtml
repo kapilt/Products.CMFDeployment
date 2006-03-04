@@ -24,6 +24,17 @@
          </select>
     </td></tr>
 
+<tr><td>Aliases</td>
+    <td>
+<textarea name="aliases:lines">
+<dtml-in aliases>
+<dtml-var sequence-item>
+</dtml-in>
+</textarea>
+</td>
+</tr>
+    
+
 <tr><td colspan="2">
     <input type="submit" value="Edit Mime Mapping"> </td></tr>
 
