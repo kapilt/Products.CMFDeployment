@@ -45,6 +45,8 @@ class PipeEnvironmentInitializer( PipeSegment ):
         uri_resolver.source_host = ctxobj.REQUEST['SERVER_URL']
         uri_resolver.mlen = mlen
 
+	uri_resolver.setupExternalResolver()
+
         pipe.services['ContentResolver'] = uri_resolver
         
         

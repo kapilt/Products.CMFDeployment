@@ -27,6 +27,12 @@
 
 </table>
 
+<dtml-if external_resolver_path>
+<h3> External Resolver: </h3>
+<p><dtml-var external_resolver_path></p>
+</p>
+</dtml-if>
+
 </form>
 
     

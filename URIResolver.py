@@ -79,7 +79,9 @@ class URIResolver:
     # and it will be added to the url    
     vhost_path = '' 
     link_error_url = 'deploy_link_error'
-
+    ext_resolver = None
+    external_resolver_path = None
+    
     def __init__(self,
                  id='',
                  source_host='http://localhost',
@@ -95,6 +97,24 @@ class URIResolver:
         self.mlen = len(mount_path)
         self.uris = OOBTree()
 
+    def setupExternalResolver(self):
+        if not self.external_resolver_path or not '.' in self.external_resolver_path :
+            return
+        module_name, from_list = rsplit( self.external_resolver_path, '.', 1)
+        try:
+            module = __import__( module_name, globals(), locals(), [from_list])
+            ext_resolver = getattr( module, from_list )
+            if isinstance(ext_resolver, types.ClassType):
+                self.ext_resolver = ext_resolver()
+            elif isinstance( ext_resolver, types.FunctionType):
+                self.ext_resolver = ext_resolver
+
+            if self.ext_resolver:
+                assert callable( self.ext_resolver )                
+        except (ImportError, AttributeError, AssertionError):
+            self.ext_resolver = None
+        
+
     def addResource(self, descriptor):
 
         for descriptor in descriptor.getDescriptors():
@@ -109,7 +129,10 @@ class URIResolver:
         if not relative_url.startswith('/'):
             relative_url = '/'+relative_url
         del self.uris[relative_url]
-        
+        for alias in descriptor.getAliases():
+            alias_url = normalize( relative_url + '/' + alias, '/')
+            if self.uris.has_key(alias_url):
+                del self.uris[ alias_url ]
         
     def _addResource(self, descriptor):
 
@@ -299,7 +322,10 @@ class URIResolver:
             total_count += 1            
             nu = self.resolveURI(u, content_url, content_folderish_p, content=descriptor.getContent())
             
-            if nu is _marker:            
+            if nu is _marker and self.ext_resolver is not None:
+                nu = self.ext_resolver( u, content_url, content_folderish_p, _marker, descriptor )
+                
+            if nu is _marker:
                 log.warning('unknown url (%s) from %s'%(u, content_url))
                 nu = self.link_error_url
                 
@@ -322,11 +348,20 @@ class URIResolver:
     def __getitem__(self, key):
         return self.uris[key]
 
-    security.declarePrivate('pprint')
     def pprint(self):
         pprint.pprint(dict(self.uris.items()))
             
-        
+
+def rsplit( value, sep, max=0):
+    if max == 0:
+        return value.split(sep)
+    # naive.. could also do rfind, but for small size this is fine
+    res = value.split(sep)
+    if len(res) <= max:
+        return res
+    join_val = sep.join( res[:-max] )
+    res[:-max] = [join_val]
+    return res
 
 def extend_relative_path(path):
     "extend '..' path"
