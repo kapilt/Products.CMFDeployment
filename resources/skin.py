@@ -111,9 +111,7 @@ class SiteSkinResourceRule( SiteBaseResource ):
         re.compile(self.view_path)
         
         if RESPONSE is not None:
-            container = self.getParentNode()
-            return RESPONSE.redirect("%s/manage_main"%container.absolute_url())
-        
+            return RESPONSE.redirect("%s/test_rule_results"%(self.absolute_url()))
     
     security.declarePrivate('getSkinDirectories')
     def getSkinDirectories(self):

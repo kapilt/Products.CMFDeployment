@@ -200,7 +200,7 @@ def fs_file_cooker(self, descriptor, object):
 def file_cooker(self, descriptor, object):
 
     descriptor.setBinary(1)
-    if isinstance(object.data, types.StringType):
+    if isinstance(object.data, str):
         data = object.data
     else:
         data = str(object.data)
@@ -236,6 +236,11 @@ def cook(self, descriptor):
     try:
         render(self, descriptor, object)
     except:
+##         import sys, pdb, traceback
+##         ec, e, tb = sys.exc_info()
+##         print ec, e
+##         traceback.print_tb( tb )
+##         pdb.post_mortem( tb )
         log.warning("error while render skin object %s"%str(object.getPhysicalPath()))
         descriptor.setGhost(1)
 
