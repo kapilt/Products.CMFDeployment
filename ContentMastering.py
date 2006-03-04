@@ -31,8 +31,9 @@ $Id$
 from Namespace import *
 
 from DeploymentExceptions import InvalidSkinName
-from MimeMapping import MimeMappingContainer
+from Descriptor import DescriptorFactory
 from ExpressionContainer import getDeployExprContext
+from MimeMapping import MimeMappingContainer
 from utils import file2string, is_baseunit
 
 from Log import LogFactory
@@ -114,6 +115,18 @@ class ContentMastering(Folder):
         self._setObject('site_skin', ob)
 
     #################################
+
+    def prepareContent(self, content):
+        """
+        attempt to prepare a content object, for testing purposes
+        """
+
+        factory = DescriptorFactory( self )
+        descriptor = factory( content )
+        self.prepare( descriptor )
+
+        return descriptor.rule_id or "Not Deployed"
+        
     def prepare(self, descriptor):
         """
         prepare a descriptor for deployment by finding and applying a
@@ -191,6 +204,12 @@ class ContentMastering(Folder):
             else:
                 descriptor.setRendered(render())
         except:
+##             import sys, pdb, traceback
+##             ec, e, tb = sys.exc_info()
+##             print ec, e
+##             traceback.print_tb( tb )
+##             pdb.post_mortem( tb )   
+            
             log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
             descriptor.setGhost(1) # ghostify it        
             #raise
