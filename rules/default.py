@@ -17,6 +17,7 @@ addContentRuleForm = DTMLFile('../ui/MimeExtensionMappingAddForm', globals())
 
 def addContentRule(self, id, extension_expression, condition, view_method, ghost=0, RESPONSE=None):
     """ add content rule """
+
     mapping = MimeExtensionMapping(id=id,
                                    extension_expression=extension_expression,
                                    condition=condition,
@@ -242,7 +243,7 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
               'ext_expr':self.extension_text,
               'filter_expr':self.condition_text,
               'product':'CMFDeployment',
-              'factory':'addMimeMapping' }
+              'factory':'addContentRule' }
              
         return xml_export_template%d
              

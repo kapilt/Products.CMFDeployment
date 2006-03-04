@@ -62,13 +62,10 @@ class MetaReader(ContentHandler):
         
     def startElement(self, element_name, attrs):
         name = element_name.lower()
+
         if self.prefix: name = '%s%s'%(self.prefix, name.capitalize())      
-
-
         method = getattr(self, 'start%s'%name.capitalize(), None)
 
-        if self.prefix == 'Resources':
-            print element_name, method, 'start%s'%name.capitalize(), attrs
         # get rid of unicode
         d = {}
         for k, v in attrs.items():
@@ -230,9 +227,12 @@ DEFAULTS = {
 def remap_default_rule_factory( m ):
     delk = []
     for key, factory_key in DEFAULT_RULE_FACTORY_MAP.items():
+        if factory_key in m:
+            continue
         value = m.get(key, '')
         m[factory_key] = value
-        delk.append(key)
+        if key in m:
+            delk.append(key)
 
     for dk in delk:
         if dk in m:
@@ -289,7 +289,7 @@ def make_policy(portal, policy_node, id=None, title=None):
         #import pprint
         #print 'ee', product, factory
         #pprint.pprint(dict(m.items()))
-        
+
         if (product, factory) in REMAP_TYPES:
             #print 'remapped'
             m.setdefault('ghost',0)

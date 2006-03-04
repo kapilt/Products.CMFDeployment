@@ -47,20 +47,17 @@
 </dtml-with>  
   
  <dtml-with getContentMastering>
+
   <dtml-if "site_user.userid and site_user.udb_path">
    <chain_user user="<dtml-var "site_user.userid">"  udb_path="<dtml-var "site_user.udb_path">"/>
   </dtml-if>
   
   <mastering skin="<dtml-var "site_skin.skin_name">">
-
-    <!-- executed in order and order is important -->
-
     <dtml-in "mime.objectValues()">
       <dtml-with sequence-item>
 	 <dtml-var toXml>
       </dtml-with>
     </dtml-in>
-
   </mastering>
   
  </dtml-with>

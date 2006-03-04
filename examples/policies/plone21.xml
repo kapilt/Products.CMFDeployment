@@ -16,14 +16,6 @@
 
   <strategy id="default" />
 
-  <skins>
-
-    <directory view_path="/plone_images"
-               deploy_path="/images"
-               source_path="/" />
-
-  </skins>
-
   <registries>
 
     <registry view_path="/portal_css"
@@ -35,6 +27,15 @@
                source_path="/portal_javascripts" />
    
   </registries>
+
+  <resources>
+    <resource id="image_extractor" 
+	      product="CMFDeployment" 
+	      factory="addSkinResourceRule" 
+	      view_path=".*(?:png|gif|jpg)" 
+	      deployment_path="/images" 
+	      source_path="/"/>
+  </resources>
 
   <organization cmf_mount="/" 
 		fs_mount="*/examples/static/plone_2_1">
