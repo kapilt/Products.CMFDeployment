@@ -101,13 +101,15 @@ class ResourceRegistryRule( SiteBaseResource ):
         return d
     
     security.declarePrivate('getDescriptors')
-    def getDescriptors(self):
+    def getDescriptors(self, since_time=None):
         """
         Get the content descriptors for the registry.
 
         We explicitly setup descripitors with their content
         paths since we're remapping. the default content path
         is based on physical path relative to the deployment root.
+
+        since_time ignored
         """
         res = []
 

@@ -28,7 +28,7 @@ from base import SiteBaseResource
 from Products.CMFDeployment.Log import LogFactory
 from Products.CMFDeployment.Descriptor import ContentDescriptor
 from Products.CMFDeployment.URIResolver import clstrip, extend_relative_path
-
+from Products.CMFCore.FSObject import FSObject
 from Products.CMFDeployment.DeploymentExceptions import InvalidDirectoryView
 
 log = LogFactory('Directory Views')
@@ -83,7 +83,7 @@ class DirectoryViewRule( SiteBaseResource ):
     #################################
     # Begin SiteResource Interface Impl
 
-    def getDescriptors(self):
+    def getDescriptors(self, since_time):
 
         res = []
         
@@ -100,8 +100,20 @@ class DirectoryViewRule( SiteBaseResource ):
         # get rid of trailing and leading slashes and join to base path
         source_path = extend_relative_path(clstrip('/'.join( (vhost_path, base_path, '/'.join(filter(None, source_path.split('/'))))), '/'))
         deploy_path = '/'.join(filter(None, deploy_path.split('/')))
+
+        if since_time is not None:
+            since_ticks = since_time.timeTime()
+            def time_filter( dvo ):
+                if isinstance( dvo, FSObject):
+                    return since_ticks < dvo._file_mod_time 
+                else:
+                    return since_time < dvo.bobobase_modification_time()
+        else:
+            def time_filter( dvo ): return True
         
         for c in content:
+            if not time_filter(c):
+                continue
             d = ContentDescriptor(c)
             d.setContentPath(deploy_path)
             d.setFileName(c.getId())

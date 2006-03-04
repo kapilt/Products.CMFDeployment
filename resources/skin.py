@@ -28,6 +28,7 @@ from Products.CMFDeployment.Namespace import *
 from Products.CMFDeployment.Log import LogFactory
 from Products.CMFDeployment.URIResolver import clstrip, extend_relative_path
 from Products.CMFDeployment.Descriptor import ContentDescriptor
+from Products.CMFCore.FSObject import FSObject
 
 from base import SiteBaseResource
 from directoryview import cook
@@ -139,7 +140,7 @@ class SiteSkinResourceRule( SiteBaseResource ):
         return res
 
     security.declarePrivate('getDescriptors')
-    def getDescriptors(self):
+    def getDescriptors(self, since_time):
         
         mp = self.getDeploymentPolicy().getContentOrganization().getActiveStructure().getCMFMountPoint()
         
@@ -157,9 +158,21 @@ class SiteSkinResourceRule( SiteBaseResource ):
         deploy_path = '/'.join(filter(None, deploy_path.split('/')))
         
         container_map = ContainerMap( directories )
+        since_ticks = since_time.timeTime()
+
+        if since_time is not None:
+            def time_filter( dvo ):
+                if isinstance( dvo, FSObject):
+                    return since_ticks < dvo._file_mod_time 
+                else:
+                    return since_time < dvo.bobobase_modification_time()
+        else:
+            def time_filter( dvo ): return True                
 
         res = []
         for c in container_map.match( self.view_path ):
+            if not time_filter( c ):
+                continue
             d = ContentDescriptor(c)
             d.setContentPath(deploy_path)
             d.setFileName(c.getId())

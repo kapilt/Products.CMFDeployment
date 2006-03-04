@@ -31,6 +31,7 @@ from base import SiteBaseResource
 from Products.CMFDeployment.Descriptor import ContentDescriptor
 from Products.CMFDeployment.URIResolver import clstrip, extend_relative_path
 
+from directoryview import cook
 
 addResourceTemplateRuleForm = DTMLFile('../ui/ResourceTemplateAddForm', globals())
 
@@ -71,7 +72,12 @@ class ResourceTemplateRule( SiteBaseResource ):
             container = self.getParentNode()
             return RESPONSE.redirect("%s/manage_main"%container.absolute_url())
         
-    def getDescriptors(self):
+    def getDescriptors(self, since_time=None):
+        """
+        return the descriptor corresponding to this template resource
+        
+        since_time ignored
+        """
 
         portal = self.portal_url.getPortalObject()
         view_path = self.view_path
@@ -79,7 +85,7 @@ class ResourceTemplateRule( SiteBaseResource ):
             view_path = view_path[1:]
         
         ob = portal.restrictedTraverse( view_path )
-
+        
 
         source_path, deploy_path = self.source_path, self.deployment_path 
         uris = self.getDeploymentPolicy().getDeploymentURIs()
@@ -102,8 +108,11 @@ class ResourceTemplateRule( SiteBaseResource ):
         d = ContentDescriptor( ob )
         d.setContentPath(content_path)
         d.setFileName( file_name )
-        d.setSourcePath( view_path )
+        d.setSourcePath( source_path )
         d.setRenderMethod('')        
         d.rule_id = self.getId()
 
         return [d]
+
+    def cook(self, descriptor):
+        return cook( self, descriptor )

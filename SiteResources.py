@@ -68,7 +68,7 @@ class SiteResources(OrderedFolder):
         return OrderedFolder.all_meta_types(self, interfaces=self._product_interfaces)        
 
     security.declarePrivate('getContent')
-    def getContent(self):
+    def getContent(self, since_time=None):
         """
         Get the content descriptors for the directory views.
 
@@ -78,10 +78,10 @@ class SiteResources(OrderedFolder):
         """
 
         for resource in self.objectValues():
-            for descriptor in resource.getDescriptors():
+            for descriptor in resource.getDescriptors( since_time ):
                 yield descriptor
 
-    security.declarePrivate('cookViewObject')
+    security.declarePrivate('cook')
     def cook(self, descriptor):
         assert descriptor.rule_id
         rule = self._getOb( descriptor.rule_id )
