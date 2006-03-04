@@ -73,9 +73,10 @@ class DirectoryViewRule( SiteBaseResource ):
     meta_type = "Directory View Rule"
     security = ClassSecurityInfo()
 
-    icon_path = 'folder_icon.gif'
+
     xml_factory = "addDirectoryViewRule"
-    
+
+    icon_path = 'folder_icon.gif'    
     # zmi icon
     def icon(self):
         return getToolByName(self, 'portal_url')(relative=1)+'/'+self.icon_path

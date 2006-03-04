@@ -45,6 +45,13 @@ class BaseRule( SimpleItem ):
 
     meta_type = "Base Rule"
 
+    icon_path = "linkTransparent.gif"
+
+    # zmi icon
+    def icon(self):
+        return getToolByName(self, 'portal_url')(relative=1)+'/'+self.icon_path
+
+
 def addChildView(self, id, extension_expression, view_method, binary=False, RESPONSE=None):
     """
     add child view
@@ -122,6 +129,7 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
         )
 
     aliases = ()
+    icon = BaseRule.icon
 
     def __init__(self, id, extension_expression, condition, view_method, ghost, aliases):
         self.id = id

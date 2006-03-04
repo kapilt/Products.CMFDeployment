@@ -34,6 +34,8 @@ class PortalCatalogSource(BaseSource):
         )
 
     xml_factory = 'addPortalCatalogSource'
+
+    icon_path = "book_icon.gif"
     
     source = DTMLFile('../ui/ContentSourceView', globals())
 
@@ -73,6 +75,8 @@ class IncrementalCatalogSource(BaseSource):
         )
 
     xml_factory = 'addIncrementalCatalogSource'
+
+    icon_path = "book_icon.gif"
     
     source = DTMLFile('../ui/ContentSourceView', globals())
 

@@ -27,6 +27,7 @@ $Id$
 """
 
 from Products.CMFDeployment.utils import SerializablePlugin
+from Products.CMFDeployment.Namespace import getToolByName
 
 source_template = """\
  <source id="%(id)s"
@@ -41,3 +42,9 @@ class BaseSource( SerializablePlugin ):
     xml_template = source_template
     xml_factory  = ""
 
+    icon_path = 'folder_icon.gif'
+
+    # zmi icon
+    def icon(self):
+        return getToolByName(self, 'portal_url')(relative=1)+'/'+self.icon_path
+    

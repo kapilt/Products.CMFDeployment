@@ -151,7 +151,7 @@ class TransformRulesContainer(ExpressionContainer):
          'action':'../../overview'}
         )
 
-    addRuleForm = DTMLFile('ui/ContentTransformRuleAddForm', globals())
+    addRuleForm = DTMLFile('ui/ContentTransformAddForm', globals())
 
     all_meta_types = (
         {'name':ContentTransformRule.meta_type,

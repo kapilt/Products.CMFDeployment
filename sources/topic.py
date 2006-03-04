@@ -1,7 +1,5 @@
 """
-Topic Sources are containers for zmi topics, any number of zmi topics can
-be included in a topic source, the results from each topic are utilized
-as the values from this source.
+Topic Sources are zmi topics, aka canned catalog queries.
 
 $Id$
 """
@@ -30,23 +28,21 @@ def addTopicSource( self,
 
 addTopicSourceForm = DTMLFile('../ui/SourceTopicForm', globals())
 
-class TopicSource( Folder, BaseSource ):
+class TopicSource( ZMITopic, BaseSource ):
 
     meta_type = "Topic Content Source"
 
     xml_factory = 'addTopicSource'
+
+    icon_path = "topic_icon.gif"
+    icon = BaseSource.icon
     
     __implements__ = IContentSource
-
-    def all_meta_types(self):
-        import Products
-        return [m for m in Products.meta_types if m['name']=='ZMI Topic']
 
     def __init__(self, id, title=''):
         self.id = id
         self.title = title
 
     def getContent(self):
-        for topic in self.objectValues():
-            for res in topic.queryCatalog():
-                yield res
+        for res in self.queryCatalog():
+            yield res
