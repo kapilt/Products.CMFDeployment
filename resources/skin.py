@@ -26,6 +26,8 @@ $Id$
 import re
 from Products.CMFDeployment.Namespace import *
 from Products.CMFDeployment.Log import LogFactory
+from Products.CMFDeployment.URIResolver import clstrip, extend_relative_path
+from Products.CMFDeployment.Descriptor import ContentDescriptor
 
 from base import SiteBaseResource
 from directoryview import cook
@@ -71,7 +73,7 @@ class ContainerMap( object ):
 
     def match(self, pattern):
         regex = re.compile(pattern)
-        return [ self.containers[ self._object_map[ oid ]] \
+        return [ self.containers[ self._object_map[ oid ]]._getOb( oid ) \
                  for oid in self._object_map.keys() \
                  if regex.match( oid ) is not None ]
 
@@ -97,6 +99,21 @@ class SiteSkinResourceRule( SiteBaseResource ):
                 {'label':'Test',
                  'action':'test_rule_results'},
                 )
+
+    def edit(self, view_path, source_path, deployment_path, RESPONSE=None):
+        """
+        edit
+        """
+        
+        SiteBaseResource.edit( self, view_path, source_path, deployment_path)
+        
+        # test the regex for compilation validity
+        re.compile(self.view_path)
+        
+        if RESPONSE is not None:
+            container = self.getParentNode()
+            return RESPONSE.redirect("%s/manage_main"%container.absolute_url())
+        
     
     security.declarePrivate('getSkinDirectories')
     def getSkinDirectories(self):
