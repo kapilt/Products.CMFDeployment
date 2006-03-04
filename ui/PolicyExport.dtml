@@ -20,29 +20,13 @@
   </identification>
 
 
-  <skins>
-    <dtml-in "getContentDirectoryViews().objectValues()">
+  <resources>
+    <dtml-in "getSiteResources().objectValues()">
      <dtml-with sequence-item>
-      <directory id="<dtml-var id>"
-	         view_path="<dtml-var view_path>"
-                 deploy_path="<dtml-var deployment_path>"
-                 source_path="<dtml-var source_path>" />
+       <dtml-var toXml>
      </dtml-with>
     </dtml-in>
-  </skins>
-
-  <dtml-if "getContentRegistries()">
-  <registries>
-    <dtml-in "getContentRegistries().objectValues()">
-     <dtml-with sequence-item>
-      <registry id="<dtml-var id>"
-	         view_path="<dtml-var view_path>"
-                 deploy_path="<dtml-var deployment_path>"
-                 source_path="<dtml-var source_path>" />
-     </dtml-with>
-    </dtml-in>
-  </registries>
-  </dtml-if>
+  </resources>
 
  <dtml-with "getContentOrganization().structure">
  
@@ -53,7 +37,11 @@
     <dtml-in "restricted">
       <restricted id="<dtml-var sequence-item>" />
     </dtml-in>
-    
+
+    <dtml-in composite_doc_types>
+      <composite type="<dtml-var sequence-item>" />
+    </dtml-in>
+
   </organization>
   
 </dtml-with>  

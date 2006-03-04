@@ -2,7 +2,7 @@
 
 <dtml-var manage_tabs>
 
-<h2> Mastering; User </h2>
+<h2> Mastering: User </h2>
 
 <p> The user chosen here is used *throughout* the deployment process,
     so catalog searches for content will be implictly filtered by this

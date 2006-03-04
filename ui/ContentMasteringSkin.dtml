@@ -3,7 +3,7 @@
 <dtml-var manage_tabs>
 
 <dtml-let current_skin="_.getattr(this().site_skin, 'skin_name', 'None')">
-<h2> Mastering: Skin, </h2>
+<h2> Mastering: Skin </h2>
 
 <p> The Skin chosen here is used to when 'cooking' the content for deployment. </p>
 

@@ -27,7 +27,7 @@ Created: 8/10/2002
 $Id$
 """
 
-from Interface import Base as Interface
+from Interface import Interface, Attribute
 
 class ICredentials(Interface):
 
@@ -192,4 +192,45 @@ class IContentStorage(Interface):
 
     def store(self, descriptor):
         """
+        """
+
+
+
+class ISiteResource( Interface ):
+    """
+    global site resource
+    """
+    view_path = Attribute("")
+    source_path = Attribute("")
+    deployment_path = Attribute("")
+
+    def edit( view_path, source_path, deployment_path ):
+        """
+        edit the resource
+        """
+
+    def getDescriptors( modified_since=None ):
+        """
+        return sequence of descriptors for the resource
+        """
+
+    def conflicts( container ):
+        """
+        boolean - does this resource conflict with other resources in the container?
+        
+        """
+
+    def isValid( container ):
+        """
+        boolean - is the resource as configured valid?
+        """
+
+    def cook( descriptor ):
+        """
+        render the descriptor
+        """
+
+    def toXml():
+        """
+        return an xml description of the object
         """

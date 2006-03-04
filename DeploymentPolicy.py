@@ -54,10 +54,8 @@ class DeploymentPolicy(Folder):
         {'label':'Organization',
          'action':'%s/manage_workspace'%DefaultConfiguration.ContentOrganization},
 
-        {'label':'Skins',
-         'action':'%s/manage_workspace'%DefaultConfiguration.ContentDirectoryViews},
-        {'label':'Registries',
-         'action':'%s/manage_workspace'%DefaultConfiguration.ContentRegistries},
+        {'label':'Resources',
+         'action':'%s/manage_workspace'%DefaultConfiguration.SiteResources},
 
         {'label':'URIs',
          'action':'%s/manage_workspace'%DefaultConfiguration.ContentURIs},
@@ -104,18 +102,14 @@ class DeploymentPolicy(Folder):
     def getContentDeployment(self):
         return self._getOb(DefaultConfiguration.ContentDeployment)
 
-    def getContentDirectoryViews(self):
-        return self._getOb(DefaultConfiguration.ContentDirectoryViews)
-
-    def getContentRegistries(self):
-        # registries only installed in plone 2.1
-        return self._getOb(DefaultConfiguration.ContentRegistries, None)
-
     def getContentTransforms(self):
         return self._getOb(DefaultConfiguration.ContentTransforms)
 
     def getContentSources( self ):
         return self.getContentIdentification().sources
+
+    def getSiteResources( self ):
+        return self._getOb(DefaultConfiguration.SiteResources)
 
     def getContentRules( self ):
         return self.getContentMastering().mime

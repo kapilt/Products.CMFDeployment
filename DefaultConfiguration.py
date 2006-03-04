@@ -34,8 +34,7 @@ ContentIdentification = 'ContentIdentification'
 ContentOrganization   = 'ContentOrganization'
 ContentMastering      = 'ContentMastering'
 ContentDeployment     = 'ContentDeployment'
-ContentDirectoryViews = 'ContentDirectoryViews'
-ContentRegistries     = 'ContentRegistries'
+SiteResources         = 'SiteResources'
 ContentURIs           = 'ContentURIs'
 DeploymentHistory     = 'DeploymentHistory'
 
@@ -44,7 +43,7 @@ DependencySource      = 'dependency_source'
 
 ContentTransforms     = 'transforms'
 
-DEPLOYMENT_DEBUG      = False
+DEPLOYMENT_DEBUG      = True
 
 DEFAULT_CONTENT_SOURCE_ID = "portal_catalog_source"
 
@@ -53,10 +52,9 @@ from ContentIdentification import ContentIdentification as KlassContentIdentific
 from ContentMastering import ContentMastering as KlassContentMastering
 from ContentDeployment import ContentDeployment as KlassContentDeployment
 from DeploymentHistory import DeploymentHistoryContainer as KlassDeploymentHistory
-from ContentDirectoryViews import ContentDirectoryView as KlassContentDirectoryView
-from ContentRegistries import ContentRegistry as KlassContentRegistry
 from ContentURI import ContentURI as KlassContentURI
 from ContentTransforms import ContentTransforms as KlassContentTransforms
+from SiteResources import SiteResources as KlassSiteResources
 
 def add_structure(policy):
 
@@ -78,19 +76,10 @@ def add_deployment(policy):
     ob = KlassContentDeployment(ContentDeployment)
     policy._setObject(ContentDeployment, ob)
 
-def add_view(policy):
-    
-    ob = KlassContentDirectoryView(ContentDirectoryViews)
-    policy._setObject(ContentDirectoryViews, ob)
+def add_resource(policy):
 
-def add_registry(policy):
-    try: # conditionally add this based on presence of plone 2.1 registries
-        policy.portal_css
-    except AttributeError:
-        return
-    
-    ob = KlassContentRegistry(ContentRegistries)
-    policy._setObject(ContentRegistries, ob)
+    ob = KlassSiteResources( SiteResources )
+    policy._setObject( SiteResources, ob )
 
 def add_history(policy):
 
@@ -112,10 +101,9 @@ _add_funcs = [
     ( ContentIdentification, add_identification ),
     ( ContentMastering, add_mastering ),
     ( ContentDeployment, add_deployment ),
-    ( ContentDirectoryViews, add_view ),
-    ( ContentRegistries, add_registry ),
     ( DeploymentHistory, add_history ),
     ( ContentURIs, add_uris ),
+    ( SiteResources, add_resource ),
     ( ContentTransforms, add_filter ),
     ]
 

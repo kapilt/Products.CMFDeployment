@@ -31,6 +31,7 @@ import DeploymentTool
 import utils
 from Globals import package_home
 from Products.CMFCore.utils import ToolInit
+from Products.CMFCore import CMFCorePermissions
 from Products.CMFCore.DirectoryView import registerDirectory
 
 tools = (DeploymentTool.DeploymentTool,)
@@ -43,6 +44,7 @@ import ContentIdentification
 import Descriptor
 import MimeMapping
 
+import resources
 import rules
 import transports
 import sources
@@ -67,7 +69,9 @@ def initialize(context):
     utils.registerIcon('policy.png')
     utils.registerIcon('identify.png')
     utils.registerIcon('protocol.png')     
-
+    utils.registerIcon('resource_directory_view.gif')
+    utils.registerIcon('resource_registry.gif')    
+    
     # register default plugin components
     rsync = transports.rsync
     context.registerClass(
@@ -93,6 +97,33 @@ def initialize(context):
         permission = 'CMFDeploy: Add Content Rule',
         constructors = ( crule.addContentRuleForm,
                          crule.addContentRule ),
+        visibility = None
+        )
+
+    dview = resources.directoryview
+    context.registerClass(
+        dview.DirectoryViewRule,
+        permission = CMFCorePermissions.ManagePortal,
+        constructors = ( dview.addDirectoryViewRuleForm,
+                         dview.addDirectoryViewRule ),
+        visibility = None
+        )
+
+    registry = resources.registry
+    context.registerClass(
+        registry.ResourceRegistryRule,
+        permission = CMFCorePermissions.ManagePortal,
+        constructors = ( registry.addResourceRegistryRuleForm,
+                         registry.addResourceRegistryRule ),
+        visibility = None
+        )
+
+    rskin = resources.skin
+    context.registerClass(
+        rskin.SiteSkinResourceRule,
+        permission = CMFCorePermissions.ManagePortal,
+        constructors = ( rskin.addSkinResourceRuleForm,
+                         rskin.addSkinResourceRule ),
         visibility = None
         )
 

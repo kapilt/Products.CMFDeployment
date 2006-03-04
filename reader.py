@@ -63,8 +63,12 @@ class MetaReader(ContentHandler):
     def startElement(self, element_name, attrs):
         name = element_name.lower()
         if self.prefix: name = '%s%s'%(self.prefix, name.capitalize())      
+
+
         method = getattr(self, 'start%s'%name.capitalize(), None)
 
+        if self.prefix == 'Resources':
+            print element_name, method, 'start%s'%name.capitalize(), attrs
         # get rid of unicode
         d = {}
         for k, v in attrs.items():
@@ -157,6 +161,20 @@ class PolicyReader(MetaReader):
 	dirs.append(sd)
 
     def endSkinsskins(self,attrs):
+	self.prefix=''
+
+    def startResources(self, attrs):
+        resources = PolicyNode( attrs )
+	self.policy.resources = resources
+	self.prefix='Resources'
+        self.policy.resources.setdefault('resources',[])        
+
+    def startResourcesresource(self, attrs):
+	resources = self.policy.resources.setdefault('resources', [])
+	resource = PolicyNode(attrs)
+	resources.append(resource)
+
+    def endResourcesresources(self,attrs):
 	self.prefix=''
 
     def startRegistries(self, attrs):
@@ -324,34 +342,41 @@ def make_policy(portal, policy_node, id=None, title=None):
                                 vhost_path=policy_node.uris.vhost_path,
                                 link_error_url=policy_node.uris.link_errors
                                 )
- 
-    ## skins setup
-    directory_views = getattr(policy, DefaultConfiguration.ContentDirectoryViews)
 
-    for sd in policy_node.skins.directories:
-        id = sd.get('id', sd.view_path.replace('/',''))
-	directory_views.addDirectoryViewRule(
-                                id,
-				sd.view_path, 
-				sd.source_path, 
-				sd.deploy_path
-				)
-    ## registries setup
-    registries = getattr(policy, DefaultConfiguration.ContentRegistries, None)
-    try:
-        registries_node = policy_node.registries.registries
-    except KeyError:
-        registries_node = None
-    if registries_node is not None and registries is not None:
+    #################################
+    # Site Resources setup
+
+    # backwards compat skin directory
+    resources = getattr( policy, DefaultConfiguration.SiteResources )
+
+    if hasattr( policy_node, 'skins') and hasattr( policy_node.skins, 'directories'):
+        for sd in policy_node.skins.directories:
+            id = sd.get('id', sd.view_path.replace('/',''))
+            resources.manage_addProduct['CMFDeployment'].addDirectoryViewRule(
+                id,
+                sd.view_path, 
+                sd.source_path, 
+                sd.deploy_path
+                )
+            
+    ## backwards compat registry rule
+    if hasattr( policy_node, 'registries') and hasattr( policy_node.registries, 'registries'):
         for reg in registries_node:
-            id = "reg_" + reg.get('id', reg.view_path.replace('/',''))
-            registries.addRegistryRule(
-                                id,
-				reg.view_path, 
-				reg.source_path, 
-				reg.deploy_path
-				)
+            id = reg.get('id', reg.view_path.replace('/',''))
+            if not id.startswith('reg_'):
+                id = "reg_" + id
+            resources.manage_addProduct['CMFDeployment'].addResourceRegistryRule(
+                id,
+                reg.view_path, 
+                reg.source_path, 
+                reg.deploy_path
+                )
 
+    # new style resource specification
+    if hasattr(policy_node, 'resources') and hasattr(policy_node.resources, 'resources'):
+        for resource_node in policy_node.resources.resources:
+            factory, md = getFactory( resources, resource_node )
+            factory( **md )
   
     # strategy setup - XXX convert to pipeline id
 #    strategies = getattr(policy, DefaultConfiguration.DeploymentStrategy)

@@ -28,8 +28,48 @@ $Id$
 """
 
 
+import inspect, sys
 from Acquisition import aq_base
+from OFS.SimpleItem import SimpleItem
 import OFS, App
+
+
+class SerializablePlugin( SimpleItem ):
+
+    meta_type = 'Serializable Plugin'
+    xml_template = None
+    xml_factory  = None
+
+    def toXml(self):
+        data = self.getInfoForXml()
+        if data is None:
+            return ''
+        return self.xml_template%( data )
+    
+    def getInfoForXml(self):
+        """
+        get a dictionary of info for xml formatting
+        """
+        # do a basic xml export for stateless sources
+        assert self.xml_template, self.xml_factory
+        
+        # stateful sources should override
+        module = inspect.getmodule( self.__class__ )
+        parts = module.__name__.split('.')
+        
+        if 'Products' not in parts:
+            return
+
+        idx = parts.index('Products')
+        product = ".".join(parts[idx+1:idx+2])
+        
+        d = { 'id': self.id,
+              'title': self.title_or_id(),
+              'product': product,
+              'factory': self.xml_factory }
+
+        return d
+
 
 def registerIcon(filename):
     """

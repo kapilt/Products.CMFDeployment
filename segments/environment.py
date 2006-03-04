@@ -63,11 +63,8 @@ class PipeEnvironmentInitializer( PipeSegment ):
         deployer   = ctxobj.getContentDeployment()
         addService("ContentTransports", deployer)
         
-        views      = ctxobj.getContentDirectoryViews()
-        addService("ContentDirectoryViews", views)
-
-        registries = ctxobj.getContentRegistries()
-        addService("ContentRegistries", registries)
+        resources = ctxobj.getSiteResources()
+        addService("SiteResources", resources)
 
         resolver   = ctxobj.getDeploymentURIs()
         addService("ContentResolver", resolver )

@@ -38,12 +38,15 @@ import os, sys, time, shutil, commands
 if __name__ == '__main__':
     execfile(os.path.join(sys.path[0], 'framework.py'))
 from Testing import ZopeTestCase
-from Products.CMFPlone.tests.PloneTestCase import PloneTestCase
+
 ZopeTestCase.installProduct('CMFDeployment')
 ZopeTestCase.installProduct('MimetypesRegistry')
 ZopeTestCase.installProduct('PortalTransforms')
 ZopeTestCase.installProduct('Archetypes')
 ZopeTestCase.installProduct('ATContentRule')
+ZopeTestCase.installProduct('kupu')
+
+from Products.CMFPlone.tests.PloneTestCase import PloneTestCase
 
 import unittest
 from StringIO import StringIO

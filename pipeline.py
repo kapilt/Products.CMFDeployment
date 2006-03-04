@@ -8,7 +8,6 @@ from segments.core import PolicyPipeline, PipeExecutor
 
 from Namespace import getToolByName
 import DefaultConfiguration
-from ContentRegistries import HAS_REGISTRY
 
 class PipelineFactory( object ):
 
@@ -50,8 +49,7 @@ class IncrementalPipelineFactory( PipelineFactory ):
         deletion_pipeline  = self.constructDeletionPipeline()
         processor_pipeline = self.constructContentProcessorPipeline()
         storage_pipeline   = self.constructContentStoragePipeline()
-        dv_pipeline = self.constructDirectoryViewPipeline()
-        reg_pipeline = self.constructRegistryPipeline()
+        resource_pipeline  = self.constructResourcePipeline()
 
         steps = (
            segments.environment.PipeEnvironmentInitializer(),
@@ -60,10 +58,7 @@ class IncrementalPipelineFactory( PipelineFactory ):
            deletion_pipeline,
            segments.user.UserLock(),
            processor_pipeline,
-           dv_pipeline)
-        if HAS_REGISTRY:
-           steps += (reg_pipeline,)
-        steps += (
+           resource_pipeline,
            storage_pipeline,
            segments.user.UserUnlock(),
            segments.skin.SkinUnlock(),
@@ -152,11 +147,14 @@ class IncrementalPipelineFactory( PipelineFactory ):
                 )
             )
 
-    def constructDirectoryViewPipeline( self ):
-        return segments.directoryview.DirectoryViewDeploy( incremental=True)
+    def constructResourcePipeline(self):
+        return segments.resource.SiteResourceDeploy( incremental=True )
 
-    def constructRegistryPipeline( self ):
-        return segments.registry.RegistryDeploy( incremental=True)
+##     def constructDirectoryViewPipeline( self ):
+##         return segments.directoryview.DirectoryViewDeploy( incremental=True)
+
+##     def constructRegistryPipeline( self ):
+##         return segments.registry.RegistryDeploy( incremental=True)
 
 
 class PipelineDatabase( object ):
