@@ -73,9 +73,12 @@ class DirectoryViewRule( SiteBaseResource ):
     meta_type = "Directory View Rule"
     security = ClassSecurityInfo()
 
-    icon = 'misc_/CMFDeployment/resource_directory_view.gif'
-
+    icon_path = 'folder_icon.gif'
     xml_factory = "addDirectoryViewRule"
+    
+    # zmi icon
+    def icon(self):
+        return getToolByName(self, 'portal_url')(relative=1)+'/'+self.icon_path
     
     #################################
     # Begin SiteResource Interface Impl
@@ -236,11 +239,6 @@ def cook(self, descriptor):
     try:
         render(self, descriptor, object)
     except:
-##         import sys, pdb, traceback
-##         ec, e, tb = sys.exc_info()
-##         print ec, e
-##         traceback.print_tb( tb )
-##         pdb.post_mortem( tb )
         log.warning("error while render skin object %s"%str(object.getPhysicalPath()))
         descriptor.setGhost(1)
 

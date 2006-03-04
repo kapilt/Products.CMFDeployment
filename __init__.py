@@ -127,6 +127,16 @@ def initialize(context):
         visibility = None
         )
 
+    template = resources.template
+    context.registerClass(
+        template.ResourceTemplateRule,
+        permission = CMFCorePermissions.ManagePortal,
+        constructors = ( template.addResourceTemplateRuleForm,
+                         template.addResourceTemplateRule ),
+        visibility = None
+        )
+
+
     catalog = sources.catalog
     context.registerClass(
         catalog.PortalCatalogSource,

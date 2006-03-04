@@ -95,6 +95,8 @@ class SiteSkinResourceRule( SiteBaseResource ):
 
     test_rule_results = DTMLFile('../ui/ResourceSkinTest', globals() )
 
+    icon = 'misc_/CMFDeployment/resource_directory_view.gif'
+    
     manage_options = SiteBaseResource.manage_options + (
                 {'label':'Test',
                  'action':'test_rule_results'},
