@@ -11,15 +11,56 @@
 
 <table>
 
-<tr><td>Target URL Path</td>
-    <td><input type="text" name="target_path" value="<dtml-var target_path>"></td>
+<tr><td><div class="form-label">Use Relative Resolution</td>
+    <td><select name="relative_target_resolution:int">
+	<option <dtml-if "not _['relative_target_resolution']">selected</dtml-if> 
+	        value="0">No</option>
+        <option <dtml-if relative_target_resolution>selected</dtml-if> 
+	        value="1">Yes</option>
+	</select>
+    </td>
+</tr>
 
-<tr><td>Vhost Path Fix (not needed for most)</td>
-    <td><input type="text" name="vhost_path" value="<dtml-var vhost_path>"></td>
+<tr>
+    <td>
+     <div class="form-label">
+      Target URL Prefix
+     </div>
+    </td>
+    <td>
+       <div class="form-element">
+        <input type="text" name="target_path" value="<dtml-var target_path>" size="60">
+       </div>
+    </td>
+</tr>
 
+<tr>
+    <td>
+     <div class="form-optional">
+     Vhost Path Fix (not needed for most)
+     </div>
+    </td>
+    <td>
+       <div class="form-element">
+           <input type="text" name="vhost_path" value="<dtml-var vhost_path>" size="60">
+     
+       </div>
+    </td>
+</tr>
 
-<tr><td>Linking Error URL</td>
-    <td><input type="text" name="link_error_url" value="<dtml-var link_error_url>"></td>
+<tr>
+    <td>
+     <div class="form-label">
+     Linking Error URL
+     </div>
+    </td>
+    <td>
+     <div class="form-element">
+     <input class="form-element"
+            type="text" name="link_error_url" value="<dtml-var link_error_url>" size="60">
+     </div>
+    </td>
+</tr>
 
 <tr><td colspan="2">
     <input type="submit" value="edit uri settings">

@@ -81,6 +81,7 @@ class URIResolver:
     link_error_url = 'deploy_link_error'
     ext_resolver = None
     external_resolver_path = None
+    relative_target_resolution = False
     
     def __init__(self,
                  id='',
@@ -136,13 +137,17 @@ class URIResolver:
         
     def _addResource(self, descriptor):
 
+        # we use this as the source path, it must be mount point relative
         relative_url = descriptor.getSourcePath() or descriptor.content_url
+        
+        # we use this as part of the target path
         content_path = descriptor.getContentPath()
         
         if relative_url and relative_url[0] != '/':
             relative_url = '/'+relative_url
         
         if content_path is None:
+            # no explicit target path, calculate the target path based on the source
             mlen = len(self.mount_path)
             if not self.mount_path.startswith('/'):
                 mlen += 1
@@ -279,6 +284,32 @@ class URIResolver:
         if not object:
             return _marker
         return  self.uris.get("/"+object.absolute_url(1), _marker)
+
+    def _resolveAsRelative( self, source_url, target_url, content_folderish_p=False ):
+        """
+        
+        source file:///a/b/c/e/foo.html
+        target file:///a/b/d/f/index.html
+        
+        ../../d/f/index.html
+        
+        """
+
+        common_idx = gcd_path( source_url, target_url ) 
+        
+        relative_url_parts = []
+        
+        source_remainder = source_url[ common_idx: ]
+        target_remainder = target_url[ common_idx: ]
+
+        s_parts = source_remainder.split('/')
+        s_parts.pop(-1)
+        
+        for s in s_parts:
+            relative_url_parts.append('../')
+
+        relative_url_parts.append( target_remainder )
+        return "".join( relative_url_parts )
     
     def resolve(self, descriptor):
 
@@ -292,6 +323,9 @@ class URIResolver:
           XXX need to add handling of absolute folder with ending slash [CHP]
           
         relative uris, convert to absolute uris
+
+        return resolved uris as absolute relative uris with target prefix,
+        if resolution fails, return link_error_url attribute.
 
         XXX for folder types, we replace to the view  not the
         folder path, it be nice to go to the path.
@@ -309,7 +343,6 @@ class URIResolver:
 
     def _resolveDescriptor(self, descriptor ):
 
-
         r = descriptor.getRendered()
         uris = unique( filter( lambda u: u[1], (url_regex.findall(r) +\
                                                 css_regex.findall(r))
@@ -319,26 +352,29 @@ class URIResolver:
         
         content_url = descriptor.getSourcePath() or descriptor.getContentURL()
         
-        count = 0
-        total_count = 0
-        
         for l, u in uris:
             
-            total_count += 1            
             nu = self.resolveURI(u, content_url, content_folderish_p, content=descriptor.getContent())
             
             if nu is _marker and self.ext_resolver is not None:
                 nu = self.ext_resolver( u, content_url, content_folderish_p, _marker, descriptor )
                 
-            if nu is _marker:
+            if nu is _marker: # no replacement url found
                 #log.warning('unknown url (%s) from %s'%(u, content_url))
                 nu = self.link_error_url
-                
-            elif nu is None:
-                count+=1
+            elif nu is None: # not a resolvable url type  
                 continue
+            elif nu and self.relative_target_resolution: # transform to relative target link
+                content_path = normalize( content_url, "/" )
+                if content_path and content_folderish_p:
+                    content_path += '/'
+                content_target_url = self.uris.get( content_path )
+                if content_target_url:
+                    nu = self._resolveAsRelative( content_target_url, nu, content_folderish_p )
+                else:
+                    log.warning('relativeres - unknown content url %s'%content_url)
             else:
-                count += 1
+                pass
 
             r = r.replace(l, l.replace(u, nu))
             
@@ -404,6 +440,20 @@ def unique(lst):
         d[l]=None
     return d.keys()
 
+def gcd( seq1, seq2 ):
+    return len(filter( lambda x: x[0]==x[1],  zip( seq1, seq2) ))
+
+def gcd_path( seq1, seq2, sep='/' ):
+    sparts = seq1.split( sep )
+    tparts = seq2.split( sep )
+    
+    common_idx = 0
+    for part in zip( sparts, tparts ):
+        if part[0] == part[1]:
+            common_idx += 1
+        else:
+            break
+    return len(sep.join( sparts[:common_idx] )) + 1
 
 ####################################
 

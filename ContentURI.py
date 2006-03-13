@@ -71,6 +71,7 @@ class ContentURI(SimpleItem, URIResolver):
             r.vhost_path   = self.vhost_path
             r.link_error_url = self.link_error_url
             r.external_resolver_path = self.external_resolver_path
+            r.relative_target_resolution = self.relative_target_resolution
         return r
     
     security.declareProtected(CMFCorePermissions.ManagePortal, 'edit')
@@ -79,6 +80,7 @@ class ContentURI(SimpleItem, URIResolver):
                        vhost_path='',
                        link_error_url='deploy_link_error',
                        external_resolver_path='',
+                       relative_target_resolution=False,
                        REQUEST=None ):
         """ edit """
 
@@ -90,7 +92,7 @@ class ContentURI(SimpleItem, URIResolver):
         self.target_path = target_path
         self.vhost_path  = vhost_path.strip()
         self.link_error_url = link_error_url.strip()
-
+        self.relative_target_resolution = bool( relative_target_resolution )
         self.external_resolver_path = external_resolver_path.strip()
         
         if REQUEST is not None:

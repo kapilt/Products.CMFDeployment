@@ -27,7 +27,11 @@ Created: 12/29/2002
 $Id: $
 """
 
-import os, sys, timeif __name__ == '__main__':    execfile(os.path.join(sys.path[0], 'framework.py'))from Testing import ZopeTestCaseZopeTestCase.installProduct('CMFDeployment')
+import os, sys, time
+if __name__ == '__main__':
+    execfile(os.path.join(sys.path[0], 'framework.py'))
+
+from Testing import ZopeTestCaseZopeTestCase.installProduct('CMFDeployment')
 
 import unittest
 from types import StringType, NoneType
@@ -180,8 +184,8 @@ class ResolveURITests(BaseResolverTests):
             if segments:
                 segments.pop()
             segments.append(d.getFileName())
-            segments.insert(0, self.resolver.target_path)
-            self.assertEqual('/'.join(segments), self.resolver[c.absolute_url(1)])
+            target_url = self.resolver.target_path + "/".join( segments ) 
+            self.assertEqual( target_url, self.resolver[c.absolute_url(1)])
 
     def testResolverCSSImport(self):
         """
@@ -400,7 +404,57 @@ class ResolverTests(BaseResolverTests):
 
         for u in uris:
             assert u in expected
-            
+
+class RelativeTargetTests(BaseResolverTests):
+
+    def testFromDocument( self ):
+        source = '/deploy/reptiles/snake.html'
+        target = '/deploy/style/site.css'
+
+        rtarget = self.resolver._resolveAsRelative( source, target, False )
+        self.assertEqual( rtarget, '../style/site.css' )
+
+    def testFromDocument2( self ):
+        source = '/deploy/reptiles/snake.html'
+        target = '/deploy/reptiles/lizard.html'
+
+        rtarget = self.resolver._resolveAsRelative( source, target, False )
+        self.assertEqual( rtarget, 'lizard.html' )
+
+    def testFromFolder1( self ):
+        source = '/deploy/reptiles/index.html'
+        target = '/deploy/reptiles/lizard.html'
+
+        rtarget = self.resolver._resolveAsRelative( source, target, True )
+        self.assertEqual( rtarget, 'lizard.html' )
+
+    def testFromFolder2( self ):
+        source = '/deploy/reptiles/'
+        target = '/deploy/reptiles/lizard.html'
+        
+        rtarget = self.resolver._resolveAsRelative( source, target, True )
+        self.assertEqual( rtarget, 'lizard.html' )
+    
+    def testFromFolder3( self ):
+        source = '/deploy/reptiles/'
+        target = '/deploy/style/site.css'
+        
+        rtarget = self.resolver._resolveAsRelative( source, target, True )
+        self.assertEqual( rtarget, '../style/site.css' )
+
+    def testFromFolder4( self ):
+        source = 'file:///usr/local/cmfdeployment/deployed_www/plone_2_1/funet-tietoverkkopalvelut/haka-infrastruktuuri/tekniikka/index.html'
+        target = 'file:///usr/local/cmfdeployment/deployed_www/plone_2_1/funet-tietoverkkopalvelut/haka-infrastruktuuri/haka-luottamusverkosto/index.html'
+
+        rtarget = self.resolver._resolveAsRelative( source, target )
+        self.assertEqual( rtarget, '../haka-luottamusverkosto/index.html')
+
+    def testFromFolder5( self ):
+        source = "file:///usr/local/cmfdeployment/deployed_www/plone_2_1/funet-tietoverkkopalvelut/haka-infrastruktuuri/tekniikka/index.html"
+        target = "file:///usr/local/cmfdeployment/deployed_www/plone_2_1/funet-tietoverkkopalvelut/haka-infrastruktuuri/tekniikka/haka-sovellukset/index.html"
+
+        rtarget = self.resolver._resolveAsRelative( source, target )
+        self.assertEqual( rtarget, 'haka-sovellukset/index.html')
         
 class RelativeResolutionTests(unittest.TestCase):
 
@@ -480,6 +534,7 @@ def test_suite():
     suite.addTest(unittest.makeSuite(RelativeResolutionTests))
     suite.addTest(unittest.makeSuite(ResolveURITests))
     suite.addTest(unittest.makeSuite(ResolverTests))
+    suite.addTest(unittest.makeSuite(RelativeTargetTests))    
     return suite
 
 if __name__ == '__main__':
