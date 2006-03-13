@@ -137,10 +137,9 @@ class URIResolver:
     def _addResource(self, descriptor):
 
         relative_url = descriptor.getSourcePath() or descriptor.content_url
-
         content_path = descriptor.getContentPath()
         
-        if relative_url[0] != '/':
+        if relative_url and relative_url[0] != '/':
             relative_url = '/'+relative_url
         
         if content_path is None:
@@ -153,11 +152,17 @@ class URIResolver:
             url_context  = relative_url[:relative_url.rfind('/')]
             content_path = url_context[mlen:]
 
-        content_path = normalize('/'.join( (self.target_path,
-                                            content_path,
-                                            descriptor.getFileName() ) ),
+        content_path = normalize('/'.join( ( content_path,
+                                             descriptor.getFileName() ) ),
                                  '/'
                                  )
+
+        # implicit upgrade.
+        if not self.target_path or not self.target_path.endswith('/'):
+            self.target_path += '/'
+            
+        # offset into content path b/c normalize always returns a prefix
+        content_path = "%s%s"%( self.target_path, content_path[1:] )
 
         log.debug("add %s -> %s"%(relative_url, content_path))
         self.uris[relative_url]=content_path
@@ -326,7 +331,7 @@ class URIResolver:
                 nu = self.ext_resolver( u, content_url, content_folderish_p, _marker, descriptor )
                 
             if nu is _marker:
-                log.warning('unknown url (%s) from %s'%(u, content_url))
+                #log.warning('unknown url (%s) from %s'%(u, content_url))
                 nu = self.link_error_url
                 
             elif nu is None:

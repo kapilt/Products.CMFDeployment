@@ -80,9 +80,14 @@ class ContentURI(SimpleItem, URIResolver):
                        link_error_url='deploy_link_error',
                        external_resolver_path='',
                        REQUEST=None ):
-        """ """
+        """ edit """
 
-        self.target_path = target_path.strip()
+
+        target_path = target_path.strip()
+        if not target_path.endswith('/'):
+            target_path += '/'
+            
+        self.target_path = target_path
         self.vhost_path  = vhost_path.strip()
         self.link_error_url = link_error_url.strip()
 
