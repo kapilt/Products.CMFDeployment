@@ -97,7 +97,7 @@ class ResourceTemplateRule( SiteBaseResource ):
         # get rid of trailing and leading slashes and join to base path
         source_path = extend_relative_path(clstrip('/'.join( (vhost_path, base_path, '/'.join(filter(None, source_path.split('/'))))), '/'))
 
-        assert '.' in deploy_path and '/' in deploy_path
+        assert '/' in deploy_path
 
         idx = deploy_path.rfind('/')
         content_path = deploy_path[:idx]
