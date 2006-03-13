@@ -158,9 +158,10 @@ class SiteSkinResourceRule( SiteBaseResource ):
         deploy_path = '/'.join(filter(None, deploy_path.split('/')))
         
         container_map = ContainerMap( directories )
-        since_ticks = since_time.timeTime()
 
         if since_time is not None:
+            since_ticks = since_time.timeTime()
+            
             def time_filter( dvo ):
                 if isinstance( dvo, FSObject):
                     return since_ticks < dvo._file_mod_time 
@@ -171,8 +172,9 @@ class SiteSkinResourceRule( SiteBaseResource ):
 
         res = []
         for c in container_map.match( self.view_path ):
-            if not time_filter( c ):
-                continue
+            #if not time_filter( c ):
+            #    continue
+
             d = ContentDescriptor(c)
             d.setContentPath(deploy_path)
             d.setFileName(c.getId())
