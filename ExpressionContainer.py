@@ -29,8 +29,7 @@ $Id$
 from OFS.OrderedFolder import OrderedFolder
 from Products.PageTemplates.Expressions import SecureModuleImporter, getEngine
 
-from Namespace import Implicit, ClassSecurityInfo, InitializeClass
-
+from Namespace import Implicit, ClassSecurityInfo, InitializeClass, getToolByName
 
 class ExpressionContainer(OrderedFolder):
     pass
@@ -58,6 +57,10 @@ class MimeUtilities(Implicit):
     def has_index(self, obj):
         return not not getattr(aq_base(obj), 'index_html', None)
 
+    def match_state( self, obj, state):
+        wf_tool = getToolByName( obj, 'portal_workflow')
+        wf_state = wf_tool.getInfoFor( self, 'review_state')
+        return wf_tool == state
 
 InitializeClass(MimeUtilities)
 DeploymentMimeUtilities = MimeUtilities()
