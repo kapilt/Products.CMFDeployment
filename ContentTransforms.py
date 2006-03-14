@@ -79,6 +79,7 @@ class ContentTransforms(Folder):
                 script = getTransform(fr.script_id)
             except:
                 log.warning('Content Transform Script %s Not Found'%str(fr.script_id))
+                continue
             try:
                 rendered = script(descriptor, rendered, file_path)
             except:
