@@ -30,7 +30,8 @@ from Products.CMFDeployment.Descriptor import ContentDescriptor
 from Products.CMFDeployment.URIResolver import clstrip, extend_relative_path
 from Products.CMFCore.FSObject import FSObject
 from Products.CMFDeployment.DeploymentExceptions import InvalidDirectoryView
-
+from Products.CMFDeployment.DefaultConfiguration import DEPLOYMENT_DEBUG
+from DocumentTemplate import HTML
 log = LogFactory('Directory Views')
 
 from Interface import Interface, Attribute
@@ -252,6 +253,12 @@ def cook(self, descriptor):
     try:
         render(self, descriptor, object)
     except:
+        if DEPLOYMENT_DEBUG:
+            import sys, pdb, traceback
+            ec, e, tb = sys.exc_info()
+            print ec, e
+            traceback.print_tb( tb )
+            #pdb.post_mortem( tb )               
         log.warning("error while render skin object %s"%str(object.getPhysicalPath()))
         descriptor.setGhost(1)
 
