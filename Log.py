@@ -74,8 +74,11 @@ class ComponentLogging:
                 '')
         
     def debug(self, msg, extra='', **kwargs):
-        self.write(self.compose(msg, extra, **kwargs), 0)
-        
+        self.write(self.compose(msg, extra, **kwargs), -100)
+
+    def info(self, msg, extra='', **kwargs):
+        self.write(self.compose(msg, extra, **kwargs), 0)        
+
     def warning(self, msg, extra='', **kwargs):
         self.write(self.compose(msg, extra, **kwargs), 100)
 

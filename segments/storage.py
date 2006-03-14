@@ -77,6 +77,8 @@ class ContentStorageManager(object):
         structure = self.getStructure( pipe )
         
         for descriptor in descriptors:
+            if descriptor.isGhost(): # if a child view errors then it has no content
+                continue
             content_path = structure.getContentPathFromDescriptor( descriptor )
             #if content_path.endswith(sep):
             #log.warning('invalid content path detected %s ... fixing'%content_path)
@@ -128,7 +130,7 @@ class ContentStorageManager(object):
 #        if not rendered:
 #            return
 
-        log.debug("storing content %s at %s"%(descriptor.content_url, location))
+        log.info("storing content %s at %s"%(descriptor.content_url, location))
         
         fh = open(location, 'w')
         try:
