@@ -176,6 +176,12 @@ class ContentDescriptor(object):
     def getChildDescriptors(self):
         return self.child_descriptors or ()
 
+    def getContainedDescriptors(self, include_self=True):
+        if include_self:
+            yield self
+        for d in self.getChildDescriptors():
+            for s in d.getContainedDescriptors():
+                yield s
 
     #################################
     # dependency management

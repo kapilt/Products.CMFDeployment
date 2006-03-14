@@ -18,7 +18,8 @@ def install(self):
         out.write("Added 'deployment_templates' directory view to portal_skins\n")
 
     # dont install deployment skin in 2.1
-    if self._getOb('portal_css', None) is None:
+    if True:
+    #if self._getOb('portal_css', None) is None:
         skins = skinstool.getSkinSelections()
         if 'Plone Deployment' not in skins:
             path=[elem.strip() for elem in \

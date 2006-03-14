@@ -33,7 +33,7 @@ from core import Consumer
 from Products.CMFDeployment.Log import LogFactory
 #from Products.CMFDeployment.Statistics import IOStatistics
 
-import os
+import os, itertools
 from os import sep, path, mkdir
 log = LogFactory('Content Storage')
 
@@ -73,7 +73,7 @@ class ContentStorageManager(object):
         if descriptor.isGhost(): 
             return 
 
-        descriptors = descriptor.getDescriptors()
+        descriptors = descriptor.getContainedDescriptors()
         structure = self.getStructure( pipe )
         
         for descriptor in descriptors:
@@ -92,8 +92,7 @@ class ContentStorageManager(object):
         remove a rendered content object on the filesystem
         """
         
-
-        descriptors = descriptor.getDescriptors()
+        descriptors = descriptor.getContainedDescriptors()
         structure   = self.getStructure( pipe )
 
         for descriptor in descriptors:
@@ -130,7 +129,7 @@ class ContentStorageManager(object):
 #        if not rendered:
 #            return
 
-        log.info("storing content %s at %s"%(descriptor.content_url, location))
+        log.debug("storing content %s at %s"%(descriptor.content_url, location))
         
         fh = open(location, 'w')
         try:

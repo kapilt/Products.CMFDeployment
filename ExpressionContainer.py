@@ -28,7 +28,7 @@ $Id$
 
 from OFS.OrderedFolder import OrderedFolder
 from Products.PageTemplates.Expressions import SecureModuleImporter, getEngine
-
+from Products.CMFCore.WorkflowCore import WorkflowException
 from Namespace import Implicit, ClassSecurityInfo, InitializeClass, getToolByName
 
 class ExpressionContainer(OrderedFolder):
@@ -59,8 +59,11 @@ class MimeUtilities(Implicit):
 
     def match_state( self, obj, state):
         wf_tool = getToolByName( obj, 'portal_workflow')
-        wf_state = wf_tool.getInfoFor( self, 'review_state')
-        return wf_tool == state
+        try:
+            wf_state = wf_tool.getInfoFor( obj, 'review_state')
+        except WorkflowException:
+            return False
+        return wf_state== state
 
 InitializeClass(MimeUtilities)
 DeploymentMimeUtilities = MimeUtilities()

@@ -1,9 +1,15 @@
 <dtml-var manage_page_header>
 
-<h2> Add AT Content Rule </h2>
+<h2> Add AT Composite Content Rule </h2>
 
+<p> 
 
-<form action="addATContentRule" method="POST">
+meant for content types which appear as a single object in the
+catalog but contain separate non indexed content objects. 
+
+</p>
+
+<form action="addATCompositeRule" method="POST">
 <table>
 
 <tr><td>Id</td>
@@ -24,7 +30,7 @@
 
 
 <tr><td colspan="2">
-    <input type="submit" value="Add Archetypes Content Rule"> </td></tr>
+    <input type="submit" value="Add Archetypes Composite Content Rule"> </td></tr>
 
 </table>
 

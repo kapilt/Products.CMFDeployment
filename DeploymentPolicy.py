@@ -45,7 +45,7 @@ class DeploymentPolicy(Folder):
 
     manage_options = (
 
-        {'label':'overview',
+        {'label':'Overview',
          'action':'overview'},
         
         {'label':'Identification',

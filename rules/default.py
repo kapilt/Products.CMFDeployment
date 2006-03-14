@@ -13,6 +13,7 @@ except: # 2.0
 from Products.CMFDeployment.Namespace import *
 from Products.CMFDeployment.Descriptor import DescriptorFactory
 from Products.CMFDeployment.DeploymentInterfaces import IContentRule
+from Products.CMFDeployment.utils import SerializablePlugin
 
 addContentRuleForm = DTMLFile('../ui/MimeExtensionMappingAddForm', globals())
 
@@ -42,7 +43,7 @@ xml_export_template = """
 """
 
 
-class BaseRule( SimpleItem ):
+class BaseRule( SerializablePlugin ):
 
     meta_type = "Base Rule"
 
@@ -115,6 +116,9 @@ class ContentRule( OrderedFolder, BaseRule ):
 
     meta_type = 'Content Rule'
 
+    xml_template = xml_export_template
+    xml_factory  = "addContentRule"
+    
     view_method = ''
 
     __implements__ = (IContentRule,)
@@ -190,7 +194,7 @@ class ContentRule( OrderedFolder, BaseRule ):
             
         
         if not isinstance( parent, (PortalContent, PortalFolderBase) ):
-           return ()
+           return []
         rdeps = [parent,]
 
         try: # archetypes reference support ( like plone2.1 related items)
@@ -259,16 +263,13 @@ class ContentRule( OrderedFolder, BaseRule ):
                              view_method, binary, RESPONSE)
 
     #################################
-    def toXml(self):
-
-        d = { 'id':self.id,
-              'view_method':self.view_method,
-              'ext_expr':self.extension_text,
-              'filter_expr':self.condition_text,
-              'product':'CMFDeployment',
-              'factory':'addContentRule' }
-             
-        return xml_export_template%d
+    def getInfoForXml(self):
+        d = BaseRule.getInfoForXml(self)
+        del d['title']
+        d.update( { 'view_method':self.view_method,
+                    'ext_expr':self.extension_text,
+                    'filter_expr':self.condition_text } )
+        return d
              
 
     

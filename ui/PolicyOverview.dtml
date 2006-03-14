@@ -16,14 +16,13 @@ how it should be displayed when deployed, and how it should be deployed </p>
 
 <dtml-let history="getDeploymentHistory()">
 <dtml-let last_time="history.getLastTime()">
-<dtml-if last_time>
-<p>
+ <dtml-if last_time>
+ <p>
   Last Deployment Time - <dtml-var last_time>   
   <div style="display:block; font-size:smaller">
    <a href="<dtml-var "history.getLast().absolute_url()">">See Log</a></div>
-</p>
-
-</dtml-if>
+ </p>
+ </dtml-if>
 </dtml-let>
 </dtml-let>
 

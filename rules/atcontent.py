@@ -26,6 +26,7 @@ $Id$
 from Products.Archetypes import public as atapi
 from Products.CMFDeployment.Descriptor import DescriptorFactory
 from Products.CMFDeployment.DeploymentInterfaces import IContentRule
+from Products.CMFDeployment import utils as deploy_utils
 
 from Products.CMFCore import CMFCorePermissions
 from Products.CMFCore.Expression import Expression
@@ -52,15 +53,17 @@ def addATContentRule(self, id, extension_expression, condition, view_method, gho
     if RESPONSE is not None:
         return RESPONSE.redirect('manage_workspace')
     
-addATContentRuleForm = DTMLFile('ui/ContentRuleATAddForm', globals())
+addATContentRuleForm = DTMLFile('../ui/ContentRuleATAddForm', globals())
 
 class ArchetypeContentRule( ContentRule ):
 
     meta_type = "Archetype Content Rule"
+    xml_factory = "addATContentRule"
     
     __implements__ = IContentRule
 
     security = ClassSecurityInfo()
+
 
     def isValid(self, content, context):
         if not isinstance( content, (atapi.BaseContent, atapi.BaseFolder) ):
@@ -106,24 +109,7 @@ class ArchetypeContentRule( ContentRule ):
             yield descriptor
 
     def getResourceName(self, content):
-        cid = content.getId()
-        if '.' in cid:
-            return cid
-        elif hasattr(content, 'content_type') and content.content_type:
-            if callable(content.content_type):
-                content_type = content.content_type()
-            else:
-                content_type = content.content_type
-            major, minor = content_type.split('/')
-            if major == 'text' and minor == 'plain':
-                minor = 'html'
-            if major == 'text' and minor == 'structured':
-                minor = 'html'
-            if major == 'text' and minor == 'x-rst':
-                minor = 'html'
-            return "%s.%s"%(cid, minor)
-        raise RuntimeError("Could not Determine Extension ")
-
+        return deploy_utils.guess_filename( content )
     
 
 InitializeClass(ArchetypeContentRule)

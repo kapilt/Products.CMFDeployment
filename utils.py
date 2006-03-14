@@ -85,6 +85,32 @@ class SerializablePlugin( SimpleItem ):
         return d
 
 
+def guess_filename( content ):
+    cid = content.getId()
+    if '.' in cid and ( len(cid)-cid.rfind('.') ) < 5 : 
+        #print 'gf id', cid
+        return content.id
+    elif '.' in content.title:
+        #print 'gf ti', content.title
+        return content.title
+    elif hasattr(content, 'content_type') and content.content_type:
+        if callable(content.content_type):
+            content_type = content.content_type()
+        else:
+            content_type = content.content_type
+        major, minor = content_type.split('/')
+        if major == 'text' and minor == 'plain':
+            minor = 'html'
+        if major == 'text' and minor == 'structured':
+            minor = 'html'
+        if major == 'text' and minor == 'x-rst':
+            minor = 'html'
+        #print 'gf m', "%s.%s"%(cid,minor)
+        return "%s.%s"%(cid, minor)
+    
+    raise RuntimeError("Could not Determine Extension ")
+    
+
 def registerIcon(filename):
     """
     verbatim from mailing list post

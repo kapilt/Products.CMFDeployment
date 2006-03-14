@@ -115,14 +115,13 @@ class URIResolver:
         except (ImportError, AttributeError, AssertionError):
             self.ext_resolver = None
         
-
     def addResource(self, descriptor):
 
-        for descriptor in descriptor.getDescriptors():
+        for descriptor in descriptor.getContainedDescriptors():
             self._addResource( descriptor )
 
     def removeResource( self, descriptor ):
-        for descriptor in descriptor.getDescriptors():
+        for descriptor in descriptor.getContainedDescriptors():
             self._removeResource( descriptor )
             
     def _removeResource(self, descriptor):
@@ -336,7 +335,7 @@ class URIResolver:
         # we need some sort of policy decision
         """
 
-        for descriptor in descriptor.getDescriptors():
+        for descriptor in descriptor.getContainedDescriptors():
             if descriptor.isBinary() or descriptor.isGhost():
                 continue
             self._resolveDescriptor( descriptor )
@@ -345,7 +344,7 @@ class URIResolver:
 
         r = descriptor.getRendered()
         uris = unique( filter( lambda u: u[1], (url_regex.findall(r) +\
-                                                css_regex.findall(r))
+                                                css_regex.findall(r) )
                                                 ) )
         content_folderish_p = descriptor.content_folderish_p and not \
                               descriptor.composite_content_p
@@ -360,7 +359,7 @@ class URIResolver:
                 nu = self.ext_resolver( u, content_url, content_folderish_p, _marker, descriptor )
                 
             if nu is _marker: # no replacement url found
-                #log.warning('unknown url (%s) from %s'%(u, content_url))
+                log.warning('unknown url (%s) from %s'%(u, content_url))
                 nu = self.link_error_url
             elif nu is None: # not a resolvable url type  
                 continue
@@ -512,4 +511,5 @@ def resolve_relative(content_url, relative_url, content_folderish_p=0):
 url_regex = re.compile("""(?P<url>(?:href=|src=|@import)\s*["']\s*(.*?)["'])""")
 test_uri_regex = re.compile('''(?:href=|src=|@import)\s*["']\s*(.*?)["']''')
 css_regex  = re.compile("""(?P<url>url\(['"]{0,1}\s*(.*?)['"]{0,1}\))""")
+free_form_regex = re.compile('(?P<url>"(http://.*)")')
 test_css_regex  = re.compile("""url\(['"]{0,1}\s*(?P<url>.*?)['"]{0,1}\)""")

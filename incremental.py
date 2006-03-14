@@ -146,7 +146,7 @@ class DeletionRecord( object ):
         self.child_descriptors = None
         
         # attach child descriptors
-        for cd in descriptor.getChildDescriptors():
+        for cd in descriptor.getContainedDescriptors(include_self=False):
             if self.child_descriptors is None:
                 self.child_descriptors = []
             self.child_descriptors.append( DeletionRecord( policy, cd ) )
@@ -186,6 +186,9 @@ class DeletionRecord( object ):
             return [ self ]
         else:
             return (self,)+tuple(self.child_descriptors)
+
+    # deletion descriptors store nested descriptors in a flat list
+    getContainedDescriptors = getDescriptors
 
     def getReverseDependencies( self, context ):
 
@@ -395,13 +398,16 @@ class PolicyIncrementalIndex( SimpleItem ):
         key = catalog.uids.get( path, None )
         
         if key is None:
+            # don't create persistent records for objects not in catalog
+            return 
+
             # not sure if we should do this.. at min log this
             # basically index the object if no rid is found for it.
             pcatalog = getToolByName(self, 'portal_catalog')
-            pcatalog.indexObject( pcatalog )
+            pcatalog.indexObject( object )
 
             key = catalog.uids.get( path )
-            assert key is not None
+            assert key is not None, "path has no key %s"%(path)
   
         if not self._index.has_key( key ):
             self._length.change(1)

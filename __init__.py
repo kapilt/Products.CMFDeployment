@@ -110,6 +110,15 @@ def initialize(context):
                          atrule.addATContentRule ),
         visibility = None
         )
+
+    atcomposite = rules.atcomposite
+    context.registerClass(
+        atcomposite.ATCompositeRule,
+        permission = 'CMFDeploy: Add Content Rule',
+        constructors = ( atcomposite.addATCompositeRuleForm,
+                         atcomposite.addATCompositeRule ),
+        visibility = None
+        )
     
     dview = resources.directoryview
     context.registerClass(
