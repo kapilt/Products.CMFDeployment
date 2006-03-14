@@ -102,6 +102,15 @@ def initialize(context):
         visibility = None
         )
 
+    atrule = rules.atcontent
+    context.registerClass(
+        atrule.ArchetypeContentRule,
+        permission = 'CMFDeploy: Add Content Rule',
+        constructors = ( atrule.addATContentRuleForm,
+                         atrule.addATContentRule ),
+        visibility = None
+        )
+    
     dview = resources.directoryview
     context.registerClass(
         dview.DirectoryViewRule,

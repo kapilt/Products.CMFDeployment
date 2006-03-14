@@ -1,9 +1,9 @@
 <dtml-var manage_page_header>
 
-<h2> Add Content Rule </h2>
+<h2> Add AT Content Rule </h2>
 
 
-<form action="addContentRule" method="POST">
+<form action="addATContentRule" method="POST">
 <table>
 
 <tr><td>Id</td>
@@ -24,7 +24,7 @@
 
 
 <tr><td colspan="2">
-    <input type="submit" value="Add Mime Mapping"> </td></tr>
+    <input type="submit" value="Add Archetypes Content Rule"> </td></tr>
 
 </table>
 
