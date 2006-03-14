@@ -17,14 +17,16 @@ def install(self):
         addDirectoryViews(skinstool, 'skins', DeploymentProductHome)
         out.write("Added 'deployment_templates' directory view to portal_skins\n")
 
-    skins = skinstool.getSkinSelections()
-    if 'Plone Deployment' not in skins:
-        path=[elem.strip() for elem in \
-              skinstool.getSkinPath('Plone Default').split(',')]
-        path.insert(path.index('custom')+1, 'deployment_templates')
-        skinstool.addSkinSelection('Plone Deployment', ','.join(path))
-    else:
-        out.write("Plone Deployment skin already setup\n")
+    # dont install deployment skin in 2.1
+    if self._getOb('portal_css', None) is None:
+        skins = skinstool.getSkinSelections()
+        if 'Plone Deployment' not in skins:
+            path=[elem.strip() for elem in \
+                  skinstool.getSkinPath('Plone Default').split(',')]
+            path.insert(path.index('custom')+1, 'deployment_templates')
+            skinstool.addSkinSelection('Plone Deployment', ','.join(path))
+        else:
+            out.write("Plone Deployment skin already setup\n")
 
     if 'content_modification_date' not in self.portal_catalog.indexes():
         self.portal_catalog.manage_addIndex( "content_modification_date", "DateIndex")
