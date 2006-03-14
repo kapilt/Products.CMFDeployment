@@ -11,6 +11,7 @@ except: # 2.0
     from Products.CMFCore.PortalFolder import PortalFolder as PortalFolderBase
 
 from Products.CMFDeployment.Namespace import *
+from Products.CMFDeployment.Descriptor import DescriptorFactory
 from Products.CMFDeployment.DeploymentInterfaces import IContentRule
 
 addContentRuleForm = DTMLFile('../ui/MimeExtensionMappingAddForm', globals())
@@ -81,11 +82,17 @@ class ChildView( BaseRule ):
         self.view_method = ''
         self.binary = False
 
-    def edit(self,  extension_text, view_method, binary):
-        self.extension_text = extension_text
-        self.extension = Expression( extension_text )
+    def edit(self,  extension_expression, view_method, RESPONSE=None):
+        """
+        edit the child view
+        """
+        self.extension_text = extension_expression
+        self.extension = Expression( extension_expression )
         self.view_method = view_method
-        self.binary = not not binary
+        #self.binary = not not binary
+        
+        if RESPONSE is not None:
+            RESPONSE.redirect('manage_workspace')
 
     def process( self, descriptor, expr_context):
         extension = self.extension( expr_context )
@@ -218,9 +225,6 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
     
         for cdesc in self.getChildDescriptors( descriptor, context ):
             descriptor.addChildDescriptor( cdesc )
-
-        dependencies = self.getDependencies( descriptor, context )
-        descriptor.setDependencies( dependencies )
 
         reverse_dependencies = self.getReverseDependencies( descriptor, context )
         descriptor.setReverseDependencies( reverse_dependencies )
