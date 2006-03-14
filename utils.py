@@ -29,10 +29,24 @@ $Id$
 
 
 import inspect, sys
-from Acquisition import aq_base
+from Acquisition import aq_base, Implicit
+from DateTime import DateTime
 from OFS.SimpleItem import SimpleItem
 import OFS, App
 
+
+class ContentModificationInspector( Implicit ):
+
+    def __call__(self):
+        return DateTime()
+    
+## while more conceptually beholden, the below isn't correct for
+## subobject modification, the above insteads binds to index time
+#
+#        content = self.aq_parent
+#        if content._p_changed:
+#            return DateTime()
+#        return content.bobobase_modification_time()
 
 class SerializablePlugin( SimpleItem ):
 

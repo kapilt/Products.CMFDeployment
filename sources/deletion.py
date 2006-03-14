@@ -26,12 +26,21 @@ class DeletionSource( SimpleItem ):
 
     meta_type = "Deletion Source"
     
+    manage_options = (
+        {'label':'Source',
+         'action':'source'},
+        )
+    source = DTMLFile('../ui/ContentSourceDeletionView', globals())
+    
     def __init__(self, id, title=""):
         self.id = id
         self._records = []
 
     def getContent( self ):
         return self.destructiveIter()
+
+    def listContent( self ):
+        return tuple( self._records )
         
     def destructiveIter(self):
         for rec in self._records:

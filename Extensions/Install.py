@@ -26,8 +26,8 @@ def install(self):
     else:
         out.write("Plone Deployment skin already setup\n")
 
-    if 'bobobase_modification_time' not in self.portal_catalog.indexes():
-        self.portal_catalog.manage_addIndex( "bobobase_modification_time", "DateIndex")
+    if 'content_modification_date' not in self.portal_catalog.indexes():
+        self.portal_catalog.manage_addIndex( "content_modification_date", "DateIndex")
 
     portal = self.portal_url.getPortalObject()
     portal.portal_catalog.indexObject( portal )

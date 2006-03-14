@@ -50,13 +50,15 @@ import transports
 import sources
 import incremental
 import pipeline
+import utils
 
 DeploymentProductHome = package_home( globals() )
 
 registerDirectory('skins', globals())
 
 methods = {
-    'DeploymentPipelineIds':pipeline.getPipelineNames
+    'DeploymentPipelineIds':pipeline.getPipelineNames,
+    'content_modification_date':utils.ContentModificationInspector()
     }
 
 def initialize(context):

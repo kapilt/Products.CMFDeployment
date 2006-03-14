@@ -29,6 +29,7 @@ $Id$
 """
 from Namespace import *
 from BTrees.OIBTree import OISet
+from BTrees.IOBTree import IOBTree
 from BTrees.Length import Length
 
 class DeploymentHistoryContainer(Folder):
@@ -52,7 +53,7 @@ class DeploymentHistoryContainer(Folder):
 
     def __init__(self, id):
         self.id = id
-        self._records = OISet()
+        self._records = IOBTree() # OISet()
         self._record_length = Length(0)
 
     #security.declarePrivate('addHistory')
@@ -64,20 +65,26 @@ class DeploymentHistoryContainer(Folder):
 
     security.declarePrivate('attachHistory')
     def attachHistory(self, history):
-        hid = str(self._record_length())
+        rid  = self._record_length()
+        hid = str( rid )
         history.id = hid
-        self._records.insert(history)
+        self._records[rid] = history
         self._record_length.change(1)
         
     security.declareProtected(Permissions.view_management_screens, 'getHistories')
     def getHistories(self):
-        return tuple(self._records)
+        return tuple(self._records.values())
+
+    def getLastTimeIdx( self ):
+        return self.portal_catalog._catalog.getIndex('content_modification_date')._convert(
+            self.getLastTime()
+            )
 
     security.declarePrivate('getLastTime')
     def getLastTime(self):
         if self._record_length() == 0:
             return None
-        return self._records[self._record_length()-1].creation_time
+        return self._records[ self._records.maxKey() ].creation_time
 
     security.declarePrivate('makeHistory')
     def makeHistory(self):
