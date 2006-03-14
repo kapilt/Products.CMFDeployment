@@ -12,6 +12,23 @@ how it should be displayed when deployed, and how it should be deployed </p>
 <input type="checkbox" name="reset_date:int" value="1"> Reset Deployment Date
 </form>
 
+
+
+<dtml-let history="getDeploymentHistory()">
+<dtml-let last_time="history.getLastTime()">
+<dtml-if last_time>
+<p>
+  Last Deployment Time - <dtml-var last_time>   
+  <div style="display:block; font-size:smaller">
+   <a href="<dtml-var "history.getLast().absolute_url()">">See Log</a></div>
+</p>
+
+</dtml-if>
+</dtml-let>
+</dtml-let>
+
+
+
 <p>Download Policy as <a href="policy_xml">XML</a></p>
 
 <dtml-var manage_page_footer>

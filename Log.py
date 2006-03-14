@@ -58,8 +58,8 @@ class ComponentLogging:
         return "[%s] : %s "%(self._component, msg)
 
     def write(self, msg, level):
-        if not DefaultConfiguration.DEPLOYMENT_DEBUG:
-            return
+        #if not DefaultConfiguration.DEPLOYMENT_DEBUG:
+        #    return
         #print msg
         record_p, zlog_p = configuration.getConfigurationFor(self._component)
         if record_p or level >= OVERRIDE_THRESHOLD_LEVEL:

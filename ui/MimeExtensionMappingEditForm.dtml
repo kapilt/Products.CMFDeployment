@@ -2,7 +2,7 @@
 
 <dtml-var manage_tabs>
 
-<h2> Edit Mime Mapping (<dtml-var getId>)</h2>
+<h2> Edit <dtml-var meta_type> (<dtml-var getId>)</h2>
 
 
 <form action="editMapping" method="POST">
@@ -36,7 +36,7 @@
     
 
 <tr><td colspan="2">
-    <input type="submit" value="Edit Mime Mapping"> </td></tr>
+    <input type="submit" value="Edit <dtml-var meta_type>"> </td></tr>
 
 </table>
 

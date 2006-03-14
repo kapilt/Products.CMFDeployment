@@ -18,7 +18,6 @@ ZopeTestCase.installProduct('CMFDeployment')
 ZopeTestCase.installProduct('MimetypesRegistry')
 ZopeTestCase.installProduct('PortalTransforms')
 ZopeTestCase.installProduct('Archetypes')
-ZopeTestCase.installProduct('ATContentRule')
 
 from Products.CMFCore.utils import getToolByName
 from Products.CMFDeployment import DeploymentProductHome
@@ -55,7 +54,6 @@ class TestIncrementalComponents(PloneTestCase):
             os.mkdir( TESTDEPLOYDIR )
         
         installer = getToolByName(self.portal, 'portal_quickinstaller')
-        installer.installProduct('ATContentRule')
         installer.installProduct('CMFDeployment')
         
         self.portal.invokeFactory('Folder', 'folderwithindex')
@@ -110,7 +108,7 @@ class TestIncrementalComponents(PloneTestCase):
         event_fs_path = os.path.join( TESTDEPLOYDIR, 'events', 'cignex_sprint.html')
         assert os.path.exists( event_fs_path )
         
-        rule = self.policy.getContentMastering().mime.Event
+        rule = self.policy.getContentMastering().rules.Event
         rule.edit( rule.extension_text,
                    "python: 'rabbit' in object.Description()",
                    rule.view_method )

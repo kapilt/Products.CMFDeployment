@@ -31,10 +31,12 @@ $Id$
 from Namespace import *
 
 import DefaultConfiguration
+
+from ContentRules import ContentRuleContainer
 from DeploymentExceptions import InvalidSkinName
 from Descriptor import DescriptorFactory
 from ExpressionContainer import getDeployExprContext
-from MimeMapping import MimeMappingContainer
+
 from utils import file2string, is_baseunit
 
 from Log import LogFactory
@@ -47,8 +49,8 @@ class ContentMastering(Folder):
 
     manage_options = (
 
-        {'label':'Overview',
-         'action':'overview'},
+        {'label':'Rules',
+         'action':'rules/manage_main'},        
         
         {'label':'Skin',
          'action':'skin'},
@@ -56,8 +58,8 @@ class ContentMastering(Folder):
         {'label':'User',
          'action':'user'},
 
-        {'label':'Rules',
-         'action':'mime/manage_main'},        
+        {'label':'Overview',
+         'action':'overview'},
 
         {'label':'Policy',
          'action':'../overview'}
@@ -106,8 +108,8 @@ class ContentMastering(Folder):
 
     def manage_afterAdd(self, item, container):
 
-        ob = MimeMappingContainer('mime')
-        self._setObject('mime', ob)
+        ob = ContentRuleContainer('rules')
+        self._setObject('rules', ob)
 
         ob = SiteChainUser()
         self._setObject('site_user', ob)
@@ -136,12 +138,12 @@ class ContentMastering(Folder):
         portal = getToolByName(self, 'portal_url').getPortalObject()
         c = descriptor.getContent()
         ctx = getDeployExprContext(c, portal) 
-        mappings = self.mime.objectValues()
+        mappings = self.rules.objectValues()
         for m in mappings:
             if m.isValid( c, ctx):
                 m.process( descriptor, ctx )
                 return True
-        log.debug('no mime mapping (%s)->(%s)'%(str(c.portal_type), descriptor.content_url))
+        log.debug('no rule for (%s)->(%s)'%(str(c.portal_type), descriptor.content_url))
         return None
 
     def cook(self, descriptor):

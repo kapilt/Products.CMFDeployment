@@ -43,7 +43,6 @@ ZopeTestCase.installProduct('CMFDeployment')
 ZopeTestCase.installProduct('MimetypesRegistry')
 ZopeTestCase.installProduct('PortalTransforms')
 ZopeTestCase.installProduct('Archetypes')
-ZopeTestCase.installProduct('ATContentRule')
 ZopeTestCase.installProduct('kupu')
 
 from Products.CMFPlone.tests.PloneTestCase import PloneTestCase
@@ -55,6 +54,7 @@ from Products.CMFCore.utils import getToolByName
 from Products.CMFDeployment.Descriptor import ContentDescriptor
 from Products.CMFDeployment import DeploymentProductHome
 
+from sample import SampleImageSchemaContent, registerContent
 
 TESTDEPLOYDIR = os.path.join( DeploymentProductHome, 'tests', 'deploy')
 
@@ -155,15 +155,14 @@ def setupContentTree( portal ):
         event_url="http://hazmat.gov")    
         
     logo = portal['logo.jpg']
-    content = str(logo)
+    image_content = str(logo)
     portal.invokeFactory('Image', 'vera.jpg')
-    portal['vera.jpg'].edit(file=content)
+    #portal['vera.jpg'].edit(file=image_content)
 
-
-    portal.events.invokeFactory('Sample Image Content', 'image_test')
-    fh = open( os.path.join( DeploymentProductHome, 'www', 'identify.png'))
-    portal.events['image_test'].setPortrait( fh )        
-    fh.close()
+    #content = SampleImageSchemaContent('image_test')
+    #portal.events._setObject( content.id, content )
+    #portal.events['image_test'].setPortrait( image_content )        
+    #fh.close()
     
 class DeploymentTests( PloneTestCase ):
 
@@ -178,9 +177,9 @@ class DeploymentTests( PloneTestCase ):
 
         installer = getToolByName(self.portal, 'portal_quickinstaller')
         installer.installProduct('Archetypes')
-        installer.installProduct('ATContentRule')        
         installer.installProduct('CMFDeployment')
 
+        #registerContent( self.portal )
         setupContentTree(self.portal)
         
         policy_file = os.path.join( DeploymentProductHome, 'examples', 'policies', 'plone.xml') 
@@ -194,10 +193,12 @@ class DeploymentTests( PloneTestCase ):
         get_transaction().commit(1)
         self.portal.changeSkin( self.portal.portal_skins.getDefaultSkin() )
 
-        rules = policy.getContentMastering().mime
-        rules.manage_addProduct['ATContentRule'].addArchetypeContentRule(
+        rules = policy.getContentMastering().rules
+        rules.manage_addProduct['CMFDeployment'].addATContentRule(
             id = "at_image_content",
-            condition="python: object.portal_type == 'Sample Image Content'"
+            extension_expression="string:${object/getId}.html",
+            condition="python: object.portal_type == 'Sample Image Content'",
+            view_method="string:base_view",
             )
         
         

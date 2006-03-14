@@ -30,14 +30,20 @@ $Id$
 from Namespace import *
 from DeploymentInterfaces import IContentRule
 
-class MimeMappingContainer(OrderedFolder):
+class ContentRuleContainer(OrderedFolder):
 
-    meta_type = 'Mime Mapping Container'
+    meta_type = 'Content Rule Container'
 
     manage_options = (
 
-        {'label':'Mappings',
+        {'label':'Rules',
          'action':'manage_main'},
+
+        {'label':'Skin',
+         'action':'../skin'},
+
+        {'label':'User',
+         'action':'../user'},
 
         {'label':'Mastering',
          'action':'../overview'},        
@@ -63,4 +69,4 @@ class MimeMappingContainer(OrderedFolder):
         return self.manage_addProduct['CMFDeployment'].addContentRule(*args, **kw)
 
 
-InitializeClass( MimeMappingContainer )    
+InitializeClass( ContentRuleContainer )    

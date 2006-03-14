@@ -86,6 +86,11 @@ class DeploymentHistoryContainer(Folder):
             return None
         return self._records[ self._records.maxKey() ].creation_time
 
+    def getLast(self):
+        if self._record_length() == 0:
+            return None
+        return self._records[ self._records.maxKey() ].__of__(self)
+
     security.declarePrivate('makeHistory')
     def makeHistory(self):
         return DeploymentHistory('Not Recorded')

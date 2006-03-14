@@ -42,7 +42,7 @@ import ContentDeployment
 import ContentIdentification
 #import DeploymentStrategy
 import Descriptor
-import MimeMapping
+import ContentRules
 
 import resources
 import rules
@@ -95,7 +95,7 @@ def initialize(context):
 
     crule = rules.default
     context.registerClass(
-        crule.MimeExtensionMapping,
+        crule.ContentRule,
         permission = 'CMFDeploy: Add Content Rule',
         constructors = ( crule.addContentRuleForm,
                          crule.addContentRule ),

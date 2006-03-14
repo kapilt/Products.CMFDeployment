@@ -83,7 +83,7 @@ class PolicyImportExportTests( PloneTestCase ):
         dtool.manage_delObjects(['plone_example'])
         dtool.addPolicy( policy_xml = xml )
         self.assertEqual(
-            dtool.getPolicy('plone_example').getContentMastering().mime.Folder.condition_text,
+            dtool.getPolicy('plone_example').getContentMastering().rules.Folder.condition_text,
             "python: object.portal_type == 'Folder'"
             )
 

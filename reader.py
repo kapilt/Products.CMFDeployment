@@ -297,7 +297,7 @@ def make_policy(portal, policy_node, id=None, title=None):
 
         #pprint.pprint( dict( m.items() ) )
             
-        factory = getattr(mastering.mime.manage_addProduct[product], factory)
+        factory = getattr(mastering.rules.manage_addProduct[product], factory)
         md = dict(m)
         if 'product' in md: del md['product']
         if 'factory' in md: del md['factory']

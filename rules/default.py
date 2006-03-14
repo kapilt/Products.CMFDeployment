@@ -19,12 +19,12 @@ addContentRuleForm = DTMLFile('../ui/MimeExtensionMappingAddForm', globals())
 def addContentRule(self, id, extension_expression, condition, view_method, ghost=0, aliases=(), RESPONSE=None):
     """ add content rule """
 
-    mapping = MimeExtensionMapping(id=id,
-                                   extension_expression=extension_expression,
-                                   condition=condition,
-                                   view_method=view_method,
-                                   ghost=ghost,
-                                   aliases=aliases)
+    mapping = ContentRule(id=id,
+                          extension_expression=extension_expression,
+                          condition=condition,
+                          view_method=view_method,
+                          ghost=ghost,
+                          aliases=aliases)
 
     self._setObject(id, mapping)
 
@@ -111,9 +111,9 @@ class ChildView( BaseRule ):
     
 InitializeClass( ChildView )
     
-class MimeExtensionMapping( OrderedFolder, BaseRule ):
+class ContentRule( OrderedFolder, BaseRule ):
 
-    meta_type = 'Mime Extension Mapping'
+    meta_type = 'Content Rule'
 
     view_method = ''
 
@@ -233,7 +233,7 @@ class MimeExtensionMapping( OrderedFolder, BaseRule ):
         
         return descriptor
 
-    def editMapping(self, extension_expression, condition, view_method, ghost=0, aliases=None, RESPONSE=None):
+    def editMapping(self, extension_expression, condition, view_method, ghost=0, aliases=(), RESPONSE=None):
         """ """
         self.extension = Expression(extension_expression)
         self.extension_text = extension_expression

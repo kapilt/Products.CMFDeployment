@@ -60,10 +60,10 @@ class DeploymentPolicy(Folder):
         {'label':'URIs',
          'action':'%s/manage_workspace'%DefaultConfiguration.ContentURIs},
 
-        {'label':'Templating',
+        {'label':'Rendering',
          'action':'%s/manage_workspace'%DefaultConfiguration.ContentMastering},
 
-        {'label':'Deployment', 
+        {'label':'Transports', 
          'action':'%s/manage_workspace'%DefaultConfiguration.ContentDeployment},
 
         {'label':'Transforms',
@@ -112,7 +112,7 @@ class DeploymentPolicy(Folder):
         return self._getOb(DefaultConfiguration.SiteResources)
 
     def getContentRules( self ):
-        return self.getContentMastering().mime
+        return self.getContentMastering().rules
     
     def getDeploymentHistory(self):
         return self._getOb(DefaultConfiguration.DeploymentHistory)
@@ -171,7 +171,7 @@ class DeploymentPolicy(Folder):
                 ec, e, tb = sys.exc_info()
                 print ec, e
                 print traceback.print_tb( tb )
-                pdb.post_mortem( tb )
+                #pdb.post_mortem( tb )
                 raise e
         finally:
             Log.detachLogMonitor(history)
@@ -182,8 +182,7 @@ class DeploymentPolicy(Folder):
         self.getDeploymentPolicy().setResetDate(False)
 
         if RESPONSE:
-            RESPONSE.setHeader('Content-Type', 'text/html')
-            return "<html><pre>deployed</pre></body></html>"
+            return RESPONSE.redirect('manage_workspace')
         return True
 
     def manage_afterAdd(self, item, container):

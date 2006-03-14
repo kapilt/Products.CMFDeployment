@@ -177,6 +177,9 @@ class DeletionRecord( object ):
 
     def getFileName(self):
         return self.file_name
+
+    def getAliases(self):
+        return ()
     
     def getDescriptors(self):
         if not self.child_descriptors:
@@ -282,7 +285,7 @@ class PolicyIncrementalIndex( SimpleItem ):
         ctx = getDeployExprContext( obj, portal )
 
         match_found = None
-        rules = policy.getContentMastering().mime
+        rules = policy.getContentMastering().rules
         for rule in rules.objectValues():
             if rule.isValid( obj, ctx):
                 match_found = rule
@@ -318,7 +321,7 @@ class PolicyIncrementalIndex( SimpleItem ):
             return
         
         content = self.getObjectFor( documentId )
-        rules = policy.getContentMastering().mime
+        rules = policy.getContentMastering().rules
         self._processDeletion( policy, rules, deletion_source, documentId, content )
 
     def _apply_index( request, cid=""):

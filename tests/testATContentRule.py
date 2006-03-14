@@ -44,79 +44,12 @@ import unittest
 from StringIO import StringIO
 from types import StringType, NoneType
 from Products.CMFCore.utils import getToolByName
-from Products.Archetypes import public as atapi
+
 from Products.CMFDeployment.Descriptor import DescriptorFactory
 from Products.CMFDeployment import DeploymentProductHome
 from Products.CMFDeployment.ExpressionContainer import getDeployExprContext
 
-ContentSchema = atapi.BaseSchema + atapi.Schema((
-    atapi.ImageField('portrait',
-               mode='rw',
-               accessor='getPortrait',
-               mutator='setPortrait',
-               max_size=(150,150),
-               required=0,
-               widget=atapi.ImageWidget(
-                   label='Portrait',
-                   label_msgid='label_portrait',
-                   description="To add or change the portrait: click the "
-                       "\"Browse\" button; select a picture of yourself. "
-                       "Recommended image size is 75 pixels wide by 100 "
-                       "pixels tall.",
-                   description_msgid='help_portrait',
-                   i18n_domain='plone',
-                   ),
-               ),
-    ))
-
-
-class SampleImageSchemaContent( atapi.BaseContent ):
-
-    schema = ContentSchema
-    archetype_name = portal_type = meta_type = "Sample Image Content"
-
-atapi.registerType( SampleImageSchemaContent, "CMFDeployment")
-
-FolderSchema = atapi.BaseFolderSchema + atapi.Schema((
-    atapi.ImageField('portrait',
-               mode='rw',
-               accessor='getPortrait',
-               mutator='setPortrait',
-               max_size=(150,150),
-               required=0,
-               widget=atapi.ImageWidget(
-                   label='Portrait',
-                   label_msgid='label_portrait',
-                   description="To add or change the portrait: click the "
-                       "\"Browse\" button; select a picture of yourself. "
-                       "Recommended image size is 75 pixels wide by 100 "
-                       "pixels tall.",
-                   description_msgid='help_portrait',
-                   i18n_domain='plone',
-                   ),
-               ),
-    ))
-
-class SampleImageSchemaFolder( atapi.BaseFolder ):
-
-    schema = FolderSchema
-    archetype_name = portal_type = meta_type = "Sample Image Folder"
-
-atapi.registerType( SampleImageSchemaFolder, "CMFDeployment")
-
-def registerContent( ):
-
-    # add type information for Dummy
-    tt = portal.portal_types
-    tt.manage_addTypeInformation(
-        FactoryTypeInformation.meta_type,
-        id = 'Simple Image Folder',
-        typeinfo_name = 'CMFDefault: Folder')
-
-    tt.manage_addTypeInformation(
-        FactoryTypeInformation.meta_type,
-        id = 'Simple Image Content',
-        typeinfo_name = 'CMFDefault: Document')    
+from sample import registerContent, SampleImageSchemaContent
 
 class ATContentRuleTests( PloneTestCase ):
 
@@ -127,6 +60,7 @@ class ATContentRuleTests( PloneTestCase ):
      
         self.loginPortalOwner()
 
+        registerContent( self.portal )
         self.portal._setObject('image_content', SampleImageSchemaContent('image_content'))
         self.image_content = self.portal.image_content         
         fh = open( os.path.join( DeploymentProductHome, 'www', 'identify.png'))
@@ -142,7 +76,7 @@ class ATContentRuleTests( PloneTestCase ):
         fh.close()
         
         self.policy = policy = deployment_tool.getPolicy('plone_example')
-        self.rules = policy.getContentMastering().mime
+        self.rules = policy.getContentMastering().rules
 
         self.rules.manage_addProduct['CMFDeployment'].addATContentRule(
             id = "at_image_content",

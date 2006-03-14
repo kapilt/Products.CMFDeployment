@@ -53,7 +53,7 @@
   </dtml-if>
   
   <mastering skin="<dtml-var "site_skin.skin_name">">
-    <dtml-in "mime.objectValues()">
+    <dtml-in "rules.objectValues()">
       <dtml-with sequence-item>
 	 <dtml-var toXml>
       </dtml-with>

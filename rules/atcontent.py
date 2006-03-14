@@ -35,7 +35,7 @@ from Acquisition import aq_inner, aq_parent
 from AccessControl import ClassSecurityInfo
 from Globals import DTMLFile, InitializeClass
 
-from default import MimeExtensionMapping as ContentRule
+from default import ContentRule
 
 def addATContentRule(self, id, extension_expression, condition, view_method, ghost=0, aliases=(), RESPONSE=None):
     """

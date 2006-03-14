@@ -70,7 +70,7 @@ class ResolveFolderURITests(PloneTestCase):
         fh.close()
         
         self.policy = policy = deployment_tool.getPolicy('plone_example')
-        self.rules = policy.getContentMastering().mime
+        self.rules = policy.getContentMastering().rules
         self.resolver = self.policy.getDeploymentURIs()
         self.resolver.source_host = 'http://www.example.com'
         self.resolver.mount_path = '/portal'
