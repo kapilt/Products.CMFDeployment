@@ -30,6 +30,7 @@ $Id$
 
 from Namespace import *
 
+import DefaultConfiguration
 from DeploymentExceptions import InvalidSkinName
 from Descriptor import DescriptorFactory
 from ExpressionContainer import getDeployExprContext
@@ -204,11 +205,12 @@ class ContentMastering(Folder):
             else:
                 descriptor.setRendered(render())
         except:
-##             import sys, pdb, traceback
-##             ec, e, tb = sys.exc_info()
-##             print ec, e
-##             traceback.print_tb( tb )
-##             pdb.post_mortem( tb )   
+            if DefaultConfiguration.DEPLOYMENT_DEBUG:
+                import sys, pdb, traceback
+                ec, e, tb = sys.exc_info()
+                print ec, e
+                traceback.print_tb( tb )
+                #pdb.post_mortem( tb )   
             
             log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
             descriptor.setGhost(1) # ghostify it        
