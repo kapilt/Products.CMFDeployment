@@ -117,6 +117,7 @@ class ATContentRuleTests( PloneTestCase ):
         
         self.assertEqual( descriptor.getRenderMethod(), "index_html")
         self.assertEqual( len(descriptor.getReverseDependencies()), 2)
+        self.assertEqual( descriptor.isGhost(), True)
         
         
     def testRule(self):

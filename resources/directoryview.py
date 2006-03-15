@@ -24,7 +24,6 @@ $Id$
 """
 
 from Products.CMFDeployment.Namespace import *
-from base import SiteBaseResource
 from Products.CMFDeployment.Log import LogFactory
 from Products.CMFDeployment.Descriptor import ContentDescriptor
 from Products.CMFDeployment.URIResolver import clstrip, extend_relative_path
@@ -32,10 +31,10 @@ from Products.CMFCore.FSObject import FSObject
 from Products.CMFDeployment.DeploymentExceptions import InvalidDirectoryView
 from Products.CMFDeployment.DefaultConfiguration import DEPLOYMENT_DEBUG
 from DocumentTemplate import HTML
+
 log = LogFactory('Directory Views')
 
-from Interface import Interface, Attribute
-
+from base import SiteBaseResource
 
 addDirectoryViewRuleForm = DTMLFile('../ui/ResourceDirectoryViewAddForm', globals())
 
