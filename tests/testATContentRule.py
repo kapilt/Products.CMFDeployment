@@ -49,7 +49,7 @@ from Products.CMFDeployment.Descriptor import DescriptorFactory
 from Products.CMFDeployment import DeploymentProductHome
 from Products.CMFDeployment.ExpressionContainer import getDeployExprContext
 
-from sample import registerContent, SampleImageSchemaContent
+from sample import registerContent, SampleImageSchemaContent, SampleImageSchemaFolder
 
 class ATContentRuleTests( PloneTestCase ):
 
@@ -90,6 +90,34 @@ class ATContentRuleTests( PloneTestCase ):
         self.image_content = None
         self.raw_image = None
         self.policy = None
+
+    def testContainerRule(self):
+
+        self.rules.manage_addProduct['CMFDeployment'].addATContainerRule(
+            id = "at_container",
+            extension_expression = "string:${object/getId}/index.html",
+            condition = "python: object.portal_type == 'Sample Image Folder'",
+            view_method = ""
+            )
+
+        self.portal._setObject( "image_folder", SampleImageSchemaFolder("image_folder") )
+        image_folder = self.portal._getOb( "image_folder")
+        image_folder.invokeFactory('Document', 'index_html')
+        
+        factory = DescriptorFactory( self.policy )
+        context = getDeployExprContext( image_folder, self.portal)
+
+        self.assertEqual(
+            self.rules.at_container.isValid( image_folder, context ),
+            True
+            )
+
+        descriptor = factory( image_folder )
+        descriptor = self.rules.at_container.process( descriptor, context )
+        
+        self.assertEqual( descriptor.getRenderMethod(), "index_html")
+        self.assertEqual( len(descriptor.getReverseDependencies()), 2)
+        
         
     def testRule(self):
         factory = DescriptorFactory( self.policy )

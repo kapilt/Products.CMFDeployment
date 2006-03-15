@@ -45,12 +45,4 @@ class ATCompositeRule( ArchetypeContentRule ):
                  cdescriptor.setFileName( utils.guess_filename( cdescriptor.getContent() ) )
                  descriptor.addChildDescriptor( cdescriptor )
 
-    def getXReverseDependencies( self, descriptor, context ):
-
-        dependencies = ArchetypeContentRule.getReverseDependencies( self, descriptor, context )
-        # for composite content, we explicitly redeploy contained objects
-        # only because some composite implementations don't index contained objects
-        dependencies.extend( descriptor.getContent().contentValues() )
-        return dependencies
-    
 InitializeClass(ATCompositeRule)

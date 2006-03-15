@@ -193,7 +193,7 @@ class ContentDescriptor(object):
         self.dependencies = dependencies 
 
     def getReverseDependencies( self ):
-        return self.reverse_dependencies or ()
+        return self.reverse_dependencies or []
 
     def setReverseDependencies( self, reverse_dependencies ):
         self.reverse_dependencies = reverse_dependencies

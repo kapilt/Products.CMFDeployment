@@ -102,6 +102,15 @@ def initialize(context):
         visibility = None
         )
 
+    atcontainer = rules.atcontainer
+    context.registerClass(
+        atcontainer.ATContainerRule,
+        permission = 'CMFDeploy: Add Content Rule',
+        constructors = ( atcontainer.addATContainerRuleForm,
+                         atcontainer.addATContainerRule ),
+        visibility = None
+        )    
+
     atrule = rules.atcontent
     context.registerClass(
         atrule.ArchetypeContentRule,
