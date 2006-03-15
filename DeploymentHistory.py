@@ -94,6 +94,11 @@ class DeploymentHistoryContainer(Folder):
     security.declarePrivate('makeHistory')
     def makeHistory(self):
         return DeploymentHistory('Not Recorded')
+
+    security.declarePrivate('clear')
+    def clear(self):
+        self._record_length = Length(0)
+        self._records = IOBTree()
         
     def __bobo_traverse__(self, REQUEST, name=None):
 

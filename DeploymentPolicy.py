@@ -123,6 +123,21 @@ class DeploymentPolicy(Folder):
     def getDeploymentPolicy(self):
         return self
 
+    security.declareProtected('Manage Portal', 'clearState')
+    def clearState(self, RESPONSE=None):
+        """
+        clear all persistent state from the policy, not including
+        configuration.
+        """
+        self.getDeploymentHistory().clear()
+        self.getDeploymentURIs().clear()
+
+        factory = pipeline.getPipeline( self.pipeline_id )
+        factory.clearState( self )
+        
+        if RESPONSE is not None:
+            RESPONSE.redirect('manage_workspace')
+
     security.declarePrivate('getPipeline')
     def getPipeline(self):
         factory = pipeline.getPipeline( self.pipeline_id )

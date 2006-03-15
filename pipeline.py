@@ -107,6 +107,16 @@ class IncrementalPipelineFactory( PipelineFactory ):
 
         policy.setResetDate( True )
 
+
+    def clearState( self, policy ):
+        import incremental
+        catalog = getToolByName( policy, 'portal_catalog' )
+        pidx_id = incremental.getIncrementalIndexId( policy )
+        for idx in catalog.index_objects():
+            if idx.getId() == pidx_id:
+                idx.clearState()
+        
+
     #################################
     # private methods for easy subclass construction
     def constructContentProcessorPipeline( self ):

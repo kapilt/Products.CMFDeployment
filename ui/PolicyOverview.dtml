@@ -18,16 +18,22 @@ how it should be displayed when deployed, and how it should be deployed </p>
 <dtml-let last_time="history.getLastTime()">
  <dtml-if last_time>
  <p>
-  Last Deployment Time - <dtml-var last_time>   
-  <div style="display:block; font-size:smaller">
-   <a href="<dtml-var "history.getLast().absolute_url()">">See Log</a></div>
+  Last Deployment Time - <dtml-var last_time>   - 
+  <em>
+   <a href="<dtml-var "history.getLast().absolute_url()">">See Log</a></em>
  </p>
  </dtml-if>
 </dtml-let>
 </dtml-let>
 
 
+<p> Reset - You can also clear all non configuration persistent state from the
+policy. If your a configuring and executing a policy, its a good idea
+to do this after configuration. it will reset the incremental state. 
+<em> <a href="clearState">Clear State</a> </em>
+</p>
 
-<p>Download Policy as <a href="policy_xml">XML</a></p>
+
+<p>Download Policy - as <em><a href="policy_xml">XML</a></em></p>
 
 <dtml-var manage_page_footer>

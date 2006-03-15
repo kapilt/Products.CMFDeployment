@@ -37,6 +37,7 @@ License: GPL
 from Namespace import *
 from Products.CMFCore import CMFCorePermissions
 from URIResolver import URIResolver
+from BTrees.OOBTree import OOBTree
 
 class ContentURI(SimpleItem, URIResolver):
 
@@ -58,6 +59,10 @@ class ContentURI(SimpleItem, URIResolver):
     def __init__(self, id):
         self.id = id
         ContentURI.inheritedAttribute('__init__')(self)
+
+    security.declarePrivate('clear')
+    def clear(self):
+        self.uris = OOBTree()
 
     security.declarePrivate('clone')
     def clone(self, persistent=0):

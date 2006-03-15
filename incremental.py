@@ -251,8 +251,9 @@ class PolicyIncrementalIndex( SimpleItem ):
     def __init__(self, id, extra=None, caller=None):
         self.id = id
         self.policy_id = self._getPolicyId( id )
-        self._length = Length()
-        self._index = IOBTree()
+
+        self.clearState()
+
 
     def getId(self):
         return self.id
@@ -383,14 +384,11 @@ class PolicyIncrementalIndex( SimpleItem ):
 
 
     #################################
-    def isObjectDeployed( self, object ):
-        path = '/'.join( object.getPhysicalPath() )
-        rid = self.getrid( path )
-        return not not rid
     
     def getObjectFor( self, documentId ):
         return self.getobject( documentId )
-    
+
+    security.declarePrivate('recordObject')
     def recordObject(self, rule_id, object):
         assert rule_id is not None
         catalog = self.aq_parent
@@ -417,4 +415,10 @@ class PolicyIncrementalIndex( SimpleItem ):
             if rule_id != srule_id or spath != path:
                 self._index[key] = ( rule_id, path )
                 
+
+    security.declarePrivate('clearState')
+    def clearState(self):
+        self._length = Length(0)
+        self._index  = IOBTree()
+        
 InitializeClass( PolicyIncrementalIndex )
