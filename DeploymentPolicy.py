@@ -237,7 +237,9 @@ class DeploymentPolicy(Folder):
             RESPONSE.setHeader("Content-Length", len( export ) )
             RESPONSE.setHeader("Content-Disposition",
                                'attachment; filename="%s.xml"'%(self.getId()))
-        
+
+        return export
+    
     def getInfoForXml( self ):
         info =  {'attributes':{'id':self.id,
                                'title': self.title_or_id(),

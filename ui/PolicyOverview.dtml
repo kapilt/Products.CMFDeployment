@@ -34,6 +34,6 @@ to do this after configuration. it will reset the incremental state.
 </p>
 
 
-<p>Download Policy - as <em><a href="policy_xml">XML</a></em></p>
+<p>Download Policy - as <em><a href="export">XML</a></em></p>
 
 <dtml-var manage_page_footer>

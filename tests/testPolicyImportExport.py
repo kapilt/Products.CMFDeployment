@@ -104,13 +104,15 @@ class PolicyImportExportTests( PloneTestCase ):
         deployment_tool = getToolByName(self.portal, 'portal_deployment')
         deployment_tool.addPolicy( policy_xml=fh )
         example = deployment_tool._getOb( 'plone21_example')
-        return example.export()
+        export = example.export()
+        return export
 
     def testXmlParsing(self):
 
         xstr = self.testXmlGeneration()
         ctx  = io.ImportContext( None, {} )
         stream = StringIO( xstr )
+
         try:
             ctx.load( stream )
         except:
