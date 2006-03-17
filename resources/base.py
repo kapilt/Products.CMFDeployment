@@ -91,6 +91,7 @@ class SiteBaseResource( SerializablePlugin ):
 
     def getInfoForXml(self):
         d = SerializablePlugin.getInfoForXml(self)
+        del d['attributes']['title']
         d['view_path'] = self.view_path
         d['deployment_path'] = self.deployment_path
         d['source_path'] = self.source_path

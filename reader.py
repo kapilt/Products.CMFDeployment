@@ -54,7 +54,11 @@ class PolicyNode(UserDict):
     
 class MetaReader(ContentHandler):
 
-    def __init__(self):
+    def __init__(self, parser, alt_element, alt_handler):
+
+        self.parser = parser
+        self.alt_element = alt_element
+        self.alt_handler = alt_handler
 
         self.buf = []
         self.prefix = ''
@@ -62,6 +66,9 @@ class MetaReader(ContentHandler):
         
     def startElement(self, element_name, attrs):
         name = element_name.lower()
+        if name == self.alt_element:
+            self.alt_handler.startElement( element_name, attrs )
+            return self.parser.setContentHandler( self.alt_handler )
 
         if self.prefix: name = '%s%s'%(self.prefix, name.capitalize())      
         method = getattr(self, 'start%s'%name.capitalize(), None)
@@ -361,7 +368,7 @@ def make_policy(portal, policy_node, id=None, title=None):
             
     ## backwards compat registry rule
     if hasattr( policy_node, 'registries') and hasattr( policy_node.registries, 'registries'):
-        for reg in registries_node:
+        for reg in policy_node.registries.registries:
             id = reg.get('id', reg.view_path.replace('/',''))
             if not id.startswith('reg_'):
                 id = "reg_" + id

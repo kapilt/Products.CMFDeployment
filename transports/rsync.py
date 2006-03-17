@@ -34,7 +34,7 @@ from cStringIO import StringIO
 
 from Products.CMFDeployment.Namespace import *
 from Products.CMFDeployment.DeploymentInterfaces import *
-
+from Products.CMFDeployment.utils import SerializablePlugin
 
 class RsyncSSHProtocol(object):
 
@@ -138,7 +138,7 @@ def addRsyncSSHTransport(self,
         RESPONSE.redirect("manage_main")
 
 
-class RsyncSSHTransport(SimpleItem):
+class RsyncSSHTransport(SerializablePlugin):
 
     __implements__ = IDeploymentTarget
 
@@ -157,11 +157,15 @@ class RsyncSSHTransport(SimpleItem):
 
     target_settings = DTMLFile('../ui/RsyncTargetSettingsForm', globals())
 
+    remote_directory = ''
+    xml_factory = 'addRsyncSSHTransport'
+    
     def __init__(self, id):
         self.id = id
         self._user = None
         self._password = None
         self.host = None
+        self.remote_directory = ''
 
     security.declareProtected(CMFCorePermissions.ManagePortal, 'edit')
     def edit(self,
@@ -205,6 +209,19 @@ class RsyncSSHTransport(SimpleItem):
     security.declareProtected(CMFCorePermissions.ManagePortal, 'getDirectory')
     def getDirectory(self):
         return self.remote_directory
+
+    security.declarePrivate('getInfoForXml')
+    def getInfoForXml( self ):
+        d = SerializablePlugin.getInfoForXml( self )
+        del d['attributes']['title']
+        d.update( {
+            'host':self.host,
+            'password': '',
+            'password_confirm': '',
+            'remote_directory':self.remote_directory }
+                  )
+        return d
+
 
 InitializeClass( RsyncSSHTransport )
 

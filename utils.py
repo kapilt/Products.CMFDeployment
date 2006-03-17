@@ -55,19 +55,26 @@ class SerializablePlugin( SimpleItem ):
     xml_factory  = None
 
     def toXml(self):
-        data = self.getInfoForXml()
+        # compatiblity method
+        assert self.xml_template, self.xml_factory
+        data = self.getInfoForXmlTemplate()
         if data is None:
             return ''
         return self.xml_template%( data )
-    
+
+    def getInfoForXmlTemplate(self):
+        # compatiblity method
+        info = self.getInfoForXml()
+        info.update( info['attributes'] )
+        del info['attributes']
+        return info
+        
     def getInfoForXml(self):
         """
         get a dictionary of info for xml formatting
         """
-        # do a basic xml export for stateless sources
-        assert self.xml_template, self.xml_factory
-        
         # stateful sources should override
+        
         module = inspect.getmodule( self.__class__ )
         parts = module.__name__.split('.')
         
@@ -77,13 +84,32 @@ class SerializablePlugin( SimpleItem ):
         idx = parts.index('Products')
         product = ".".join(parts[idx+1:idx+2])
         
-        d = { 'id': self.id,
-              'title': self.title_or_id(),
-              'product': product,
-              'factory': self.xml_factory }
+        d = { 'attributes': { 'id': self.id,
+                              'title': self.title_or_id(),
+                              'product': product,
+                              'factory': self.xml_factory } }
+
+##         d = { 'id': self.id,
+##               'title': self.title_or_id(),
+##               'product': product,
+##               'factory': self.xml_factory } 
 
         return d
 
+
+def getXmlPath( self ):
+    res = []
+    policy = self.getPolicy()
+    
+    idx = self.aq_chain.index( policy )
+
+    chain = self.aq_chain[idx:]
+    for c in chain:
+        res.append( c.xml_key )
+
+    filter( None, res )
+    return ".".join( res )
+    
 
 def guess_filename( content ):
     cid = content.getId()

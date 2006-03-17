@@ -56,6 +56,8 @@ class ContentTransforms(Folder):
         )
 
     overview = DTMLFile('ui/ContentTransformsOverview', globals())
+
+    xml_key = 'content_transforms'
     
     def __init__(self, id):
         self.id = id
@@ -100,6 +102,16 @@ class ContentTransforms(Folder):
         ob = TransformRulesContainer('rules')
         self._setObject('rules', ob)
 
+    def getInfoForXml( self ):
+        res = []
+        for transform in self.rules.objectValues():
+            res.append( transform.getInfoForXml() )
+
+        if not res:
+            return {}
+        return {'attributes':{ 'enabled':bool( self.enabled ) },
+                'transforms': res }
+            
 
 class ContentTransformRule(SimpleItem):
 
@@ -137,6 +149,15 @@ class ContentTransformRule(SimpleItem):
         if RESPONSE is not None:
             RESPONSE.redirect('../manage_main')
 
+    def getInfoForXml( self ):
+        return dict(
+            product='container',
+            factory='addRule',
+            id = self.id,
+            condition = self.condition_text,
+            script_id = self.script_id )
+    
+        
 class TransformRulesContainer(ExpressionContainer):
 
     meta_type = 'Content Transform Rules Container'

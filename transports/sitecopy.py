@@ -29,6 +29,7 @@ from Products.CMFDeployment.DeploymentInterfaces import IDeploymentProtocol, IDe
 from Products.CMFDeployment.lib import pexpect
 from Products.CMFDeployment.DeploymentExceptions import ProtocolError
 from Products.CMFDeployment.Namespace import *
+from Products.CMFDeployment.utils import SerializablePlugin
 
 from cStringIO import StringIO
 
@@ -116,6 +117,7 @@ class SiteCopyTransport( SimpleItem ):
     security = ClassSecurityInfo()
 
     _tprotocol = SiteCopyProtocol()
+    xml_factory = "addSiteCopyTransport"
     
     manage_options = (
         
@@ -170,4 +172,15 @@ class SiteCopyTransport( SimpleItem ):
     def getProtocol(self):
         return self._tprotocol
 
+    security.declarePrivate('getInfoForXml')
+    def getInfoForXml( self ):
+        d = SerializablePlugin.getInfoForXml( self )
+        del d['attributes']['title']
+        d.update( {
+            'rcfile':self.rcfile,
+            'storepath':self.storepath
+                  } )
+        return d
+        
+        
 InitializeClass( SiteCopyTransport )

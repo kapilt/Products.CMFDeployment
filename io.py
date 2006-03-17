@@ -1,16 +1,18 @@
 """
-a new xml export/import system, utilizes a genericized form that allows for
-just passing nested python types (lists,dictionaries, etc ) to the
-exporter, and getting the same back from the importer.
+a new policy xml export/import system, utilizes a genericized form that allows for
+just passing nested python types [json like] (lists,dictionaries, etc,)  to the exporter, and
+getting the same back from the importer.
 
 construction in turn follows from the python data structure, and is pluggable
 by registering against a handler against path into the data structure.
 
 compatibility for the new impl is in two stages, on old xml formats
-we use the old parser for a release cycle, its now depreceated.
+we use the old parser for a release cycle, the old format is now depreceated.
 
 for the new format, compatibility will be via a series of python transforms
 applied the nested python data structure.
+
+
 
 $Id$
 """
@@ -20,7 +22,24 @@ from xml.sax.saxutils import XMLGenerator
 from xml.sax.xmlreader import AttributesNSImpl
 from xml.sax import make_parser, ContentHandler
 
+import reader as policy_reader # we use content handler dispatch to preserve compatibility
+
 _marker = object()
+
+class struct( dict ):
+    # used on import for easier value access
+    def __getattr__(self, key):
+        try:
+            return self[key]
+        except KeyError:
+            try:
+                return self[unicode(key)]
+            except:
+                pass
+            raise AttributeError( key )
+        
+    def __setattr__(self, key, value ):
+        self[key]=value
 
 class ImportReader( ContentHandler ):
 
@@ -28,18 +47,19 @@ class ImportReader( ContentHandler ):
         u"string" : types.StringType,
         u"int" : types.IntType,
         u"bool" : types.BooleanType,
-        u"dict" : types.DictType,
+        u"dict" : struct, #types.DictType,
         u"list" : types.ListType
         }
 
-    subnode_types = ( types.ListType, types.DictType, types.TupleType )
+    subnode_types = ( types.ListType, types.DictType, types.TupleType, struct )
 
     def __init__(self):
         self.buf = []
         self.root = {}
         self.current_path = ''
         self.current_type = u'string'
-
+        self.stack = []
+    
     def getData(self):
         return self.root
         
@@ -52,7 +72,7 @@ class ImportReader( ContentHandler ):
         # everything in the new format should have a type code.
 
         self.current_path += ".%s"%element_name
-        self.current_type = v_type
+        self.stack.append( v_type )
 
         if v_type is None:
             v_type = 'dict'
@@ -63,7 +83,6 @@ class ImportReader( ContentHandler ):
             self.createData( self.current_path, v_type )
 
         if len(d) > 1: # has 'real' attributes
-            #print d['type'], d
             assert d['type'] == 'dict'
             del d['type']
             path = self.current_path + ".attributes"
@@ -72,11 +91,14 @@ class ImportReader( ContentHandler ):
     def endElement( self, element_name ):
         assert self.current_path.endswith( element_name ), "%s %s"%( self.current_path, element_name )
         
-        if self.buf:
+        if self.buf and not self._types[ self.stack[-1] ] in self.subnode_types:
             data = "".join( self.buf )
-            self.createData( self.current_path, self.current_type, data)
-            self.buf = []
-            
+            data = data.strip()
+            self.createData( self.current_path, self.stack[-1], data)
+
+        self.buf = []
+        self.stack.pop(-1)
+        
         if self.current_path.rfind('.') != -1:
             idx = self.current_path.rfind('.') 
             self.current_path = self.current_path[:idx]
@@ -90,28 +112,14 @@ class ImportReader( ContentHandler ):
             data = factory( data )
         else:
             data = factory()
-        last, last_part = self._traverse( path )
+        last, last_part = traverseStruct( path, self.root  )
         if last_part == 'entry':
             last.append( data )
         else:
             last[ last_part ] = data
             
-    def _traverse( self, path ):
-        
-        last = self.root
-        parts = path.split('.')
-        parts.pop(0)
-        last_part = parts.pop(-1)
-        
-        for p in parts:
-            if p == 'entry':
-                last = last[-1]
-            else:
-                last = last[ p ]
-                
-        return last, last_part
-    
-class ExportSerializer( object ):
+
+class ExportWriter( object ):
 
     _values = {
         types.StringType : "dumpEntry",
@@ -152,12 +160,10 @@ class ExportSerializer( object ):
         self._encoding = encoding
 
         self._logger.startDocument()
-        attrs = AttributesNSImpl({}, {})
-        self._logger.startElementNS((None, self.policy_id), self.policy_id, attrs)
-
         self._stack = []
 
     def close( self ):
+        return
         self._logger.endElementNS((None, self.policy_id), self.policy_id )
         self._logger.endDocument()
 
@@ -244,15 +250,204 @@ class ExportSerializer( object ):
     def convertValue( self, value ):
         return unicode( value )
 
-    def convertBoolean( self, value ):
-        return unicode( value )
 
-    def convertInteger( self, value ):
-        return unicode( value )
+def traverseStruct( path, data, get=False ):
+    last = data
+    parts = path.split('.')
+    parts = filter(None, parts )
+    last_part = parts.pop(-1)
+        
+    for p in parts:
+            if p == 'entry':
+                last = last[-1]
+            else:
+                last = last[ p ]
 
-    def convertDateTime( self, value ):
-        return unicode( self, value )
+    if get is False:
+        return last, last_part
 
+    if last_part == 'entry':
+        return last
+    else:
+        return last[ last_part ]
+
+def mapStruct( data, d=None, prefix='' ):
+    if d is None:
+        d = dict()
+    for k,v in data.items():
+        d[prefix+k]=v
+        if isinstance( v, (dict, struct) ):
+            mapStruct( v, d, prefix+k+'.' )
+    return d
+
+def getFactory( ctx, node ):
+    product_name = node.attributes['product']
+    factory_name = node.attributes['factory']
+
+    if product_name == 'container':
+        factory = getattr( ctx, factory_name )
+    else:
+        factory = getattr( ctx.manage_addProduct[ product_name ], factory_name )
+        
+    md = dict( node )
+    md.update( node.attributes )
+    
+    if 'product' in md: del md['product']
+    if 'factory' in md: del md['factory']
+
+    del md['attributes']
+
+    md = dict( [ (str(k),v) for k,v in md.items() ])
+    
+    return factory, md
+
+
+class IOContext( object ):
+
+    def load( self, context ):
+        raise NotImplemented
+
+    def construct( self ):
+        raise NotImplemented
+
+
+def CompatiblityFilenameForRule( ctx ):
+    # example compatibilty transform
+    for i in ctx.key_map['policy.mastering.rules']:
+        v = i['filename']
+        del i['filename']
+        i['extension_expression'] = v
+
+
+class ImportContext( IOContext ):
+
+    transforms = [
+        CompatiblityFilenameForRule
+        ]
+    
+    def __init__( self, context, overrides=None ):
+        self.context = context
+        self.policy = None
+        self.data = None
+        self.overrides = overrides or {}
+
+        self.construct_type = None # marker for compatilibity
+
+    def load( self, stream ):
+
+#        if isinstance( stream, str):
+#            stream = StringIO.StringIO( stream )
+            
+        reader = ImportReader()
+
+        parser = make_parser()
+
+        preader = policy_reader.PolicyReader(  parser, u"policy", reader )
+        parser.setContentHandler( preader )
+        parser.parse( stream )
+
+        if parser.getContentHandler() is preader:
+            self.construct_type = 'compatiblity'
+            self.data = preader.getPolicy()
+
+        if parser.getContentHandler() is reader:
+            
+            self.data = reader.getData()
+            self.key_map = mapStruct( self.data )        
+            for t in self.transforms:
+                t( self )
+
+    def construct(self):
+
+        if self.construct_type == 'compatiblity':
+            return policy_reader.make_policy( self.context,
+                                              self.data,
+                                              id = self.overrides.get('id'),
+                                              title = self.overrides.get('title') )
+
+        # sort by length, so we finish root config/construction before leaf        
+        keys = [ ( len(k), k) for k in self.key_map.keys() ]
+        keys.sort()
+        keys = [ k[1] for k in keys]
+        
+        for k in keys:
+            handler = self._handlers.get( k )
+            if handler is None:
+                continue
+            data = traverseStruct( k, self.data, get=True )
+            handler( self, k, data )
+
+        return self.policy
+
+    def editFromStruct( ctx, name, value ):
+        container = ctx.resolveContainer( name )
+        container.fromStruct( value )
+
+    def pluginConstructor( ctx, name, value ):
+        container = ctx.resolveContainer( name )
+        for v in value:
+            factory, md = getFactory( container, v )
+            factory( **md )
+            
+    def policyConstructor( ctx, name, value ):
+        id = ctx.overrides.get('id')
+        if id is None:
+            id = value.attributes.id
+            
+        pipeline_id = value.attributes.pipeline_id
+        title = value.attributes.get('title', id )
+        ctx.policy = ctx.context.addPolicy( id, title, policy_pipeline_id=pipeline_id )
+
+    def resolveContainer( self, name ):
+        parts = name.split('.')
+        parts.reverse()
+
+        for p in parts:
+            accessor = self._names.get( p )
+            if accessor is not None:
+                if isinstance( accessor, str):
+                    accessor = getattr( self.policy, accessor )
+                else:
+                    accessor = lambda func=accessor, policy=self.policy: func(policy)
+                return accessor()
+
+    # plugin container accessors, callable to be called with policy, or string method spec of policy
+    _names = {'identification':'getContentTransforms',
+              'mastering' : 'getContentMastering',
+              'organization' : 'getContentOrganization',
+              'rules' : 'getContentRules',
+              'resolver' : 'getDeploymentURIs',
+              'sources' : lambda policy: policy.getContentIdentification().sources,
+              'filters' : lambda policy: policy.getContentIdentification().filters,
+              'site_resources': 'getSiteResources'}
+
+
+    # just a calllable accepting ( policy, name, value )
+    _handlers = {
+        'policy.identification.sources' : pluginConstructor,
+        'policy.identification.filters' : pluginConstructor,
+        'policy.organization' : editFromStruct,
+        'policy.transports' : pluginConstructor,
+        'policy.site_resources': pluginConstructor,
+        'policy.mastering.rules' : pluginConstructor,
+        'policy.mastering' : editFromStruct,
+        'policy': policyConstructor,
+        }
+
+
+class ExportContext( object ):
+
+    def load( self, policy ):
+        self.policy = policy
+
+    def construct( self, stream=None):
+        stream = StringIO.StringIO()
+        serializer = ExportWriter( stream, "utf-8")
+        info = self.policy.getInfoForXml()
+        serializer.dumpDictionary( "policy", info ) 
+            
+        serializer.close()
+        return stream.getvalue()
 
 
 if __name__ == '__main__':
@@ -270,7 +465,7 @@ if __name__ == '__main__':
    from xml.dom.minidom import parseString
    
    stream = StringIO()
-   serializer = ExportSerializer( stream, "utf-8")
+   serializer = ExportWriter( stream, "utf-8")
    serializer.dumpDictionary('identification', d )
    serializer.close()
 
@@ -284,9 +479,25 @@ if __name__ == '__main__':
    parser.setContentHandler(reader)
 
    stream = StringIO( xstr )
-   parser.parse( stream )
+   try:
+       parser.parse( stream )
+   except:
+       import sys, pdb, traceback
+       exc_info = sys.exc_info()
+       traceback.print_exception( *exc_info )
+       pdb.post_mortem( exc_info[-1] )
    data = reader.getData()
    pprint(data)
+
+   print
+   print
+
+   key_map = mapStruct(data)
+   keys = [ ( len(k), k) for k in key_map.keys() ]
+   keys.sort()
+   keys = [ k[1] for k in keys]
+   for k in keys:
+       print k, key_map[k]
 
 
     

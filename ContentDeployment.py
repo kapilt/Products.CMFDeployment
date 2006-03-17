@@ -33,7 +33,7 @@ $Id$
 from Namespace import *
 from DeploymentInterfaces import *
 from DeploymentExceptions import *
-
+from utils import getXmlPath
 
 #################################
 # container for pluggable transports
@@ -53,7 +53,8 @@ class ContentDeployment( OrderedFolder ):
         ) + App.Undo.UndoSupport.manage_options
 
     overview = DTMLFile('ui/ContentDeploymentOverview', globals())
-    
+
+    xml_key = 'transports'
     _product_interfaces = ( IDeploymentTarget, )
 
     security = ClassSecurityInfo()
@@ -69,6 +70,13 @@ class ContentDeployment( OrderedFolder ):
     def deploy(self, structure):
         for target in self.objectValues():
             target.transfer( structure )
+
+    def getInfoForXml( self ):
+        res = []
+        for transport in self.objectValues():
+            res.append( transport.getInfoForXml() )
+        return res
+
 
 InitializeClass( ContentDeployment )
 

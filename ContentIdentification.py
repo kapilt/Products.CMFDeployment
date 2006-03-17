@@ -30,6 +30,8 @@ $Id$
 from Namespace import *
 from Products.CMFCore.Expression import Expression
 from Products.PageTemplates.Expressions import SecureModuleImporter, getEngine
+
+from Products.CMFDeployment.utils import SerializablePlugin
 from Log import LogFactory
 
 from DeploymentInterfaces import *
@@ -60,6 +62,7 @@ class ContentIdentification(Folder):
     security.declareProtected(Permissions.view_management_screens, 'overview')
     overview = DTMLFile('ui/IdentificationOverview', globals())
 
+    xml_key = "identification"
     allowed_meta_types = ()
     
     def __init__(self, id):
@@ -112,6 +115,13 @@ class ContentIdentification(Folder):
         self._setObject('sources',  ContentSourceContainer('sources'))
         self._setObject('filters',  ContentFilterContainer('filters'))
 
+    def getInfoForXml(self):
+        d = {}
+        d.update( self.sources.getInfoForXml() )
+        d.update( self.filters.getInfoForXml() )
+        return d
+    
+
 InitializeClass(ContentIdentification)
 
 
@@ -143,6 +153,12 @@ class ContentSourceContainer( OrderedFolder ):
             for c in source.getContent():
                 yield c
 
+    def getInfoForXml( self ):
+        res = []
+        for source in self.objectValues():
+            res.append( source.getInfoForXml() )
+        return {'sources':res }
+
 ##     def manage_afterAdd(self, item, container):
         
 ##         import DefaultConfiguration
@@ -161,7 +177,7 @@ InitializeClass( ContentSourceContainer )
 #################################
 # Filters
 
-class ContentFilter(SimpleItem):
+class ContentFilter(SerializablePlugin):
 
     meta_type = 'Content Filters'
     __implements__ = IContentFilter
@@ -171,6 +187,9 @@ class ContentFilter(SimpleItem):
          'action':'manage_editContentFilter'},
         ) + App.Undo.UndoSupport.manage_options
 
+
+    xml_factory = "addFilter"
+    
     manage_options = filter_manage_options + SimpleItem.manage_options
     manage_editContentFilter = DTMLFile('ui/ContentExpFilterEditForm', globals())
 
@@ -188,6 +207,13 @@ class ContentFilter(SimpleItem):
         self.expression = Expression(expression_text)
         if REQUEST is not None:
             REQUEST.RESPONSE.redirect(self.absolute_url()+'/manage_main')
+
+    def getInfoForXml(self):
+        d = SerializablePlugin.getInfoForXml( self )
+        del d['title']
+        d['text' ] = self.expression_text
+        d['product'] = "container"
+        return d
 
 InitializeClass( ContentFilter )
 
@@ -225,6 +251,12 @@ class ContentFilterContainer( OrderedFolder ):
         if REQUEST is not None:
             REQUEST.RESPONSE.redirect('manage_main')
 
+    def getInfoForXml(self):
+        res = []
+        for ob in self.objectValues( ContentFilter.meta_type ):
+            res.append( ob )
+        return {'filters':res}
+        
 
 def getFilterExprContext(object_memento, portal):
 

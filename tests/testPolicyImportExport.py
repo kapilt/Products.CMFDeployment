@@ -28,7 +28,7 @@ $Id: $
 
 """
 
-import os, sys, time
+import os, sys, time, StringIO
 if __name__ == '__main__':
     execfile(os.path.join(sys.path[0], 'framework.py'))
     
@@ -43,6 +43,7 @@ from types import StringType, NoneType
 from Products.CMFCore.utils import getToolByName
 from Products.CMFDeployment.Descriptor import ContentDescriptor
 from Products.CMFDeployment import DeploymentProductHome
+from Products.CMFDeployment import io
 
 class PolicyImportExportTests( PloneTestCase ):
 
@@ -87,6 +88,55 @@ class PolicyImportExportTests( PloneTestCase ):
             "python: object.portal_type == 'Folder'"
             )
 
+    def testInfoForXml(self):
+        policy_file = os.path.join( DeploymentProductHome, 'examples', 'policies', 'plone.xml') 
+        fh = open( policy_file )
+        deployment_tool = getToolByName(self.portal, 'portal_deployment')
+        deployment_tool.addPolicy( policy_xml=fh )
+        example = deployment_tool._getOb( 'plone_example')
+        info = example.getInfoForXml()
+        #import pprint
+        #pprint.pprint( info )
+
+    def testXmlGeneration(self):
+        policy_file = os.path.join( DeploymentProductHome, 'examples', 'policies', 'plone21.xml') 
+        fh = open( policy_file )
+        deployment_tool = getToolByName(self.portal, 'portal_deployment')
+        deployment_tool.addPolicy( policy_xml=fh )
+        example = deployment_tool._getOb( 'plone21_example')
+        return example.export()
+
+    def testXmlParsing(self):
+
+        xstr = self.testXmlGeneration()
+        ctx  = io.ImportContext( None, {} )
+        stream = StringIO( xstr )
+        try:
+            ctx.load( stream )
+        except:
+            import pdb, traceback, sys
+            exc_info = sys.exc_info()
+            traceback.print_exception( *exc_info )
+            pdb.post_mortem( exc_info[-1] )
+
+        return ctx
+
+    def testXmlImport( self ):
+        ctx = self.testXmlParsing()
+
+        deployment_tool = getToolByName(self.portal, 'portal_deployment')
+        example = deployment_tool._getOb( 'plone21_example')        
+        ctx.context = example
+        ctx.overrides = {'id':'test_xio'}
+        try:
+            ctx.construct()
+        except:
+            import pdb, traceback, sys
+            exc_info = sys.exc_info()
+            traceback.print_exception( *exc_info )
+            pdb.post_mortem( exc_info[-1] )
+
+        
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(PolicyImportExportTests))

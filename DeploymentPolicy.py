@@ -27,9 +27,12 @@ Created: 8/10/2002
 $Id$
 """
 
+from xml.dom.minidom import parseString
+   
 import DefaultConfiguration
 import Log
 import pipeline
+import io
 
 from Namespace import *
 from DeploymentInterfaces import IDeploymentPolicy
@@ -80,6 +83,7 @@ class DeploymentPolicy(Folder):
     _active = 1
     _reset_date = False
     policy_xml = DTMLFile('ui/PolicyExport', globals())
+    xml_key = 'policy'
 
     icon = 'misc_/CMFDeployment/policy.png'
     
@@ -210,6 +214,24 @@ class DeploymentPolicy(Folder):
         factory = pipeline.getPipeline( self.pipeline_id )
         factory.beginPolicyRemoval( self )
         
+    def export( self, pretty=True ):
+        ctx = io.ExportContext()
+        ctx.load( self )
+        export = ctx.construct()
+        if not pretty:
+            return export
+        
+        dom = parseString( export )
+        return dom.toprettyxml()
+        
+    def getInfoForXml( self ):
+        info =  {'attributes':{'id':self.id,
+                               'title': self.title_or_id(),
+                               'pipeline_id': self.pipeline_id } }
+        for ob in self.objectValues():
+            if hasattr( aq_base( ob ), 'xml_key' ):
+                info[ob.xml_key] = ob.getInfoForXml()
+        return info
     
 InitializeClass(DeploymentPolicy)
     

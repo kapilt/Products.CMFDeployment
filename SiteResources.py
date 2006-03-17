@@ -57,6 +57,7 @@ class SiteResources(OrderedFolder):
         
         )
 
+    xml_key = "site_resources"
     _product_interfaces = ( ISiteResource, )
 
     def __init__(self, id, title=''):
@@ -86,6 +87,12 @@ class SiteResources(OrderedFolder):
         assert descriptor.rule_id
         rule = self._getOb( descriptor.rule_id )
         return rule.cook( descriptor )
+
+    def getInfoForXml( self ):
+        res = []
+        for resource in self.objectValues():
+            res.append( resource.getInfoForXml() )
+        return res
 
 InitializeClass(SiteResources)
 

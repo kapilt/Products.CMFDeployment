@@ -37,8 +37,8 @@ xml_export_template = """
 <rule id="%(id)s"
       product="%(product)s"
       factory="%(factory)s"
-      condition="%(filter_expr)s"
-      ext_expr="%(ext_expr)s"
+      condition="%(condition)s"
+      ext_expr="%(filename)s"
       view_method="%(view_method)s" />
 """
 
@@ -126,8 +126,8 @@ class ContentRule( OrderedFolder, BaseRule ):
     manage_options = (
         {'label':'Mapping',
          'action':'editMappingForm'},
-        {'label':'Child Views',
-         'action':'manage_main'},
+#        {'label':'Child Views',
+#         'action':'manage_main'},
         ) + App.Undo.UndoSupport.manage_options
     
     editMappingForm = DTMLFile('../ui/MimeExtensionMappingEditForm', globals())
@@ -265,10 +265,11 @@ class ContentRule( OrderedFolder, BaseRule ):
     #################################
     def getInfoForXml(self):
         d = BaseRule.getInfoForXml(self)
-        del d['title']
+        del d['attributes']['title']
         d.update( { 'view_method':self.view_method,
-                    'ext_expr':self.extension_text,
-                    'filter_expr':self.condition_text } )
+                    'filename':self.extension_text,
+                    'aliases': list( self.aliases ),
+                    'condition':self.condition_text } )
         return d
              
 

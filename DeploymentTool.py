@@ -32,6 +32,7 @@ $Id$
 from Namespace import *
 from DeploymentPolicy import DeploymentPolicy
 from reader import read_policy, make_policy
+import io
 
 class DeploymentTool(UniqueObject, Folder):
 
@@ -65,18 +66,28 @@ class DeploymentTool(UniqueObject, Folder):
     def addPolicy(self, policy_id='', policy_title='', policy_pipeline_id='incremental', policy_xml='', REQUEST=None):
         """  """
 
-        if policy_xml:
-            policy_node = read_policy(policy_xml)
-            policy = make_policy(self, policy_node,  policy_id, policy_title)
-            policy_id = policy.getId()
-        else:
+        if not policy_xml:
             policy = DeploymentPolicy(policy_id, policy_title, policy_pipeline_id)
             self._setObject(policy_id, policy )
-                            
+            policy = self._getOb(policy_id)
+            
+            if REQUEST is not None:
+                return REQUEST.RESPONSE.redirect(policy.absolute_url()+'/manage_workspace')
+            return policy
+        
+        # import from xml
+        overrides = {}
+        overrides['id'] = policy_id
+        overrides['title'] = policy_title
+
+        ctx = io.ImportContext( self, overrides )
+        ctx.load( policy_xml )
+        policy = ctx.construct()
         
         if REQUEST is not None:
-            policy = self._getOb(policy_id)
-            REQUEST.RESPONSE.redirect(policy.absolute_url()+'/manage_workspace')
+            return REQUEST.RESPONSE.redirect(policy.absolute_url()+'/manage_workspace')
+
+        return policy
 
     security.declareProtected(CMFCorePermissions.ManagePortal, 'removePolicy')        
     def removePolicy(self, policy_id):

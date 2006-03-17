@@ -71,6 +71,8 @@ class ContentOrganization(Folder):
 
     overview  = DTMLFile('ui/ContentOrganizationOverview',  globals())
 
+    xml_key = 'organization'
+
     def __init__(self, id):
         self.id = id
 
@@ -92,6 +94,24 @@ class ContentOrganization(Folder):
     def manage_afterAdd(self, item, container):
         self._setObject('structure',CMFContentStructure('structure'))
         #self._setObject('organize', StructureMapping('organize'))
+
+    security.declarePrivate('getInfoForXml')
+    def getInfoForXml( self ):
+        structure = self.getActiveStructure()
+        
+        return {'attributes':{ 'cmf_path':structure.cmf_mount_point,
+                               'fs_path':structure.mount_point },
+                'restricted': list( structure.restricted ),
+                'composites': list( structure.composite_doc_types ),
+
+                                    }
+
+    security.declarePrivate('fromStruct')
+    def fromStruct( self, struct ):
+        structure = self.getActiveStructure()
+        structure.setRestrictedPoints( struct.restricted )
+        structure.setCMFMountPoint( struct.attributes.cmf_path )
+        structure.setMountPoint( struct.attributes.fs_path )
 
 InitializeClass(ContentOrganization)
 

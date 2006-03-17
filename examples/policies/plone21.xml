@@ -49,8 +49,8 @@
     <restricted id="reference_catalog" />
 
   </organization>
-  
-  <!-- <chain_user user="plone"  udb_path="/plone/acl_users" /> -->
+
+  <chain_user user="nobody" udb_path="special" /> 
 
   <mastering skin="Plone Default">
 

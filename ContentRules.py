@@ -52,6 +52,7 @@ class ContentRuleContainer(OrderedFolder):
          'action':'../../overview'}
         )
 
+    security = ClassSecurityInfo()
     _product_interfaces = ( IContentRule, )
     
     def __init__(self, id, title=''):
@@ -61,12 +62,20 @@ class ContentRuleContainer(OrderedFolder):
     def all_meta_types(self):
         """Delegate the call passing our allowed interfaces"""
         return OrderedFolder.all_meta_types(self, interfaces=self._product_interfaces)
-        
+
+    security.declareProtected('CMFDeploy: Add Content Rule', 'addMimeMapping')        
     def addMimeMapping(self, *args, **kw):
         return self.manage_addProduct['CMFDeployment'].addContentRule(*args, **kw)
 
+    security.declareProtected('CMFDeploy: Add Content Rule', 'addContentRule')
     def addContentRule(self, *args, **kw):
         return self.manage_addProduct['CMFDeployment'].addContentRule(*args, **kw)
 
+    security.declarePrivate('getInfoForXml')
+    def getInfoForXml( self ):
+        res = []
+        for ob in self.objectValues():
+            res.append( ob.getInfoForXml() )
+        return {'rules':res}
 
 InitializeClass( ContentRuleContainer )    

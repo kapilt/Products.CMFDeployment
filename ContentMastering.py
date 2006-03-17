@@ -66,16 +66,23 @@ class ContentMastering(Folder):
 
         )
 
+    security = ClassSecurityInfo()
+    
     overview = DTMLFile('ui/ContentMasteringOverview', globals())
     skin     = DTMLFile('ui/ContentMasteringSkin', globals())
     root     = DTMLFile('ui/ContentMasteringRoot', globals())
     user     = DTMLFile('ui/ContentMasteringUser', globals())
+
+    xml_key = 'mastering'
+
+
     
     def __init__(self, id):
         
         self.id = id
         self.skn_name = None
 
+    security.declareProtected('Manage portal', 'editRoot')
     def editRoot(self, enable, server, server_path, port, protocol, RESPONSE=None):
         """ """
         
@@ -84,6 +91,7 @@ class ContentMastering(Folder):
         if RESPONSE is not None:
             RESPONSE.redirect('overview')
 
+    security.declareProtected('Manage portal', 'editSkin')
     def editSkin(self, enable, skin_name, RESPONSE=None):
         """ """
         
@@ -98,6 +106,7 @@ class ContentMastering(Folder):
         if RESPONSE is not None:
             RESPONSE.redirect('overview')
 
+    security.declareProtected('Manage portal', 'editUser')
     def editUser(self, enable, user, udb_path, RESPONSE=None):
         """ """
 
@@ -119,6 +128,7 @@ class ContentMastering(Folder):
 
     #################################
 
+    security.declarePrivate('prepareContent')
     def prepareContent(self, content):
         """
         attempt to prepare a content object, for testing purposes
@@ -129,7 +139,8 @@ class ContentMastering(Folder):
         self.prepare( descriptor )
 
         return descriptor.rule_id or "Not Deployed"
-        
+
+    security.declarePrivate('prepare')        
     def prepare(self, descriptor):
         """
         prepare a descriptor for deployment by finding and applying a
@@ -146,6 +157,7 @@ class ContentMastering(Folder):
         log.debug('no rule for (%s)->(%s)'%(str(c.portal_type), descriptor.content_url))
         return None
 
+    security.declarePrivate('cook')        
     def cook(self, descriptor):
         """
         render the contents of a descriptor and its child descriptors
@@ -176,6 +188,7 @@ class ContentMastering(Folder):
         for descriptor in descriptors:
             self.renderContent( descriptor )
 
+    security.declarePrivate('renderContent')
     def renderContent( self, descriptor ):
             
         c = descriptor.getContent()
@@ -229,6 +242,22 @@ class ContentMastering(Folder):
         self.site_skin.unlock()
         self.site_user.unlock()
 
+    #################################
+    security.declarePrivate('getInfoForXml')
+    def getInfoForXml( self ):
+        d = { 'chain_skin' : self.site_skin.getInfoForXml(),
+              'chain_user' : self.site_user.getInfoForXml() }
+        d['rules'] = self.rules.getInfoForXml()['rules']
+        return d
+
+    security.declarePrivate('getFromStruct')
+    def fromStruct( self, struct ):
+        self.site_skin.edit( struct.chain_skin.enable,
+                             struct.chain_skin.attributes.skin_name )
+        
+        self.site_user.edit( struct.chain_user.enable,
+                             struct.chain_user.attributes.user,
+                             struct.chain_user.attributes.udb_path )
 
 class SiteChainSkin(SimpleItem):
     """
@@ -244,15 +273,18 @@ class SiteChainSkin(SimpleItem):
     _v_saved_skin_name = None
 
     enable = 1    
+    security = ClassSecurityInfo()
     
     def __init__(self):
         self.skin_name = None 
 
+    security.declareProtected('Manage portal', 'edit')
     def edit(self, enable, skin_name):
         
         self.enable = not not int(enable)
         self.skin_name = skin_name
 
+    security.declarePrivate('lock')
     def lock(self):
         if not self.enable or self._v_active or not self.skin_name:
             log.debug('deployment skin not enabled')
@@ -277,7 +309,8 @@ class SiteChainSkin(SimpleItem):
     def _setSkin(self):
         portal = getToolByName(self, 'portal_url').getPortalObject()
         portal.changeSkin( self.skin_name )
-        
+
+    security.declarePrivate('unlock')        
     def unlock(self):
         portal = getToolByName(self, 'portal_url').getPortalObject()
         skins = portal.portal_skins
@@ -288,6 +321,12 @@ class SiteChainSkin(SimpleItem):
         
     def manage_afterAdd(self, item, container):
         self.skin_name  = getToolByName(self, 'portal_skins').getDefaultSkin()	
+
+    #################################
+    security.declarePrivate('getInfoForXml')
+    def getInfoForXml(self):
+        return {'attributes':{ 'skin_name':self.skin_name }, 'enable':bool( self.enable )  }
+
 
 class InvalidUserDatabase(AttributeError): pass
 
@@ -302,6 +341,8 @@ class SiteChainUser(SimpleItem):
     enable = 0
     userid = None
     udb_path = None
+
+    security = ClassSecurityInfo()
     
     def edit(self, enable, user, udb_path):
         
@@ -320,7 +361,8 @@ class SiteChainUser(SimpleItem):
             raise InvalidUserDatabase(" invalid user database or user ")
         
         self.udb_path = udb_path
-        
+
+    security.declarePrivate('lock')
     def lock(self):
 
         if not self.enable or not self.userid or not self.udb_path:
@@ -348,8 +390,14 @@ class SiteChainUser(SimpleItem):
         try: req = self.REQUEST
         except: req = None
         newSecurityManager(req, user) 
-        
+
+    security.declarePrivate('unlock')        
     def unlock(self):
         pass
 
-            
+    security.declarePrivate('getInfoForXml')
+    def getInfoForXml(self):
+        return {'attributes':{ 'user' : self.userid or '',
+                               'udb_path' : self.udb_path or ''},
+                               'enable' : bool( self.enable ) } 
+    
