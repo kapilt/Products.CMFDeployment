@@ -41,87 +41,6 @@ class struct( dict ):
     def __setattr__(self, key, value ):
         self[key]=value
 
-#################################
-# pull some fixes from python stdlib for 2.3
-import codecs
-
-def _outputwrapper(stream,encoding):
-    writerclass = codecs.lookup(encoding)[3]
-    return writerclass(stream)
-
-if hasattr(codecs, "register_error"):
-    def writetext(stream, text, entities={}):
-        stream.errors = "xmlcharrefreplace"
-        stream.write(escape(text, entities))
-        stream.errors = "strict"
-else:
-    def writetext(stream, text, entities={}):
-        text = escape(text, entities)
-        try:
-            stream.write(text)
-        except UnicodeError:
-            for c in text:
-                try:
-                    stream.write(c)
-                except UnicodeError:
-                    stream.write(u"&#%d;" % ord(c))
-
-def writeattr(stream, text):
-    countdouble = text.count('"')
-    if countdouble:
-        countsingle = text.count("'")
-        if countdouble <= countsingle:
-            entities = {'"': "&quot;"}
-            quote = '"'
-        else:
-            entities = {"'": "&apos;"}
-            quote = "'"
-    else:
-        entities = {}
-        quote = '"'
-    stream.write(quote)
-    writetext(stream, text, entities)
-    stream.write(quote)
-    
-
-class XMLGenerator( XMLGenerator ):
-    # subclass to bring 2.4 fixes to 2.3
-    
-    def startElementNS(self, name, qname, attrs):
-        if name[0] is None:
-            name = name[1]
-        elif self._current_context[name[0]] is None:
-            # default namespace
-            name = name[1]
-        else:
-            name = self._current_context[name[0]] + ":" + name[1]
-        self._out.write('<' + name)
-
-        for k,v in self._undeclared_ns_maps:
-            if k is None:
-                self._out.write(' xmlns="%s"' % (v or ''))
-            else:
-                self._out.write(' xmlns:%s="%s"' % (k,v))
-        self._undeclared_ns_maps = []
-
-        for (name, value) in attrs.items():
-            if name[0] is None:
-                name = name[1]
-            elif self._current_context[name[0]] is None:
-                # default namespace
-                #If an attribute has a nsuri but not a prefix, we must
-                #create a prefix and add a nsdecl
-                prefix = self.GENERATED_PREFIX % self._generated_prefix_ctr
-                self._generated_prefix_ctr = self._generated_prefix_ctr + 1
-                name = prefix + ':' + name[1]
-                self._out.write(' xmlns:%s=%s' % (prefix, quoteattr(name[0])))
-                self._current_context[name[0]] = prefix
-            else:
-                name = self._current_context[name[0]] + ":" + name[1]
-            self._out.write(' %s=' % name)
-            writeattr(self._out, value)
-        self._out.write('>')
-        
 
 class ImportReader( ContentHandler ):
 
@@ -512,6 +431,7 @@ class ImportContext( IOContext ):
         'policy.site_resources': pluginConstructor,
         'policy.mastering.rules' : pluginConstructor,
         'policy.mastering' : editFromStruct,
+        'policy.resolver'  : editFromStruct,
         'policy': policyConstructor,
         }
 
@@ -530,6 +450,91 @@ class ExportContext( object ):
         serializer.close()
         return stream.getvalue()
 
+
+
+#################################
+# pull some fixes from python stdlib for 2.3
+import codecs
+
+def _outputwrapper(stream,encoding):
+    writerclass = codecs.lookup(encoding)[3]
+    return writerclass(stream)
+
+if hasattr(codecs, "register_error"):
+    def writetext(stream, text, entities={}):
+        stream.errors = "xmlcharrefreplace"
+        stream.write(escape(text, entities))
+        stream.errors = "strict"
+else:
+    def writetext(stream, text, entities={}):
+        text = escape(text, entities)
+        try:
+            stream.write(text)
+        except UnicodeError:
+            for c in text:
+                try:
+                    stream.write(c)
+                except UnicodeError:
+                    stream.write(u"&#%d;" % ord(c))
+
+def writeattr(stream, text):
+    countdouble = text.count('"')
+    if countdouble:
+        countsingle = text.count("'")
+        if countdouble <= countsingle:
+            entities = {'"': "&quot;"}
+            quote = '"'
+        else:
+            entities = {"'": "&apos;"}
+            quote = "'"
+    else:
+        entities = {}
+        quote = '"'
+    stream.write(quote)
+    writetext(stream, text, entities)
+    stream.write(quote)
+    
+
+class XMLGenerator( XMLGenerator ):
+    # subclass to bring 2.4 fixes to 2.3
+    
+    def startElementNS(self, name, qname, attrs):
+        if name[0] is None:
+            name = name[1]
+        elif self._current_context[name[0]] is None:
+            # default namespace
+            name = name[1]
+        else:
+            name = self._current_context[name[0]] + ":" + name[1]
+        self._out.write('<' + name)
+
+        for k,v in self._undeclared_ns_maps:
+            if k is None:
+                self._out.write(' xmlns="%s"' % (v or ''))
+            else:
+                self._out.write(' xmlns:%s="%s"' % (k,v))
+        self._undeclared_ns_maps = []
+
+        for (name, value) in attrs.items():
+            if name[0] is None:
+                name = name[1]
+            elif self._current_context[name[0]] is None:
+                # default namespace
+                #If an attribute has a nsuri but not a prefix, we must
+                #create a prefix and add a nsdecl
+                prefix = self.GENERATED_PREFIX % self._generated_prefix_ctr
+                self._generated_prefix_ctr = self._generated_prefix_ctr + 1
+                name = prefix + ':' + name[1]
+                self._out.write(' xmlns:%s=%s' % (prefix, quoteattr(name[0])))
+                self._current_context[name[0]] = prefix
+            else:
+                name = self._current_context[name[0]] + ":" + name[1]
+            self._out.write(' %s=' % name)
+            writeattr(self._out, value)
+        self._out.write('>')
+
+# end py2.3 compat
+###############
 
 if __name__ == '__main__':
    

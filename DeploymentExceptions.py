@@ -33,5 +33,6 @@ class ProtocolError(Exception): pass
 class InvalidSkinName(Exception): pass
 class InvalidCMFMountPoint(Exception): pass
 class InvalidDirectoryView(Exception): pass
+class InvalidResource(Exception): pass
 class InvalidRegistry(Exception): pass
 class InvalidPortalType(Exception): pass

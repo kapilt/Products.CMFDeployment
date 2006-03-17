@@ -54,6 +54,8 @@ class ContentURI(SimpleItem, URIResolver):
     
     security = ClassSecurityInfo() 
 
+    xml_key = "resolver"
+    
     content_uri_overview = DTMLFile('ui/ContentURIOverview', globals())
     
     def __init__(self, id):
@@ -77,6 +79,7 @@ class ContentURI(SimpleItem, URIResolver):
             r.link_error_url = self.link_error_url
             r.external_resolver_path = self.external_resolver_path
             r.relative_target_resolution = self.relative_target_resolution
+            r.enable_text_resolution = self.enable_text_resolution
         return r
     
     security.declareProtected(CMFCorePermissions.ManagePortal, 'edit')
@@ -86,6 +89,7 @@ class ContentURI(SimpleItem, URIResolver):
                        link_error_url='deploy_link_error',
                        external_resolver_path='',
                        relative_target_resolution=False,
+                       enable_text_resolution=False,
                        REQUEST=None ):
         """ edit """
 
@@ -99,6 +103,7 @@ class ContentURI(SimpleItem, URIResolver):
         self.link_error_url = link_error_url.strip()
         self.relative_target_resolution = bool( relative_target_resolution )
         self.external_resolver_path = external_resolver_path.strip()
+        self.enable_text_resolution = bool( enable_text_resolution )
         
         if REQUEST is not None:
             return REQUEST.RESPONSE.redirect('content_uri_overview')
@@ -107,5 +112,21 @@ class ContentURI(SimpleItem, URIResolver):
     # protect some inherited methods
     security.declarePrivate('addResource')
     security.declarePrivate('resolve')
+
+    security.declarePrivate('getInfoForXml')
+    def getInfoForXml(self):
+        
+        return {'target_path': self.target_path,
+                'vhost_path' : self.vhost_path,
+                'link_error_url': self.link_error_url,
+                'external_resolver_path' : self.external_resolver_path,
+                'relative_target_resolution' : bool( self.relative_target_resolution ),
+                'enable_text_resolution' : bool( self.enable_text_resolution ) }
+    
+
+    security.declarePrivate('fromStruct')
+    def fromStruct( self, struct ):
+        self.editContentURI( **struct )
+
     
 InitializeClass(ContentURI)

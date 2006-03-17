@@ -36,7 +36,8 @@ from Testing import ZopeTestCaseZopeTestCase.installProduct('CMFDeployment')
 import unittest
 from types import StringType, NoneType
 from Products.CMFDeployment.Descriptor import ContentDescriptor
-from Products.CMFDeployment.URIResolver import resolve_relative, URIResolver, test_uri_regex, test_css_regex, _marker
+from Products.CMFDeployment.URIResolver import resolve_relative, URIResolver, test_uri_regex, test_css_regex, test_fform_regex, _marker
+from Products.CMFDeployment import URIResolver as resolver
 
 class Content:
 
@@ -97,11 +98,13 @@ class ContentDB:
     This is a test <a href="http://www.example.com/reptiles/snake">snake</a>   
     """)
     
-    alligator = Content("/reptiles/alligator", """
+    alligator = Content("/reptiles/alligator", '''
     <style type="text/css" media="screen"> @import url(/style/site.css);</style> 
-    
+    <select><value option="http://www.example.com/reptiles/loch_ness">foo</value></select>
+    <a href="" onclick="foobarTarget('http://www.example.com/mammals/whale')">foo</a>
     This is a test of the css uri resolver
-    """
+    This is a test <option value="http://www.example.com/reptiles/snake">snake</option>       
+    '''
     )
 
     #################################
@@ -110,6 +113,11 @@ class ContentDB:
     """)
     
     whale = Content("/mammals/whale", """
+    <style type="text/css" media="screen"> @import url(/style/site.css);</style>     
+    <select><value option="http://www.example.com/reptiles/loch_ness">foo</value></select>
+    <a href="" onclick="foobarTarget('http://www.example.com/mammals/elephant')">foo</a>
+    This is a test of the css uri resolver
+    This is a test <option value="http://www.example.com/reptiles/snake">snake</option>    
     """)
 
     loch_ness= CompositeContent("/reptiles/loch_ness", """
@@ -160,6 +168,7 @@ class BaseResolverTests(unittest.TestCase):
                                 target_path='/deploy'
                                 )
 
+        #resolver.enable_text_resolution = True
         self.resolver = resolver
 
         for d in getDescriptor():
@@ -401,6 +410,26 @@ class ResolverTests(BaseResolverTests):
 
         uris = test_css_regex.findall(rendered_target)        
         self.assertEqual(len(uris), len(expected))
+
+        for u in uris:
+            assert u in expected
+
+    def testResolve6(self):
+        # test free form urls
+        d = getDescriptor("whale")
+        rendered = d.getRendered()
+        self.resolver.enable_text_resolution = True
+        self.resolver.resolve( d )
+
+        rendered_target = d.getRendered()
+
+        uris = resolver.free_form_regex.findall( rendered_target )
+
+        expected = (
+            '/deploy/reptiles/loch_ness/index.html',
+            '/deploy/reptiles/mammals/elephant.html',
+            '/deploy/reptiles/snake.html',
+            )
 
         for u in uris:
             assert u in expected

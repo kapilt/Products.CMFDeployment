@@ -11,16 +11,6 @@
 
 <table>
 
-<tr><td><div class="form-label">Use Relative Resolution</td>
-    <td><select name="relative_target_resolution:int">
-	<option <dtml-if "not _['relative_target_resolution']">selected</dtml-if> 
-	        value="0">No</option>
-        <option <dtml-if relative_target_resolution>selected</dtml-if> 
-	        value="1">Yes</option>
-	</select>
-    </td>
-</tr>
-
 <tr>
     <td>
      <div class="form-label">
@@ -61,6 +51,29 @@
      </div>
     </td>
 </tr>
+
+
+<tr><td><div class="form-label">Use Relative Resolution</td>
+    <td><select name="relative_target_resolution:int">
+	<option <dtml-if "not _['relative_target_resolution']">selected</dtml-if> 
+	        value="0">No</option>
+        <option <dtml-if relative_target_resolution>selected</dtml-if> 
+	        value="1">Yes</option>
+	</select>
+    </td>
+</tr>
+
+<tr><td><div class="form-label">Enable Text Resolution (experimental
+    for javascript)</td>
+    <td><select name="enable_text_resolution:int">
+	<option <dtml-if "not _['enable_text_resolution']">selected</dtml-if> 
+	        value="0">No</option>
+        <option <dtml-if enable_text_resolution>selected</dtml-if> 
+	        value="1">Yes</option>
+	</select>
+    </td>
+</tr>
+
 
 <tr><td colspan="2">
     <input type="submit" value="edit uri settings">

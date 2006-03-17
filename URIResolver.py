@@ -80,8 +80,9 @@ class URIResolver:
     vhost_path = '' 
     link_error_url = 'deploy_link_error'
     ext_resolver = None
-    external_resolver_path = None
+    external_resolver_path = ""
     relative_target_resolution = False
+    enable_text_resolution = False
     
     def __init__(self,
                  id='',
@@ -350,33 +351,42 @@ class URIResolver:
                               descriptor.composite_content_p
         
         content_url = descriptor.getSourcePath() or descriptor.getContentURL()
-        
-        for l, u in uris:
-            
-            nu = self.resolveURI(u, content_url, content_folderish_p, content=descriptor.getContent())
-            
-            if nu is _marker and self.ext_resolver is not None:
-                nu = self.ext_resolver( u, content_url, content_folderish_p, _marker, descriptor )
-                
-            if nu is _marker: # no replacement url found
-                log.warning('unknown url (%s) from %s'%(u, content_url))
-                nu = self.link_error_url
-            elif nu is None: # not a resolvable url type  
-                continue
-            elif nu and self.relative_target_resolution: # transform to relative target link
-                content_path = normalize( content_url, "/" )
-                if content_path and content_folderish_p:
-                    content_path += '/'
-                content_target_url = self.uris.get( content_path )
-                if content_target_url:
-                    nu = self._resolveAsRelative( content_target_url, nu, content_folderish_p )
-                else:
-                    log.warning('relativeres - unknown content url %s'%content_url)
-            else:
-                pass
 
-            r = r.replace(l, l.replace(u, nu))
+
+        def resolve_uris( uris, r):
+
+            for l, u in uris:
             
+                nu = self.resolveURI(u, content_url, content_folderish_p, content=descriptor.getContent())
+
+                if nu is _marker and self.ext_resolver is not None:
+                    nu = self.ext_resolver( u, content_url, content_folderish_p, _marker, descriptor )
+
+                if nu is _marker: # no replacement url found
+                    log.warning('unknown url (%s) from %s'%(u, content_url))
+                    nu = self.link_error_url
+                elif nu is None: # not a resolvable url type  
+                    continue
+                elif nu and self.relative_target_resolution: # transform to relative target link
+                    content_path = normalize( content_url, "/" )
+                    if content_path and content_folderish_p:
+                        content_path += '/'
+                    content_target_url = self.uris.get( content_path )
+                    if content_target_url:
+                        nu = self._resolveAsRelative( content_target_url, nu, content_folderish_p )
+                    else:
+                        log.warning('relativeres - unknown content url %s'%content_url)
+                else:
+                    pass
+                r = r.replace(l, l.replace(u, nu))
+            return r
+        
+        r = resolve_uris( uris, r )
+        
+        if self.enable_text_resolution:
+            uris = unique( filter( lambda u: u[1], free_form_regex.findall( r ) ) )
+            r = resolve_uris( uris, r )
+
         #log.debug('resolved %d intern references of %d total refs'%(
         #                                                  count, total_count))
         descriptor.setRendered(r)
@@ -476,7 +486,6 @@ def resolve_relative(content_url, relative_url, content_folderish_p=0):
     
     path_steps = filter(None, content_path.split('/'))
     steps = filter(None, relative_url.split('/'))
-
     
     if steps[0] == '..':
         # move back two if not folder or one if a folder
@@ -510,6 +519,7 @@ def resolve_relative(content_url, relative_url, content_folderish_p=0):
 
 url_regex = re.compile("""(?P<url>(?:href=|src=|@import)\s*["']\s*(.*?)["'])""")
 test_uri_regex = re.compile('''(?:href=|src=|@import)\s*["']\s*(.*?)["']''')
-css_regex  = re.compile("""(?P<url>url\(['"]{0,1}\s*(.*?)['"]{0,1}\))""")
-free_form_regex = re.compile('(?P<url>"(http://.*)")')
+css_regex = re.compile("""(?P<url>url\(['"]{0,1}\s*(.*?)["']{0,1}\))""")
+free_form_regex = re.compile('(?P<url>[\"\'](http://.*?)[\"\'])')
+test_fform_regex = re.compile('(?:[\"\'](?P<url>http://.*)[\"\'])')
 test_css_regex  = re.compile("""url\(['"]{0,1}\s*(?P<url>.*?)['"]{0,1}\)""")

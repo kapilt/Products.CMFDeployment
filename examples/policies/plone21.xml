@@ -7,34 +7,82 @@
        product="CMFDeployment" 
        factory="addIncrementalCatalogSource" />
 
-    <!--
-    <filter id="review_state"
-            expr="python: memento.review_state in ('published','revision_draft', 'revision_submitted')" />
-    -->
-
   </identification>
 
-  <strategy id="default" />
-
-  <registries>
-
-    <registry view_path="/portal_css"
-               deploy_path="/css"
-               source_path="/portal_css" />
-
-    <registry view_path="/portal_javascripts"
-               deploy_path="/javascript"
-               source_path="/portal_javascripts" />
-   
-  </registries>
-
   <resources>
-    <resource id="image_extractor" 
-	      product="CMFDeployment" 
-	      factory="addSkinResourceRule" 
-	      view_path=".*(?:png|gif|jpg)" 
-	      deployment_path="/images" 
-	      source_path="/"/>
+
+    <resource id="reg_portal_css"
+	      product="CMFDeployment"
+	      factory="addResourceRegistryRule"
+	      view_path="/portal_css"
+	      deployment_path="/css"
+	      source_path="/portal_css"
+	      />
+
+    <resource id="reg_portal_javascripts"
+	      product="CMFDeployment"
+	      factory="addResourceRegistryRule"
+	      view_path="/portal_javascripts"
+	      deployment_path="/javascript"
+	      source_path="/portal_javascripts"
+	      />
+
+    <resource id="image_extractor"
+	      product="CMFDeployment"
+	      factory="addSkinResourceRule"
+	      view_path=".*(?:png|gif|jpg)"
+	      deployment_path="/images"
+	      source_path="/"
+	      />
+
+    <resource id="plone_images"
+	      product="CMFDeployment"
+	      factory="addDirectoryViewRule"
+	      view_path="/plone_images"
+	      deployment_path="/images"
+	      source_path="/"
+	      />
+
+    <resource id="sitemap"
+	      product="CMFDeployment"
+	      factory="addResourceTemplateRule"
+	      view_path="/sitemap"
+	      deployment_path="/sitemap.html"
+	      source_path="/sitemap"
+	      />
+
+    <resource id="search_form"
+	      product="CMFDeployment"
+	      factory="addResourceTemplateRule"
+	      view_path="/search_form"
+	      deployment_path="/search_form"
+	      source_path="/search_form"
+	      />
+
+    <resource id="search"
+	      product="CMFDeployment"
+	      factory="addResourceTemplateRule"
+	      view_path="/search"
+	      deployment_path="/search"
+	      source_path="/search"
+	      />
+
+    <resource id="iefixes_css"
+	      product="CMFDeployment"
+	      factory="addResourceTemplateRule"
+	      view_path="/IEFixes.css"
+	      deployment_path="/css/IEFixes.css"
+	      source_path="/IEFixes.css"
+	      />
+
+    <resource id="favicon"
+	      product="CMFDeployment"
+	      factory="addResourceTemplateRule"
+	      view_path="/favicon.ico"
+	      deployment_path="/favicon.ico"
+	      source_path="/favicon.ico"
+	      />
+
   </resources>
 
   <organization cmf_mount="/" 
@@ -63,19 +111,13 @@
 	  ghost="1"
           />
 
-    <mime id="Folder"
-          filter_expr="python: object.portal_type == 'Folder'"
-          ext_expr="python: '%s/index.html'%object.getId()"
-          view_method="python: object.defaultView()"
-          />
+    <rule id="Folder"
+	  product="CMFDeployment"
+	  factory="addATContainerRule"
+	  condition="python: object.portal_type == 'Folder'"
+	  ext_expr="string:${object/getId}/index.html"
+	  view_method="" />
 
-<!-- Example of adding the plone root object to the policy
-    <mime id="PloneSite"
-          filter_expr="python: object.portal_type == 'Plone Site'"
-	  ext_expr="python: 'index.html'"
-	  view_method="string:index_html"
-	  />
--->
     <mime id="IndexDocument"
           filter_expr="python: object.getId()=='index_html'"
           ext_expr="python: 'index.html'"
