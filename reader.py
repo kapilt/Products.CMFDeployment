@@ -217,7 +217,11 @@ def read_policy(file):
     return reader.getPolicy()
 
 REMAP_TYPES = ( ( 'CMFDeployment', 'addContentRule' ),
-                ( 'CMFDeployment', 'addMimeMapping' ), )
+                ( 'CMFDeployment', 'addMimeMapping' ),
+                ( 'CMFDeployment', 'addATContainerRule' ),
+                ( 'CMFDeployment', 'addATContentRule'),
+                ( 'CMFDeployment', 'addATCompositeRule') )
+                
                 
 
 DEFAULT_RULE_PRODUCT = 'CMFDeployment'    

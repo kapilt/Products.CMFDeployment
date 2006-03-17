@@ -46,8 +46,9 @@
   </organization>
   
 
+  <!--
   <chain_user user="nobody" udb_path="special" /> 
-
+  -->
   <mastering skin="Plone Deployment">
 
     <!-- executed in order and order is important -->

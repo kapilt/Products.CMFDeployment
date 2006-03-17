@@ -126,6 +126,7 @@ class ContentURI(SimpleItem, URIResolver):
 
     security.declarePrivate('fromStruct')
     def fromStruct( self, struct ):
+        struct = dict( [ (str(k),v) for k,v in struct.items() ])        
         self.editContentURI( **struct )
 
     
