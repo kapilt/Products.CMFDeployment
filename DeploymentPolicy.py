@@ -214,15 +214,29 @@ class DeploymentPolicy(Folder):
         factory = pipeline.getPipeline( self.pipeline_id )
         factory.beginPolicyRemoval( self )
         
-    def export( self, pretty=True ):
+    def export( self, compact=False, RESPONSE=None ):
+        """
+        export to xml for download
+        """
         ctx = io.ExportContext()
         ctx.load( self )
-        export = ctx.construct()
-        if not pretty:
-            return export
-        
-        dom = parseString( export )
-        return dom.toprettyxml()
+        try:
+            export = ctx.construct()
+        except:
+            import pdb, traceback, sys
+            exc_info = sys.exc_info()
+            traceback.print_exception( *exc_info )
+            pdb.post_mortem( exc_info[-1] )
+
+        if not compact:
+            dom = parseString( export )
+            export = dom.toprettyxml()
+
+        if RESPONSE is not None:
+            RESPONSE.setHeader("Content-Type", 'text/xml')
+            RESPONSE.setHeader("Content-Length", len( export ) )
+            RESPONSE.setHeader("Content-Disposition",
+                               'attachment; filename="%s.xml"'%(self.getId()))
         
     def getInfoForXml( self ):
         info =  {'attributes':{'id':self.id,
