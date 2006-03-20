@@ -201,6 +201,29 @@ def is_baseunit( ob ):
     return isinstance( aq_base(ob), BaseUnit )
 
 
+# junk to work around bad apis in atct
+try:
+
+    from Products.ATContentTypes.lib import calendarsupport
+    from StringIO import StringIO
+    
+    def event_ics_view( content ):
+        out = StringIO()
+        out.write( calendarsupport.ICS_HEADER % { 'prodid' : calendarsupport.PRODID } )
+        out.write( content.getICal() )
+        out.write( calendarsupport.ICS_FOOTER)
+        return out.getvalue()
+
+    def event_vcs_view( content ):
+        out = StringIO()
+        out.write( calendarsupport.VCS_HEADER % { 'prodid' : calendarsupport.PRODID, })
+        out.write( content.getVCal())
+        out.write( calendarsupport.VCS_FOOTER)
+        return out.getvalue()
+except:
+    event_ics_view = None
+    event_vcs_view = None
+
 # taken from code i wrote for proxyindex
 
 # used latter when constructing an object wrapper to determine if the

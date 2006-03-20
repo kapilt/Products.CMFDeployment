@@ -120,15 +120,6 @@ def initialize(context):
         visibility = None
         )
 
-    atcomposite = rules.atcomposite
-    context.registerClass(
-        atcomposite.ATCompositeRule,
-        permission = 'CMFDeploy: Add Content Rule',
-        constructors = ( atcomposite.addATCompositeRuleForm,
-                         atcomposite.addATCompositeRule ),
-        visibility = None
-        )
-    
     dview = resources.directoryview
     context.registerClass(
         dview.DirectoryViewRule,
@@ -165,7 +156,15 @@ def initialize(context):
         visibility = None
         )
 
-
+##     author = resources.author
+##     context.registerClass(
+##         author.AuthorIndexesRule,
+##         permission = CMFCorePermissions.ManagePortal,
+##         constructors = ( author.addAuthorIndexesRuleForm,
+##                          author.addAuthorIndexesRule ),
+##         visibility = None
+##         )
+    
     catalog = sources.catalog
     context.registerClass(
         catalog.PortalCatalogSource,

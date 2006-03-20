@@ -32,7 +32,9 @@ from Products.CMFDeployment.DeploymentExceptions import InvalidDirectoryView
 from Products.CMFDeployment.DefaultConfiguration import DEPLOYMENT_DEBUG
 from DocumentTemplate import HTML
 
+from Products.CMFDeployment.Log import LogFactory
 log = LogFactory('Directory Views')
+
 
 from base import SiteBaseResource
 

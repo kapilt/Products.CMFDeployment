@@ -43,7 +43,7 @@ DependencySource      = 'dependency_source'
 
 ContentTransforms     = 'transforms'
 
-DEPLOYMENT_DEBUG      = False
+DEPLOYMENT_DEBUG      = True
 
 DEFAULT_CONTENT_SOURCE_ID = "portal_catalog_source"
 

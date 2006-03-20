@@ -112,7 +112,8 @@ class ContentURI(SimpleItem, URIResolver):
     # protect some inherited methods
     security.declarePrivate('addResource')
     security.declarePrivate('resolve')
-
+    security.declareProtected('Manage portal', 'pprint')
+    
     security.declarePrivate('getInfoForXml')
     def getInfoForXml(self):
         

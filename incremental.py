@@ -154,7 +154,6 @@ class DeletionRecord( object ):
         # serialize dependencies
         dependencies = descriptor.getReverseDependencies()
         
-
         for dep in dependencies:
             if self.dependency_rids is None:
                 getrid = getToolByName( content, 'portal_catalog').getrid

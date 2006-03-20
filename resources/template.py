@@ -85,7 +85,6 @@ class ResourceTemplateRule( SiteBaseResource ):
             view_path = view_path[1:]
         
         ob = portal.restrictedTraverse( view_path )
-        
 
         source_path, deploy_path = self.source_path, self.deployment_path 
         uris = self.getDeploymentPolicy().getDeploymentURIs()

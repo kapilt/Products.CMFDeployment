@@ -117,7 +117,6 @@ class URIResolver:
             self.ext_resolver = None
         
     def addResource(self, descriptor):
-
         for descriptor in descriptor.getContainedDescriptors():
             self._addResource( descriptor )
 
@@ -136,27 +135,35 @@ class URIResolver:
                 del self.uris[ alias_url ]
         
     def _addResource(self, descriptor):
+        """
+        """
 
         # we use this as the source path, it must be mount point relative
         relative_url = descriptor.getSourcePath() or descriptor.content_url
         
         # we use this as part of the target path
         content_path = descriptor.getContentPath()
-        
+
+        # add leading / if nesc to make absolute relative
         if relative_url and relative_url[0] != '/':
             relative_url = '/'+relative_url
-        
+    
         if content_path is None:
+            # XXX this algorithm is reduplicated in contentorganization
+            # they should be insync.. duplication for execution
+            # dependency avoidance??
+            
             # no explicit target path, calculate the target path based on the source
             mlen = len(self.mount_path)
             if not self.mount_path.startswith('/'):
                 mlen += 1
                 
-            # minus last path segment
-            # find the path segment            
+            # find the relative path from the mount point,
+            # minus the last path segment.
             url_context  = relative_url[:relative_url.rfind('/')]
             content_path = url_context[mlen:]
 
+        # add in the filename for the descriptor
         content_path = normalize('/'.join( ( content_path,
                                              descriptor.getFileName() ) ),
                                  '/'
@@ -172,14 +179,23 @@ class URIResolver:
         log.debug("add %s -> %s"%(relative_url, content_path))
         self.uris[relative_url]=content_path
 
+        #################################
+        # aliases, for referring to the same representation with
+        # additional url endpoints.        
+        
+        # if its folderish add in an alias with a trailing /
         if descriptor.isContentFolderish():
             self.uris[relative_url+'/']=content_path
 
         # lets add in the generic CMF view method as well
         self.uris[normalize(relative_url+'/view', '/')] = content_path
 
+        # add in desriptor aliases
         for alias in descriptor.getAliases():
-            self.uris[ normalize( relative_url+'/'+alias, '/')] = content_path
+            alias_url = join_alias( relative_url, alias )
+            #print "alias url", alias_url, content_path
+            self.uris[ alias_url ] = content_path
+                       
         
     def resolveURI(self, u, content_url, content_folderish_p, default=_marker, content=None):
         """
@@ -211,8 +227,29 @@ class URIResolver:
             if u.count(self.mount_path) == 0:
                 nu = None
 
+            parsed = urlparse(u)
+            
             # convert to absolute_relative and lookup
-            nu = self.uris.get( urlparse(u)[2], default)
+            nu = self.uris.get( parsed[2], default)
+
+            # try with all components present attached 
+            if nu is default:
+                format_str = "%s"
+                parts = [parsed[2]]
+                
+                if parsed[3]: # attach paramaters
+                    format_str += ":%s"
+                    parts.append( parsed[3] )
+
+                if parsed[4]: # attach query string
+                    format_str += "?%s"
+                    parts.append( parsed[4] )
+
+                if parsed[5]: # attach fragment
+                    format_str += "#%s"
+                    parts.append( parsed[5] )
+
+                nu = self.uris.get( format_str%tuple(parts), default )
 
         # absolute relative /
         elif u.startswith('/'):
@@ -356,7 +393,7 @@ class URIResolver:
         def resolve_uris( uris, r):
 
             for l, u in uris:
-            
+
                 nu = self.resolveURI(u, content_url, content_folderish_p, content=descriptor.getContent())
 
                 if nu is _marker and self.ext_resolver is not None:
@@ -399,6 +436,7 @@ class URIResolver:
         return self.uris[key]
 
     def pprint(self):
+        """ pprint """
         pprint.pprint(dict(self.uris.items()))
             
 
@@ -449,6 +487,12 @@ def unique(lst):
         d[l]=None
     return d.keys()
 
+def join_alias( url, alias ):
+    if alias.startswith('..'):
+        url = url[:url.rfind('/')]
+        alias = alias[alias.find('/'):]
+    return normalize( url+'/'+alias, '/')
+    
 def gcd( seq1, seq2 ):
     return len(filter( lambda x: x[0]==x[1],  zip( seq1, seq2) ))
 

@@ -226,7 +226,8 @@ class DeploymentPolicy(Folder):
             import pdb, traceback, sys
             exc_info = sys.exc_info()
             traceback.print_exception( *exc_info )
-            pdb.post_mortem( exc_info[-1] )
+            #pdb.post_mortem( exc_info[-1] )
+            raise
 
         if not compact:
             dom = parseString( export )

@@ -15,6 +15,10 @@
 <tr><td>View Method</td>
     <td><input type="text" name="view_method" value="<dtml-var view_method>" size="50"></td></tr>
 
+<tr><td>Source Path (suffix on content relative url that this resolves
+to)</td>
+    <td><input type="text" name="source_path" value="" size="50"></td></tr>
+
 <tr><td colspan="2">
     <input type="submit" value="Add Child View Rule"> </td></tr>
 

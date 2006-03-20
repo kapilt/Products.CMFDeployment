@@ -31,6 +31,7 @@ from Namespace import *
 from BTrees.OIBTree import OISet
 from BTrees.IOBTree import IOBTree
 from BTrees.Length import Length
+from Log import getMonitors
 
 class DeploymentHistoryContainer(Folder):
 
@@ -91,9 +92,16 @@ class DeploymentHistoryContainer(Folder):
             return None
         return self._records[ self._records.maxKey() ].__of__(self)
 
+    def getCurrent(self):
+        # if called during deployment execution with an attached history
+        monitors = getMonitors()
+        # only one monitor.. need another tls? not used by anything else atm
+        history = monitors.pop()
+        return history
+
     security.declarePrivate('makeHistory')
     def makeHistory(self):
-        return DeploymentHistory('Not Recorded')
+        return DeploymentHistory('Not Recorded')#.__of__(self)
 
     security.declarePrivate('clear')
     def clear(self):

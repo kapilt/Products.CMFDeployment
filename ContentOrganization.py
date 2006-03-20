@@ -95,6 +95,15 @@ class ContentOrganization(Folder):
         self._setObject('structure',CMFContentStructure('structure'))
         #self._setObject('organize', StructureMapping('organize'))
 
+    def getContentPath(self, content ):
+        return self.getActiveStructure().getContentPath( content )
+
+    def getContentRelativePath( self, content ):
+        return self.getActiveStructure().getContentRelativePath( content )
+
+    def getContentPathFromDescriptor( self, descriptor ):
+        return self.getActiveStructure().getContentPathFromDescription( descriptor )
+
     security.declarePrivate('getInfoForXml')
     def getInfoForXml( self ):
         structure = self.getActiveStructure()

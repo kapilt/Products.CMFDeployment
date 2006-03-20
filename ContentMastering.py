@@ -197,8 +197,11 @@ class ContentMastering(Folder):
         if vm is None: # XXX redundant
             descriptor.setGhost(1)
             return
-        
-        render = getattr(c, vm, None) or getattr(c, '__call__', None)
+
+        if callable( vm ):
+            render = vm
+        else:
+            render = getattr(c, vm, None) or getattr(c, '__call__', None)
                                                  
         if render is None:
             try:
@@ -209,8 +212,10 @@ class ContentMastering(Folder):
         # this is just a tad verbose..
         #log.debug('rendering %s %s %s'%(c.getId(), vm, str(render)))
 
-        try: 
-            if getattr(aq_base(render), 'isDocTemp', 0):
+        try:
+            if callable(vm) and callable( render ):
+                descriptor.setRendered( render( descriptor.getContent() ) )
+            elif getattr(aq_base(render), 'isDocTemp', 0):
                 descriptor.setRendered(apply(render, (self, self.REQUEST)))
             elif hasattr(aq_base(c), 'precondition') and \
                  not is_baseunit(c):
@@ -225,7 +230,7 @@ class ContentMastering(Folder):
                 ec, e, tb = sys.exc_info()
                 print ec, e
                 traceback.print_tb( tb )
-                #pdb.post_mortem( tb )   
+                #pdb.post_mortem( tb )
             
             log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
             descriptor.setGhost(1) # ghostify it        

@@ -14,6 +14,7 @@ from Products.CMFDeployment.Namespace import *
 from Products.CMFDeployment.Descriptor import DescriptorFactory
 from Products.CMFDeployment.DeploymentInterfaces import IContentRule
 from Products.CMFDeployment.utils import SerializablePlugin
+from Products.CMFDeployment.URIResolver import normalize
 
 addContentRuleForm = DTMLFile('../ui/MimeExtensionMappingAddForm', globals())
 
@@ -54,13 +55,13 @@ class BaseRule( SerializablePlugin ):
         return getToolByName(self, 'portal_url')(relative=1)+'/'+self.icon_path
 
 
-def addChildView(self, id, extension_expression, view_method, binary=False, RESPONSE=None):
+def addChildView(self, id, extension_expression, view_method, source_path="", binary=False, RESPONSE=None):
     """
     add child view
     """
     cview = ChildView( id )
     self._setObject( id, cview)
-    cview.edit( extension_expression, view_method, binary )
+    cview.edit( extension_expression, view_method, source_path )
     
     if RESPONSE is not None:
         RESPONSE.redirect('manage_main')
@@ -76,14 +77,19 @@ class ChildView( BaseRule ):
          'action':'settings_form'},
         ) + BaseRule.manage_options
 
+    source_path = '/'
+
+    dabble = True
+    
     def __init__(self, id, extension_expression=''):
         self.id = id
         self.extension = Expression(extension_expression)
         self.extension_text = extension_expression
         self.view_method = ''
+        self.source_path = '/'
         self.binary = False
 
-    def edit(self,  extension_expression, view_method, RESPONSE=None):
+    def edit(self,  extension_expression, view_method, source_path='', RESPONSE=None):
         """
         edit the child view
         """
@@ -91,24 +97,36 @@ class ChildView( BaseRule ):
         self.extension = Expression( extension_expression )
         self.view_method = view_method
         #self.binary = not not binary
+        self.source_path = source_path
         
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
     def process( self, descriptor, expr_context):
+        
         extension = self.extension( expr_context )
         descriptor.setFileName( extension )
+        
         if self.binary:
             descriptor.setBinary( binary )
-
+            
         # The view method needs to be an expresison now
         if self.view_method:
             vm = Expression(self.view_method)
             vm = vm( expr_context )
         else:
             vm = ""
-        
+
+        descriptor.dabble = True
         descriptor.setRenderMethod( vm )
+
+    def getInfoForXml( self ):
+        return dict( id = self.id,
+                     source_path = self.source_path,
+                     extension_expression = self.extension_text,
+                     view_method = self.view_method,
+                     binary = bool( self.binary )
+                     )
     
 InitializeClass( ChildView )
     
@@ -126,8 +144,8 @@ class ContentRule( OrderedFolder, BaseRule ):
     manage_options = (
         {'label':'Mapping',
          'action':'editMappingForm'},
-#        {'label':'Child Views',
-#         'action':'manage_main'},
+        {'label':'Child Views',
+         'action':'manage_main'},
         ) + App.Undo.UndoSupport.manage_options
     
     editMappingForm = DTMLFile('../ui/MimeExtensionMappingEditForm', globals())
@@ -172,10 +190,27 @@ class ContentRule( OrderedFolder, BaseRule ):
         factory = DescriptorFactory( self.getDeploymentPolicy() )
         content = descriptor.getContent()
 
+        # if the content is not a container, we want the childo
+        # descriptors to appear in the content's container.
+        # to that end we set the content path on the descriptor
+        organization = self.getContentOrganization()
+        content_path = organization.getContentRelativePath( content )
+        
         for cview in self.objectValues( ChildView.meta_type ):
-            descriptor = factory( content )
-            cview.process( descriptor, expr_context)
-            yield descriptor
+            cdescriptor = factory( content )
+            cview.process( cdescriptor, expr_context )
+
+            if not descriptor.isContentFolderish():
+                cdescriptor.setContentPath( content_path )
+                
+            source_path = normalize("%s/%s"%( descriptor.content_url,
+                                              cview.source_path ),
+                                    '/' )
+
+            # setup source path for url database
+            cdescriptor.setSourcePath( source_path )
+
+            yield cdescriptor
 
     def getDependencies( self, descriptor, context ):
         """
@@ -266,10 +301,19 @@ class ContentRule( OrderedFolder, BaseRule ):
     def getInfoForXml(self):
         d = BaseRule.getInfoForXml(self)
         del d['attributes']['title']
+
+        children = []
+        for c in self.objectValues():
+            children.append( c.getInfoForXml() )
+            
         d.update( { 'view_method':self.view_method,
                     'filename':self.extension_text,
                     'aliases': list( self.aliases ),
                     'condition':self.condition_text } )
+
+        if children:
+            d['children'] = children
+            
         return d
              
 

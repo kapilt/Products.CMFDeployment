@@ -14,6 +14,10 @@
 <tr><td>View Method</td>
     <td><input type="text" name="view_method" value="<dtml-var view_method>" size="50"></td></tr>
 
+<tr><td>Source Path (suffix on content relative url that this resolves
+to)</td>
+    <td><input type="text" name="source_path" value="<dtml-var source_path>" size="50"></td></tr>
+
 <!--
 <tr><td>Binary</td>
     <td> <select name="binary:int"> 

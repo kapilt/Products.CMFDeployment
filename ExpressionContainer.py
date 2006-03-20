@@ -30,6 +30,7 @@ from OFS.OrderedFolder import OrderedFolder
 from Products.PageTemplates.Expressions import SecureModuleImporter, getEngine
 from Products.CMFCore.WorkflowCore import WorkflowException
 from Namespace import Implicit, ClassSecurityInfo, InitializeClass, getToolByName
+import utils
 
 class ExpressionContainer(OrderedFolder):
     pass
@@ -70,5 +71,13 @@ DeploymentMimeUtilities = MimeUtilities()
 
 def registerDeploymentExprMethod(name, context_method):
     assert isinstance(name, str)
-    assert not _MimeUtilities.__dict__.has_key(name),"duplicate registration %s"%name           
-    _MimeUtilities.__dict__[name]=context_method
+    assert not DeploymentMimeUtilities.__dict__.has_key(name),"duplicate registration %s"%name           
+    DeploymentMimeUtilities.__dict__[name]=context_method
+
+
+# event util method  for plone 2.1, to work around bad apis in atct
+if utils.event_ics_view is not None:
+    registerDeploymentExprMethod( "event_ics_view", utils.event_ics_view )
+
+if utils.event_vcs_view is not None:
+    registerDeploymentExprMethod( "event_vcs_view", utils.event_vcs_view )
