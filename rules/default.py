@@ -18,18 +18,26 @@ from Products.CMFDeployment.URIResolver import normalize
 
 addContentRuleForm = DTMLFile('../ui/MimeExtensionMappingAddForm', globals())
 
-def addContentRule(self, id, extension_expression, condition, view_method, ghost=0, aliases=(), RESPONSE=None):
+def addContentRule(self, id, extension_expression, condition, view_method, ghost=0, aliases=(), children=(), RESPONSE=None):
     """ add content rule """
 
-    mapping = ContentRule(id=id,
+    rule = ContentRule(id=id,
                           extension_expression=extension_expression,
                           condition=condition,
                           view_method=view_method,
                           ghost=ghost,
                           aliases=aliases)
 
-    self._setObject(id, mapping)
+    self._setObject(id, rule)
 
+    rule = self._getOb( id )
+    for child_view in children:
+        # sigh.. tired.. late nite.. hack.. works..
+        child_view = dict( [ (str(k),v) for k,v in child_view.items() ])        
+        rule.addChildView( **child_view )
+
+
+    
     if RESPONSE is not None:
         RESPONSE.redirect('manage_main')
 
@@ -290,12 +298,17 @@ class ContentRule( OrderedFolder, BaseRule ):
     edit = editMapping
 
     #################################
-    def addChildView(self, id, extension_expression, view_method, binary=False, RESPONSE=None):
+    def addChildView(self, id, extension_expression, view_method, source_path="", binary=False, RESPONSE=None):
         """
         add child view
         """
-        return addChildView( self, id, extension_expression,
-                             view_method, binary, RESPONSE)
+        return addChildView( self,
+                             id,
+                             extension_expression,
+                             view_method,
+                             source_path,
+                             binary,
+                             RESPONSE)
 
     #################################
     def getInfoForXml(self):

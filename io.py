@@ -391,7 +391,7 @@ class ImportContext( IOContext ):
             
     def policyConstructor( ctx, name, value ):
         id = ctx.overrides.get('id')
-        if id is None:
+        if not id:
             id = value.attributes.id
             
         pipeline_id = value.attributes.pipeline_id
