@@ -75,23 +75,26 @@ def initialize(context):
     utils.registerIcon('resource_registry.gif')    
     
     # register default plugin components
-    rsync = transports.rsync
-    context.registerClass(
-        rsync.RsyncSSHTransport,
-        permission = 'CMFDeploy: Add Deployment Transport',
-        constructors = ( rsync.addRsyncSSHTransportForm,
-                         rsync.addRsyncSSHTransport ),
-        visibility = None
-        )
+    if transports.rsync is not None:
+        
+        rsync = transports.rsync
+        context.registerClass(
+            rsync.RsyncSSHTransport,
+            permission = 'CMFDeploy: Add Deployment Transport',
+            constructors = ( rsync.addRsyncSSHTransportForm,
+                             rsync.addRsyncSSHTransport ),
+            visibility = None
+            )
 
-    sitecopy = transports.sitecopy
-    context.registerClass(
-        sitecopy.SiteCopyTransport,
-        permission = 'CMFDeploy: Add Deployment Transport',
-        constructors = ( sitecopy.addSiteCopyTransportForm,
-                         sitecopy.addSiteCopyTransport ),
-        visibility = None        
-        )
+    if transports.sitecopy is not None:
+        sitecopy = transports.sitecopy
+        context.registerClass(
+            sitecopy.SiteCopyTransport,
+            permission = 'CMFDeploy: Add Deployment Transport',
+            constructors = ( sitecopy.addSiteCopyTransportForm,
+                             sitecopy.addSiteCopyTransport ),
+            visibility = None        
+            )
 
     crule = rules.default
     context.registerClass(

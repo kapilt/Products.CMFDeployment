@@ -28,8 +28,22 @@ $Id$
 """
 # deployment protocol implementation directory
 
-import rsync
-import sitecopy
+from Products.CMFDeployment.Log import LogFactory
+
+
+log = LogFactory("Transports")
+
+try:
+    import rsync
+except ImportError:
+    log.error("rsync not available")
+    rsync = None
+
+try:
+    import sitecopy
+except ImportError:
+    log.error("sitecopy not available")
+    sitecopy = None
 
 #################################
 # simple global protocol registry    
