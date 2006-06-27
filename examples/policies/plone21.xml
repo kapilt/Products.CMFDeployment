@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <policy id="incremental" pipeline_id="incremental" title="incremental" type="dict">
-	<organization cmf_path="" fs_path="/usr/local/cmfdeployment/deployed_www/plone_2_1" type="dict">
+	<organization cmf_path="" fs_path="*/examples/static/plone_2_1" type="dict">
 		<composites type="list">
 			<entry type="string">
 				PloneArticle

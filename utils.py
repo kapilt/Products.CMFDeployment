@@ -187,7 +187,7 @@ def file2string(o):
             data = data.next
 
     return ''.join(buf)
-    
+
 
 try:
     from Products.Archetypes.BaseUnit import BaseUnit

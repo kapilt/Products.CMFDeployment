@@ -27,12 +27,16 @@ Created: 8/10/2002
 $Id$
 """
 
-import DeploymentTool
+
 import utils
 from Globals import package_home
 from Products.CMFCore.utils import ToolInit
 from Products.CMFCore import CMFCorePermissions
 from Products.CMFCore.DirectoryView import registerDirectory
+
+DeploymentProductHome = package_home( globals() )
+
+import DeploymentTool
 
 tools = (DeploymentTool.DeploymentTool,)
 
@@ -52,7 +56,7 @@ import incremental
 import pipeline
 import utils
 
-DeploymentProductHome = package_home( globals() )
+
 
 registerDirectory('skins', globals())
 

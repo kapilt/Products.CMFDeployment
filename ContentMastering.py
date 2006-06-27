@@ -117,14 +117,17 @@ class ContentMastering(Folder):
 
     def manage_afterAdd(self, item, container):
 
-        ob = ContentRuleContainer('rules')
-        self._setObject('rules', ob)
+        if self._getOb('rules', None) is None:
+            ob = ContentRuleContainer('rules')
+            self._setObject('rules', ob)
 
-        ob = SiteChainUser()
-        self._setObject('site_user', ob)
+        if self._getOb('site_user', None) is None:
+            ob = SiteChainUser()
+            self._setObject('site_user', ob)
 
-        ob = SiteChainSkin()
-        self._setObject('site_skin', ob)
+        if self._getOb('site_skin', None) is None:
+            ob = SiteChainSkin()
+            self._setObject('site_skin', ob)
 
     #################################
 
@@ -356,9 +359,7 @@ class SiteChainUser(SimpleItem):
         
         try:
             if udb_path == 'special':
-                # don't allow people to gain more special privileges
-                # then what they have.
-                assert user in ('nobody')
+                assert user in ('nobody', 'system')
             else:
                 udb = self.unrestrictedTraverse(udb_path)
                 assert udb.id == 'acl_users'

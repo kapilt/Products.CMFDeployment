@@ -99,8 +99,9 @@ class ContentTransforms(Folder):
             RESPONSE.redirect('./overview')
         
     def manage_afterAdd(self, item, container):
-        ob = TransformRulesContainer('rules')
-        self._setObject('rules', ob)
+        if self._getOb('rules', None) is None:
+            ob = TransformRulesContainer('rules')
+            self._setObject('rules', ob)
 
     def getInfoForXml( self ):
         res = []

@@ -69,6 +69,7 @@ class DeploymentTool(UniqueObject, Folder):
         if not policy_xml:
             policy = DeploymentPolicy(policy_id, policy_title, policy_pipeline_id)
             self._setObject(policy_id, policy )
+            
             policy = self._getOb(policy_id)
             
             if REQUEST is not None:

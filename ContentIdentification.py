@@ -112,8 +112,10 @@ class ContentIdentification(Folder):
 
     security.declarePrivate('manage_afterAdd')
     def manage_afterAdd(self, item, container):
-        self._setObject('sources',  ContentSourceContainer('sources'))
-        self._setObject('filters',  ContentFilterContainer('filters'))
+        if self._getOb('sources', None) is None:
+            self._setObject('sources',  ContentSourceContainer('sources'))
+        if self._getOb('filters', None) is None:
+            self._setObject('filters',  ContentFilterContainer('filters'))
 
     def getInfoForXml(self):
         d = {}

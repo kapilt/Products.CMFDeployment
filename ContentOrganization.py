@@ -33,6 +33,7 @@ from structure import RootDirectory, descendant_filtered_folder_collector as\
      folder_collector
 from DeploymentExceptions import InvalidCMFMountPoint, InvalidPortalType
 
+from Products.CMFDeployment import DeploymentProductHome
 from Products.CMFCore.utils import getToolByName
 from Log import LogFactory
 
@@ -92,7 +93,8 @@ class ContentOrganization(Folder):
 
     security.declarePrivate('manage_afterAdd')
     def manage_afterAdd(self, item, container):
-        self._setObject('structure',CMFContentStructure('structure'))
+        if self._getOb( 'structure', None ) is None:
+            self._setObject('structure',CMFContentStructure('structure'))
         #self._setObject('organize', StructureMapping('organize'))
 
     def getContentPath(self, content ):
@@ -118,9 +120,16 @@ class ContentOrganization(Folder):
     security.declarePrivate('fromStruct')
     def fromStruct( self, struct ):
         structure = self.getActiveStructure()
-        structure.setRestrictedPoints( struct.restricted )
+        structure.setRestrictedPoints( struct.get('restricted', () ) )
         structure.setCMFMountPoint( struct.attributes.cmf_path )
-        structure.setMountPoint( struct.attributes.fs_path )
+        fs_path = struct.attributes.fs_path
+        
+        if fs_path.startswith('*'):
+            # make default paths play nice with platform specific paths
+            fs_path = sep.join( fs_path.split('/') )
+            fs_path = fs_path.replace( '*', DeploymentProductHome )
+            
+        structure.setMountPoint( fs_path )
 
 InitializeClass(ContentOrganization)
 
