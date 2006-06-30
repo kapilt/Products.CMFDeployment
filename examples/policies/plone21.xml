@@ -131,7 +131,7 @@
 							ical_view
 						</id>
 						<view_method type="string">
-							python: deploy.event_ics_view
+							python: deploy.bind(deploy.event_ics_view, object )
 						</view_method>
 					</entry>
 					<entry type="dict">
@@ -148,7 +148,7 @@
 							vcal_view
 						</id>
 						<view_method type="string">
-							python: deploy.event_vcs_view
+							python: deploy.bind(deploy.event_vcs_view, object )
 						</view_method>
 					</entry>
 				</children>

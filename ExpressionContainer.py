@@ -74,6 +74,8 @@ def registerDeploymentExprMethod(name, context_method):
     assert not DeploymentMimeUtilities.__dict__.has_key(name),"duplicate registration %s"%name           
     DeploymentMimeUtilities.__dict__[name]=context_method
 
+# allowing for binding rendering methods to particular args in tales
+registerDeploymentExprMethod( "bind", utils.bind )
 
 # event util method  for plone 2.1, to work around bad apis in atct
 if utils.event_ics_view is not None:
@@ -81,3 +83,4 @@ if utils.event_ics_view is not None:
 
 if utils.event_vcs_view is not None:
     registerDeploymentExprMethod( "event_vcs_view", utils.event_vcs_view )
+

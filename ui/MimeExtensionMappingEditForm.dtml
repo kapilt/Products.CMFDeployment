@@ -11,7 +11,7 @@
 <tr><td>Condition Expression</td>
     <td><input type="text" name="condition" value="<dtml-var condition_text>" size="100"></td></tr>
 
-<tr><td>Value Expression</td>
+<tr><td>Filepath Expression</td>
     <td><input type="text" name="extension_expression" value="<dtml-var extension_text>" size="100"></td></tr>
 
 <tr><td>View Method (optional)</td>

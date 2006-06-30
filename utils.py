@@ -111,6 +111,21 @@ def getXmlPath( self ):
     return ".".join( res )
     
 
+class BoundFunction( object ):
+
+    def __init__(self, func, args, kw):
+        self.func = func
+        self.args = args
+        self.kw = kw
+
+    def __call__(self):
+        return self.func( *self.args, **self.kw )
+    
+def bind( func, *args, **kw ):
+    # really a curried func
+    return BoundFunction( func, args, kw )
+    
+
 def guess_filename( content ):
     cid = content.getId()
     if '.' in cid and ( len(cid)-cid.rfind('.') ) < 5 : 

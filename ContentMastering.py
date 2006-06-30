@@ -28,6 +28,8 @@ Created: 8/10/2002
 $Id$
 """
 
+import types
+
 from Namespace import *
 
 import DefaultConfiguration
@@ -193,7 +195,7 @@ class ContentMastering(Folder):
 
     security.declarePrivate('renderContent')
     def renderContent( self, descriptor ):
-            
+
         c = descriptor.getContent()
         vm = descriptor.getRenderMethod()
 
@@ -217,7 +219,14 @@ class ContentMastering(Folder):
 
         try:
             if callable(vm) and callable( render ):
-                descriptor.setRendered( render( descriptor.getContent() ) )
+                # this hack is to preserve backwards compatibility... using naked
+                # functions is deprecated. utilize the utility function,
+                # deploy.bind( func, *args, **kw) instead
+                # sigh.. likely not till 1.2
+                if isinstance( render, types.FunctionType ):
+                    descriptor.setRendered( render( descriptor.getContent() ) )
+                else:
+                    descriptor.setRendered( render() )
             elif getattr(aq_base(render), 'isDocTemp', 0):
                 descriptor.setRendered(apply(render, (self, self.REQUEST)))
             elif hasattr(aq_base(c), 'precondition') and \
@@ -233,7 +242,8 @@ class ContentMastering(Folder):
                 ec, e, tb = sys.exc_info()
                 print ec, e
                 traceback.print_tb( tb )
-                #pdb.post_mortem( tb )
+                pdb.post_mortem( tb )
+                raise
             
             log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
             descriptor.setGhost(1) # ghostify it        
