@@ -85,6 +85,9 @@ class DeploymentPolicy(Folder):
     policy_xml = DTMLFile('ui/PolicyExport', globals())
     xml_key = 'policy'
 
+    # xml serialization version
+    _serialization_format = 2
+
     icon = 'misc_/CMFDeployment/policy.png'
     
     def __init__(self, id, title, pipeline_id):
@@ -242,7 +245,9 @@ class DeploymentPolicy(Folder):
         return export
     
     def getInfoForXml( self ):
+
         info =  {'attributes':{'id':self.id,
+                               'version':self._serialization_format,
                                'title': self.title_or_id(),
                                'pipeline_id': self.pipeline_id } }
         for ob in self.objectValues():
