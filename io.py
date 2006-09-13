@@ -42,12 +42,25 @@ class struct( dict ):
         self[key]=value
 
 
+def boolreader( value=None ):
+    if isinstance( value, (str, unicode )):
+        if value.lower() in ('false', 'f'):
+            value = False
+        elif value.lower() in ('true', 't'):
+            value = True
+        else:
+            value = False
+        return value
+    if value is None:
+        return False
+    return bool( value )
+
 class ImportReader( ContentHandler ):
 
     _types = {
         u"string" : types.StringType,
         u"int" : types.IntType,
-        u"bool" : types.BooleanType,
+        u"bool" : boolreader,
         u"dict" : struct, #types.DictType,
         u"list" : types.ListType
         }
@@ -541,6 +554,7 @@ if __name__ == '__main__':
    
    d = {'identification':{'filters':[ { 'attributes': {'id':'no_members', 'expr':'python: not 1'}} ] },
         'bd':True,
+        'ed':False,
         'ef':"ste",
         'xy':[1,2,3,4],
         "ze":{'fa':1,
