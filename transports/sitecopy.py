@@ -30,7 +30,7 @@ from Products.CMFDeployment.lib import pexpect
 from Products.CMFDeployment.DeploymentExceptions import ProtocolError
 from Products.CMFDeployment.Namespace import *
 from Products.CMFDeployment.utils import SerializablePlugin
-
+from os import path
 from cStringIO import StringIO
 
 """ sitecopy config options
@@ -96,8 +96,8 @@ addSiteCopyTransportForm = DTMLFile('../ui/SiteCopyTransportAddForm', globals())
 
 def addSiteCopyTransport( self,
                           id,
-                          rcfile,
-                          storepath,
+                          rcfile='',
+                          storepath='',
                           RESPONSE=None):
     """ add site copy transport """
     
@@ -108,7 +108,7 @@ def addSiteCopyTransport( self,
     if RESPONSE is not None:
         RESPONSE.redirect('manage_main')
 
-class SiteCopyTransport( SimpleItem ):
+class SiteCopyTransport( SerializablePlugin ):
 
     __implements__ = IDeploymentTarget
 
@@ -143,14 +143,21 @@ class SiteCopyTransport( SimpleItem ):
         self.checkRCFile( rcfile )
         self.checkStorePath( storepath )
 
-        self._rcfile = rcfile
+        self._rcfile = path.abspath(path.expandvars(path.expanduser( rcfile )))
         self._storepath = storepath
 
         if RESPONSE is not None:
             RESPONSE.redirect('manage_workspace')
 
     def checkRCFile( self, rcfile ):
-        pass
+        if not path.exists(
+                  path.abspath(
+                     path.expandvars(
+                        path.expanduser( rcfile )
+                        )
+                     )
+                  ):
+            raise SyntaxError("invalid rcfile %s"%rcfile)
 
     security.declareProtected(CMFCorePermissions.ManagePortal, 'getRCFile')
     def getRCFile(self):
@@ -177,8 +184,8 @@ class SiteCopyTransport( SimpleItem ):
         d = SerializablePlugin.getInfoForXml( self )
         del d['attributes']['title']
         d.update( {
-            'rcfile':self.rcfile,
-            'storepath':self.storepath
+            'rcfile':self._rcfile,
+            'storepath':self._storepath
                   } )
         return d
         

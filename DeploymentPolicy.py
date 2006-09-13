@@ -112,6 +112,9 @@ class DeploymentPolicy(Folder):
     def getContentSources( self ):
         return self.getContentIdentification().sources
 
+    def getDeploymentTransports( self ):
+        return self._getOb(DefaultConfiguration.ContentDeployment)
+
     def getSiteResources( self ):
         return self._getOb(DefaultConfiguration.SiteResources)
 

@@ -117,13 +117,13 @@ addRsyncSSHTransportForm = DTMLFile('../ui/RsyncTransportAddForm', globals())
 
 
 def addRsyncSSHTransport(self,
-                      id,                            
-                      user,
-                      password,
-                      password_confirm,
-                      host,
-                      remote_directory,
-                      RESPONSE=None):
+                         id,                            
+                         user='',
+                         password='',
+                         password_confirm='',
+                         host='',
+                         remote_directory='',
+                         RESPONSE=None):
     """ bobo publish string """
     ob = RsyncSSHTransport( id )
     self._setObject(id, ob)

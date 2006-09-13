@@ -417,6 +417,7 @@ class ImportContext( IOContext ):
               'organization' : 'getContentOrganization',
               'rules' : 'getContentRules',
               'resolver' : 'getDeploymentURIs',
+              'transports' :'getContentDeployment',
               'sources' : lambda policy: policy.getContentIdentification().sources,
               'filters' : lambda policy: policy.getContentIdentification().filters,
               'site_resources': 'getSiteResources'}

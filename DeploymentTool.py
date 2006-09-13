@@ -83,7 +83,15 @@ class DeploymentTool(UniqueObject, Folder):
 
         ctx = io.ImportContext( self, overrides )
         ctx.load( policy_xml )
-        policy = ctx.construct()
+
+        try:
+            policy = ctx.construct()            
+        except:
+            import pdb, traceback, sys
+            exc_info = sys.exc_info()
+            traceback.print_exception( *exc_info )
+            #pdb.post_mortem( exc_info[-1] )
+            raise
         
         if REQUEST is not None:
             return REQUEST.RESPONSE.redirect(policy.absolute_url()+'/manage_workspace')
