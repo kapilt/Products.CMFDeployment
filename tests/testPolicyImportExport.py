@@ -68,7 +68,7 @@ class PolicyImportExportTests( PloneTestCase ):
         Running the export of the policy
         """
         # Viewing the policy requires manage portal permission
-        self.loginPortalOwner()
+        self.loginAsPortalOwner()
         self.testImport()
         dtool = getToolByName(self.portal, 'portal_deployment')
         xml = dtool.plone_example.policy_xml()     
@@ -87,6 +87,22 @@ class PolicyImportExportTests( PloneTestCase ):
             dtool.getPolicy('plone_example').getContentMastering().rules.Folder.condition_text,
             "python: object.portal_type == 'Folder'"
             )
+
+    def testTransportIssue1( self ):
+        policy_file = os.path.join( DeploymentProductHome, 'tests', 'io_data.xml')
+        fh = open( policy_file )
+        deployment_tool = getToolByName(self.portal, 'portal_deployment')
+        policy = deployment_tool.addPolicy( policy_xml=fh )
+        fh.close()
+        self.assertTrue( 'vx' in policy.getContentDeployment().objectIds() )
+        
+    def testBooleanIssue4 (self ):
+        policy_file = os.path.join( DeploymentProductHome, 'tests', 'io_data.xml')
+        fh = open( policy_file )
+        deployment_tool = getToolByName(self.portal, 'portal_deployment')
+        policy = deployment_tool.addPolicy( policy_xml=fh )
+        fh.close()
+        self.assertFalse( policy.getDeploymentURIs().relative_target_resolution )
 
     def testInfoForXml(self):
         policy_file = os.path.join( DeploymentProductHome, 'examples', 'policies', 'plone.xml') 
