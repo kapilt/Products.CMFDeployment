@@ -90,7 +90,6 @@ from BTrees.Length import Length
 from BTrees.IOBTree import IOBTree
 from Products.PluginIndexes.common.PluggableIndex import PluggableIndexInterface
 
-
 import DefaultConfiguration
 from Descriptor import DescriptorFactory
 from ExpressionContainer import getDeployExprContext
@@ -104,6 +103,7 @@ from utils import unwrap_object
 #  - remove from resolver
 #
 #  - remove from storage
+
 
 class DeletionRecord( object ):
     """
@@ -274,11 +274,10 @@ class PolicyIncrementalIndex( SimpleItem ):
 
         # note of caution filters operate out of band from this...
         # XXX for completeness we should do filter matching as well.
+
         if not self._index.has_key(documentId):
             return 1
-
         obj = unwrap_object( obj )
-
         policy = self._getPolicy()
         deletion_source = policy._getOb( DefaultConfiguration.DeletionSource, None )
         if deletion_source is None: # XXX log me
@@ -316,7 +315,6 @@ class PolicyIncrementalIndex( SimpleItem ):
 
         if not self._index.has_key(documentId):
             return
-
         policy = self._getPolicy()
         deletion_source = policy._getOb( DefaultConfiguration.DeletionSource, None )
         if deletion_source is None:

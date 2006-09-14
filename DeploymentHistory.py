@@ -76,11 +76,6 @@ class DeploymentHistoryContainer(Folder):
     def getHistories(self):
         return tuple(self._records.values())
 
-    def getLastTimeIdx( self ):
-        return self.portal_catalog._catalog.getIndex('content_modification_date')._convert(
-            self.getLastTime()
-            )
-
     security.declarePrivate('getLastTime')
     def getLastTime(self):
         if self._record_length() == 0:

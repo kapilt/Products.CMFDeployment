@@ -194,7 +194,7 @@ class DeploymentPolicy(Folder):
                 print ec, e
                 print traceback.print_tb( tb )
                 #pdb.post_mortem( tb )
-                raise e
+                raise 
         finally:
             Log.detachLogMonitor(history)
 
