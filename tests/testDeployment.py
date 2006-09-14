@@ -167,7 +167,7 @@ def setupContentTree( portal ):
 class DeploymentTests( PloneTestCase ):
 
     def afterSetUp(self): 
-        self.loginPortalOwner()
+        self.loginAsPortalOwner()
 
         if os.path.exists( TESTDEPLOYDIR ) and CLEAN_DEPLOY_DIR:
             shutil.rmtree( TESTDEPLOYDIR )

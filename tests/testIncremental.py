@@ -45,7 +45,7 @@ CLEAN_DEPLOY_DIR=True
 class TestIncrementalComponents(PloneTestCase):
     
     def afterSetUp(self):
-        self.loginPortalOwner()
+        self.loginAsPortalOwner()
         
         if os.path.exists( TESTDEPLOYDIR ) and CLEAN_DEPLOY_DIR:
             shutil.rmtree( TESTDEPLOYDIR )
@@ -88,10 +88,9 @@ class TestIncrementalComponents(PloneTestCase):
 
         result = list(  deletion_source.getContent() )
 
-        expected = ['portal/about/index_html', 'portal/about/contact', 'portal/about']
-        
+        expected = ['plone/about/index_html', 'plone/about/contact', 'plone/about']
         for content in result:
-            assert content.content_url in expected, "unexpected deletion record"
+            assert content.content_url in expected, "unexpected deletion record %s"%(content.content_url)
 
         self.assertEqual( len( expected ), len( result ))
 
@@ -133,6 +132,18 @@ class TestIncrementalComponents(PloneTestCase):
         self.policy.execute()
         assert os.path.exists( event_fs_path )        
 
+    def testRename( self ):
+        self.policy.execute()
+        old_image_path = os.path.join( TESTDEPLOYDIR, 'vera.jpg')
+        self.assertTrue( os.path.exists( old_image_path ) )
+        self.portal.folder_rename( ['vera.jpg'], ['ralph.jpg'], ['Ralph Picture'] )
+        results = list( self.policy.getContentIdentification().sources.catalog.getContent() )
+        self.assertTrue( len(results) == 1 )
+        self.policy.execute()
+        new_image_path = os.path.join( TESTDEPLOYDIR, 'ralph.jpg')
+        self.assertTrue( os.path.exists( new_image_path ) )
+        self.assertFalse( os.path.exists( old_image_path ) )
+        
     def testCutPasteContent(self):
         self.policy.execute()
 
@@ -202,3 +213,4 @@ def test_suite():
 
 if __name__ == '__main__':
     unittest.main()
+ 

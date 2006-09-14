@@ -58,7 +58,7 @@ class ATContentRuleTests( PloneTestCase ):
         installer.installProduct('Archetypes')                
         installer.installProduct('CMFDeployment')
      
-        self.loginPortalOwner()
+        self.loginAsPortalOwner()
 
         registerContent( self.portal )
         self.portal._setObject('image_content', SampleImageSchemaContent('image_content'))

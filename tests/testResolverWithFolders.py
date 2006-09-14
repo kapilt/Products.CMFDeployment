@@ -51,7 +51,7 @@ class ResolveFolderURITests(PloneTestCase):
     def afterSetUp(self): 
         installer = getToolByName(self.portal, 'portal_quickinstaller')
         installer.installProduct('CMFDeployment')
-        self.loginPortalOwner()
+        self.loginAsPortalOwner()
         # add the portal site to the catalog
         catalog_tool = getToolByName(self.portal, 'portal_catalog')
         catalog_tool.indexObject(self.portal)
