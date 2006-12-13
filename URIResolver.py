@@ -128,7 +128,8 @@ class URIResolver:
         relative_url = descriptor.getSourcePath() or descriptor.content_url
         if not relative_url.startswith('/'):
             relative_url = '/'+relative_url
-        del self.uris[relative_url]
+        if self.uris.has_key( relative_url ):
+            del self.uris[relative_url]
         for alias in descriptor.getAliases():
             alias_url = normalize( relative_url + '/' + alias, '/')
             if self.uris.has_key(alias_url):
