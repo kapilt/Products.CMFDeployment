@@ -11,7 +11,7 @@ from Products.CMFDeployment import utils
 
 from atcontent import ArchetypeContentRule
 
-def addATContainerRule(self, id, extension_expression, condition, view_method, ghost=0, aliases=(), RESPONSE=None):
+def addATContainerRule(self, id, extension_expression, condition, view_method, ghost=0, aliases=(), children=(), RESPONSE=None):
     """
     add an archetype rule
     """
@@ -23,6 +23,13 @@ def addATContainerRule(self, id, extension_expression, condition, view_method, g
                              aliases=aliases)
 
     self._setObject(id, atrule)
+
+    rule = self._getOb( id )
+    for child_view in children:
+        # sigh.. tired.. late nite.. hack.. works..
+        child_view = dict( [ (str(k),v) for k,v in child_view.items() ])        
+        rule.addChildView( **child_view )
+        
     if RESPONSE is not None:
         return RESPONSE.redirect('manage_workspace')
     

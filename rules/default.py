@@ -35,8 +35,6 @@ def addContentRule(self, id, extension_expression, condition, view_method, ghost
         # sigh.. tired.. late nite.. hack.. works..
         child_view = dict( [ (str(k),v) for k,v in child_view.items() ])        
         rule.addChildView( **child_view )
-
-
     
     if RESPONSE is not None:
         RESPONSE.redirect('manage_main')
