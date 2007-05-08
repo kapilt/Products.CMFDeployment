@@ -244,7 +244,9 @@ class ContentMastering(Folder):
                 traceback.print_tb( tb )
                 pdb.post_mortem( tb )
                 raise
-            
+
+            import traceback
+            traceback.print_exc()
             log.error('Error While Rendering %s'%( '/'.join(c.getPhysicalPath()) ) )
             descriptor.setGhost(1) # ghostify it        
             #raise
