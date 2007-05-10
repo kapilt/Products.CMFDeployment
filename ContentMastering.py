@@ -215,27 +215,37 @@ class ContentMastering(Folder):
                 print e
                       
         # this is just a tad verbose..
-        #log.debug('rendering %s %s %s'%(c.getId(), vm, str(render)))
+        #log.debug('rendering %s %s %s'%(c.getId(), vm, repr(render)))
 
         try:
-            if callable(vm) and callable( render ):
-                # this hack is to preserve backwards compatibility... using naked
-                # functions is deprecated. utilize the utility function,
-                # deploy.bind( func, *args, **kw) instead
-                # sigh.. likely not till 1.2
-                if isinstance( render, types.FunctionType ):
-                    descriptor.setRendered( render( descriptor.getContent() ) )
-                else:
-                    descriptor.setRendered( render() )
-            elif getattr(aq_base(render), 'isDocTemp', 0):
-                descriptor.setRendered(apply(render, (self, self.REQUEST)))
-            elif hasattr(aq_base(c), 'precondition') and \
-                 not is_baseunit(c):
-                # test if its a file object, but not an AT BaseUnit
-                descriptor.setRendered(file2string(c))
+            if getattr(aq_base(render), 'isDocTemp', 0):
+                rendered = apply(render, (self, self.REQUEST) )
+
+            # check if the view method returned a file like object for a renderer
+            elif hasattr( aq_base( render ), 'precondition'):
+                rendered = file2string( render )
+                descriptor.setBinary(1)
+                
+            # test if the content is a file object, but not an AT BaseUnit              
+            elif hasattr(aq_base(c), 'precondition') and  not is_baseunit(c):
+                rendered = file2string( c )
                 descriptor.setBinary(1)
             else:
-                descriptor.setRendered(render())
+                rendered = render()
+                
+            # if a render method returns a file
+            if hasattr( aq_base( rendered ), 'precondition') and not is_baseunit(c):
+                rendered = file2string( rendered )
+                descriptor.setBinary(1)
+                
+            # sanity check the output
+            if not isinstance( rendered, (str, unicode) ):
+                log.errror("invalid rendering output for %s %s %s"%( descriptor.content_url, repr( vm ), repr( render ) ) )
+                descriptor.setGhost(1)
+                return
+            
+            descriptor.setRendered( rendered )
+
         except:
             if DefaultConfiguration.DEPLOYMENT_DEBUG:
                 import sys, pdb, traceback
