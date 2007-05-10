@@ -240,7 +240,7 @@ class ContentMastering(Folder):
                 
             # sanity check the output
             if not isinstance( rendered, (str, unicode) ):
-                log.errror("invalid rendering output for %s %s %s"%( descriptor.content_url, repr( vm ), repr( render ) ) )
+                log.error("invalid rendering output for %s %s %s %s"%( descriptor.content_url, repr( vm ), repr( render ) ) )
                 descriptor.setGhost(1)
                 return
             
