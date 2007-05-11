@@ -169,7 +169,11 @@ def registerIcon(filename):
             App.ImageFile.ImageFile('www/%s' % filename, globals())
             )
 
-
+def safe_traverse( object, path ):
+    try:
+        return object.restrictedTraverse( path )
+    except AttributeError:
+        return None
 
 def file2string(o):
     """ transform a zope file object into a string """

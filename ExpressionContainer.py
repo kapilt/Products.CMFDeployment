@@ -77,6 +77,9 @@ def registerDeploymentExprMethod(name, context_method):
 # allowing for binding rendering methods to particular args in tales
 registerDeploymentExprMethod( "bind", utils.bind )
 
+# allow for safely traversing in an expression even if something doesn't exist  (returns None)
+registerDeploymentExprMethod( "safe_traverse", utils.safe_traverse )
+
 # event util method  for plone 2.1, to work around bad apis in atct
 if utils.event_ics_view is not None:
     registerDeploymentExprMethod( "event_ics_view", utils.event_ics_view )
