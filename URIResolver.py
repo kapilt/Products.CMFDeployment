@@ -217,8 +217,18 @@ class URIResolver:
         if not u:
             return
 
+        if '?' in u:
+            u, frag = u.split( "?", 1 )
+            frag = "?%s"%frag
+            # and anchor fragments
+        elif '#' in u:
+            u, frag = u.split( "#", 1 )
+            frag = "#%s"%frag
+        else:
+            frag = None
+             
         # absolute url
-        elif u.startswith('http'):
+        if u.startswith('http'):
 
             # extern check
             if not u.find(self.source_host) >= 0:
@@ -299,6 +309,10 @@ class URIResolver:
         # object is resolvable in the uri db.
         if nu is _marker and content:
             nu = self._resolveAcquired( content, u, rnu )
+        if nu is default:
+            return nu
+        if frag:
+            return "%s%s"%(nu, frag )
         return nu
 
     def _resolveAcquired(self, content, url, relative_url ):
@@ -531,6 +545,9 @@ def resolve_relative(content_url, relative_url, content_folderish_p=0):
     
     path_steps = filter(None, content_path.split('/'))
     steps = filter(None, relative_url.split('/'))
+
+    if not steps:
+        return content_url
     
     if steps[0] == '..':
         # move back two if not folder or one if a folder

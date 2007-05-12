@@ -125,7 +125,18 @@ class ContentDB:
     This is a test <a href="./lizard">lizard</a>   
     """)
 
+    anchor_beasty = Content('/reptiles/anchor_beasty', '''
+    This is a test <a href="snake#toxin">snake</a>   
+    This is a test <a href="./lizard#gila">lizard</a>       
+    ''')
+
+    query_beasty = Content('/reptiles/anchor_beasty', '''
+    This is a test <a href="snake?q=toxin">snake</a>   
+    This is a test <a href="./lizard?part=head&fo=sn frg">lizard</a>       
+    ''')                         
+
     #################################
+
     images = FolderContent("/images", "")
     bar_image = Content("/images/bar.gif", "")
     style = FolderContent("/style", "")
@@ -247,9 +258,9 @@ class ResolveURITests(BaseResolverTests):
         r = getDescriptor('root')
         curi = r.getContent().absolute_url(1)
         uri = '#top'
-        
+
         nu = self.resolver.resolveURI(uri, curi, 1)
-        self.assertEqual(nu, None)
+        self.assertEqual(nu, '/deploy/index.html#top')
 
     def testResolverURI6(self):
         # test relative name from folder
@@ -434,6 +445,8 @@ class ResolverTests(BaseResolverTests):
         for u in uris:
             assert u in expected
 
+
+
 class RelativeTargetTests(BaseResolverTests):
 
     def testFromDocument( self ):
@@ -557,13 +570,54 @@ class RelativeResolutionTests(unittest.TestCase):
         url = resolve_relative(content_url, relative_url, folderish_p)
         self.assertEqual(expected_url, url)
 
+class SuffixResolverTests(BaseResolverTests):
+    # test query strings and anchors
+
+#    anchor_beasty = Content('/reptiles/anchor_beasty', '''
+#    This is a test <a href="snake#toxin">snake</a>   
+#    This is a test <a href="./lizard#gila">lizard</a>       
+#    ''')
+
+    def testAnchorResolution( self ):
+        d = getDescriptor('anchor_beasty')
+        rendered = d.getRendered()
+        
+        self.resolver.resolve( d)
+        rendered_target = d.getRendered()
+        uris = test_uri_regex.findall( rendered_target )
+        expected = (
+            '/deploy/reptiles/snake.html#toxin',
+            '/deploy/reptiles/lizard.html#gila'
+            )
+        for u in uris:
+            assert u in expected
+
+#    query_beasty = Content('/reptiles/anchor_beasty', '''
+#    This is a test <a href="snake?q=toxin">snake</a>   
+#    This is a test <a href="./lizard?part=head&fo=sn frg">lizard</a>       
+
+    def testQueryResolution( self ):
+        d  = getDescriptor('query_beasty')
+        rendered = d.getRendered()
+        self.resolver.resolve( d )
+        
+        rendered_target = d.getRendered()        
+        uris = test_uri_regex.findall( rendered_target )
+        expected = (
+            '/deploy/reptiles/snake.html?q=toxin',
+            '/deploy/reptiles/lizard.html?part=head&fo=sn frg'
+            )
+        for u in uris:
+            print u
+            assert u in expected
         
 def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(RelativeResolutionTests))
     suite.addTest(unittest.makeSuite(ResolveURITests))
     suite.addTest(unittest.makeSuite(ResolverTests))
-    suite.addTest(unittest.makeSuite(RelativeTargetTests))    
+    suite.addTest(unittest.makeSuite(RelativeTargetTests))
+    suite.addTest(unittest.makeSuite(SuffixResolverTests))
     return suite
 
 if __name__ == '__main__':
