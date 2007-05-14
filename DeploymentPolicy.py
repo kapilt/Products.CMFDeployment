@@ -78,7 +78,7 @@ class DeploymentPolicy(Folder):
         ) 
 
     overview = DTMLFile('ui/PolicyOverview', globals())
-
+    preview = DTMLFile('ui/PolicyPreview', globals())
     identification = DTMLFile('ui/ContentIdentification', globals())
     _active = 1
     _reset_date = False
@@ -169,6 +169,15 @@ class DeploymentPolicy(Folder):
         """
         return self._reset_date
 
+    security.declareProtected('Manage Portal', 'previewDeployment')
+    def previewDeployment( self ):
+
+        preview_factory = pipeline.PreviewPipelineFactory()
+        preview = preview_factory()
+        preview.process( self )
+        return {'descriptors':preview.variables.get('descriptors'),
+                'deletions':preview.variables.get('deletions') }
+    
     def execute(self, REQUEST=None, RESPONSE=None):
         """ """
         if not self.isActive():

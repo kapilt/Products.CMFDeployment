@@ -133,12 +133,23 @@ class DeletionRecord( object ):
       
     """
 
+    # class defaults for new variables
+    rule_id = None
+    content_type = 'n/a'
+    content_title = 'n/a'
+    deleted_by = 'n/a'
+    deletion_time = None
+    
     def __init__(self, policy, descriptor ):
 
         content = descriptor.getContent()
         
         self.content_id = content.getId()
         self.content_url = descriptor.getContentURL()
+        self.content_type = content.portal_type
+        self.content_title = content.Title()
+        self.deleted_by = getSecurityManager().getUser().getId()
+        self.deletion_time = DateTime()
         self.file_name = descriptor.getFileName()
 
         # lazy inits.. 
@@ -374,6 +385,8 @@ class PolicyIncrementalIndex( SimpleItem ):
             rule.process( descriptor, ctx )
 
         record = DeletionRecord( policy, descriptor )
+        record.rule_id = rule.getId()
+
         deletion_source.addRecord( record )
         
         del self._index[documentId]

@@ -33,6 +33,19 @@ class ContentSource( Producer ):
                 continue
             yield content
 
+class ContentPreviewDeletion( Producer ):
+
+    def process( self, pipe, ctxobj ):
+        source = pipe.services['DeploymentPolicy']._getOb(
+            DefaultConfiguration.DeletionSource, None
+            )
+
+        if source is None:
+            raise StopIteration
+
+        for record in source.listContent():
+            yield record
+
 class ContentDeletion( Producer ):
 
     def process( self, pipe, ctxobj ):

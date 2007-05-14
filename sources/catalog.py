@@ -92,9 +92,11 @@ class IncrementalCatalogSource(BaseSource):
         return last_deployment_time
 
     def getLastDeploymentTimeIdx( self ):
-        return self.portal_catalog._catalog.getIndex('content_modification_date')._convert(
-            self.getLastDeploymentTime()
-            )        
+        return ''
+#        return self.portal_catalog._catalog.getIndex('content_modification_date')
+#    ._convert(
+#            self.getLastDeploymentTime()
+#            )        
 
     def getContent(self):
         """

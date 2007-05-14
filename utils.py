@@ -120,6 +120,9 @@ class BoundFunction( object ):
 
     def __call__(self):
         return self.func( *self.args, **self.kw )
+
+    def __str__( self ):
+        return "Bound Func", self.func
     
 def bind( func, *args, **kw ):
     # really a curried func
@@ -239,9 +242,17 @@ try:
         out.write( content.getVCal())
         out.write( calendarsupport.VCS_FOOTER)
         return out.getvalue()
+
 except:
     event_ics_view = None
     event_vcs_view = None
+
+# occasionally 
+def traverse_safe( content, path ):
+    try:
+        return content.restrictedTraverse( path )
+    except AttributeError:
+        return None
 
 # taken from code i wrote for proxyindex
 

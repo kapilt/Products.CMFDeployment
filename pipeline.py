@@ -28,7 +28,46 @@ class PipelineFactory( object ):
         raise NotImplemented
     
 
-class IncrementalPipelineFactory( PipelineFactory ):
+class PreviewPipelineFactory( PipelineFactory ):
+
+    id = 'preview'
+    
+    def __call__(self ):
+        processor_pipeline = self.constructContentProcessorPipeline()        
+        deletion_pipeline = self.constructDeletionPipeline()
+        
+        steps = (
+            segments.environment.PipeEnvironmentInitializer(),
+            processor_pipeline,
+            deletion_pipeline
+            )
+        
+        return PolicyPipeline( steps = steps )
+    
+    def constructDeletionPipeline( self ):
+        return PipeExecutor(
+            steps = (
+                segments.source.ContentPreviewDeletion(),
+                segments.dependency.RemovalDependencyInjector(),
+                segments.core.VariableAggregator("deletions")                
+                )
+            )
+    
+    def constructContentProcessorPipeline( self ):
+        return PipeExecutor(
+            
+            steps = (
+                segments.source.ContentSource(),
+                segments.unique.UniqueGuard(),
+                segments.filter.ContentFilter(),
+                segments.rule.ContentRuleMatch(),
+                segments.resolver.ResolverDatabase(),
+                segments.dependency.DeployDependencyInjector(),
+                segments.core.VariableAggregator("descriptors")
+                )
+            )
+    
+class IncrementalPipelineFactory( PreviewPipelineFactory ):
     
     id = 'incremental'
     
@@ -41,6 +80,10 @@ class IncrementalPipelineFactory( PipelineFactory ):
 
             dtime = pipeline.services['DeploymentPolicy'].getDeploymentHistory().getLastTime()
             pipeline.variables['LastDeployTime'] = dtime
+#            try:
+#                pipeline.variables['DeployResources'] = context.REQUEST.get('DeployResources', False )
+#            except AttributeError:
+#                pass
 
             return context
 
