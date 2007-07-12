@@ -171,15 +171,19 @@ CMFDeployment
 
     "Kapil Thangavelu":mailto://k_vertigo@objectrealms.net - Author
 
-    "Tahara Yusei":tahara * timedia.co.jp - Patches for Plone2/CMF 1.4
+    "Tahara Yusei":http://timedia.co.jp - Patches for Plone2/CMF 1.4
 
-    "Calvin Hendryx-Parker": calvinhp * sixfeetup.com - Deployment Skin, Use Cases, and Sponsoring
+    "Calvin Hendryx-Parker":http://sixfeetup.com - Deployment Skin, Use Cases, and Sponsoring
 
-    "Gael Le Mignot": gael * pilotsystems.net - Plone2.1 support
+    "Gael Le Mignot":http://pilotsystems.net - Plone2.1 support
 
-    "Kai Hänninen": kai.hanninen * mbconcert.fi - Plone 2.1 / Zope 2.8 support
+    "Kai Hänninen":http://mbconcert.fi - Plone 2.1 / Zope 2.8 support
 
-    "Osma Suominen": osma.suominen * mbconcert.fi - Plone 2.1 / Zope 2.8 support
+    "Osma Suominen":http://mbconcert.fi - Plone 2.1 / Zope 2.8 support
+
+    "Ken Wasetis":http://contextualcorp.com - Sponsoring, and bug reports
+
+    "Lawrence Rowe":http://objectvibe.com - compatiblity permission patch, and bug reports 
 
     I'd like to thank alan runyaga for much dicussion
     and feedback on this tool. It has benefited greatly 
