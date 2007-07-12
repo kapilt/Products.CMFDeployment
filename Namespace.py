@@ -39,7 +39,11 @@ from OFS.Folder import Folder
 from OFS.OrderedFolder import OrderedFolder
 from OFS.ObjectManager import ObjectManager, IFAwareObjectManager
 from Products.CMFCore.utils import UniqueObject, SimpleItemWithProperties, getToolByName
-from Products.CMFCore import CMFCorePermissions
+
+try:
+    from Products.CMFCore import CMFCorePermissions
+except ImportError:
+    from Products.CMFCore import permissions as CMFCorePermissions
 
 from Interface import Base as Interface
 from ZODB.PersistentMapping import PersistentMapping

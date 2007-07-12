@@ -26,7 +26,8 @@ $Id$
 from Products.Archetypes import public as atapi
 from Products.CMFDeployment.Descriptor import DescriptorFactory
 from Products.CMFDeployment.DeploymentInterfaces import IContentRule
-from Products.CMFCore import CMFCorePermissions
+from Products.CMFDeployment.Namespace import CMFCorePermissions
+
 from Products.CMFCore.Expression import Expression
 from Products.CMFCore import utils
 

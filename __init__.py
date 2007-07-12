@@ -31,8 +31,9 @@ $Id$
 import utils
 from Globals import package_home
 from Products.CMFCore.utils import ToolInit
-from Products.CMFCore import CMFCorePermissions
 from Products.CMFCore.DirectoryView import registerDirectory
+
+from Namespace import CMFCorePermissions
 
 DeploymentProductHome = package_home( globals() )
 

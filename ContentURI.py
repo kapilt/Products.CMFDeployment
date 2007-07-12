@@ -35,7 +35,6 @@ License: GPL
 
 """
 from Namespace import *
-from Products.CMFCore import CMFCorePermissions
 from URIResolver import URIResolver
 from BTrees.OOBTree import OOBTree
 
